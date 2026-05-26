@@ -12,6 +12,7 @@ import {
   HelpCircle,
   LayoutGrid,
   Loader2,
+  LogOut,
   MessageSquare,
   MoreVertical,
   Plus,
@@ -22,11 +23,13 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
 export function CreatorDashboard() {
   const router = useRouter();
+  const { signOut } = useClerk();
   const { data: forms, isLoading } = trpc.form.listMine.useQuery();
   const createForm = trpc.form.create.useMutation({
     onSuccess: (form) => {
@@ -64,7 +67,9 @@ export function CreatorDashboard() {
           </Link>
         ))}
         <div className="flex-1" />
-        <div className="w-8 h-8 rounded-full bg-[#5865f2] flex items-center justify-center text-xs font-bold text-white">A</div>
+        <button onClick={() => signOut({ redirectUrl: "/" })} className="w-10 h-10 rounded-full flex items-center justify-center text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors" title="Sign Out">
+          <LogOut size={16} />
+        </button>
       </aside>
 
       {/* Sidebar */}
