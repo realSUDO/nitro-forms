@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Clock,
   FileText,
+  Gamepad2,
   Hash,
   HelpCircle,
   LayoutGrid,
@@ -101,7 +102,7 @@ export function CreatorDashboard() {
             <button className="flex items-center gap-1 w-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8f8fa0] hover:text-[#c6c5d7] transition-colors">
               <ChevronDown size={11} /> TEMPLATES
             </button>
-            {[{ Icon: LayoutGrid, n: "gaming-forms" }, { Icon: Zap, n: "startup-forms" }].map(({ Icon: TplIcon, n }) => (
+            {[{ Icon: Gamepad2, n: "gaming-forms" }, { Icon: Zap, n: "startup-forms" }].map(({ Icon: TplIcon, n }) => (
               <Link key={n} href="/explore" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#8f8fa0] hover:bg-[#292a2d] hover:text-[#c6c5d7] transition-colors mt-0.5">
                 <TplIcon size={14} className="text-[#454655]" />
                 <span className="truncate">{n}</span>
