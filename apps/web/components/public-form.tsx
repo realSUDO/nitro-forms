@@ -191,6 +191,37 @@ export function PublicForm() {
               </div>
             )}
 
+            {field.type === "multi_select" && field.options && (
+              <div className="space-y-2 mt-2">
+                {field.options.map((opt, i) => {
+                  const selected = ((answers[field.id] as string[]) ?? []).includes(opt);
+                  return (
+                    <button
+                      key={opt}
+                      onClick={() => {
+                        const current = (answers[field.id] as string[]) ?? [];
+                        setAnswer(selected ? current.filter(v => v !== opt) : [...current, opt]);
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all",
+                        selected
+                          ? "border-[#5865f2] bg-[#5865f2]/10 text-[#f2f3f5]"
+                          : "border-[#3f4147] text-[#b5bac1] hover:border-[#4e5058] hover:bg-[#2b2d31]"
+                      )}
+                    >
+                      <span className={cn(
+                        "w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0",
+                        selected ? "bg-[#5865f2] text-white" : "bg-[#2b2d31] text-[#949ba4]"
+                      )}>
+                        {selected ? "✓" : String.fromCharCode(65 + i)}
+                      </span>
+                      <span className="text-sm">{opt}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {field.type === "rating" && (
               <div className="flex gap-2 mt-2">
                 {[1, 2, 3, 4, 5].map(n => (

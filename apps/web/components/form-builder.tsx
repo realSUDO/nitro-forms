@@ -49,6 +49,11 @@ interface FormField {
   order: number;
   options?: string[];
   position?: { x: number; y: number };
+  conditionConfig?: {
+    sourceFieldId: string;
+    operator: "equals" | "not_equals" | "greater_than" | "less_than" | "contains";
+    value: string;
+  };
 }
 
 const FIELD_TYPES: { type: FieldType; label: string; Icon: React.ElementType }[] = [
@@ -68,22 +73,26 @@ function ConditionNode({ data }: { data: { field: FormField; selected: boolean; 
   const { field, onDelete } = data;
   return (
     <div className={cn(
-      "w-[240px] rounded-lg border p-4 shadow-lg transition-all relative",
+      "w-[260px] rounded-lg border p-4 shadow-lg transition-all relative",
       data.selected ? "border-[#faa61a] shadow-[0_0_15px_rgba(250,166,26,0.3)] bg-[#2b2d31]" : "border-[#faa61a]/40 bg-[#2b2d31] hover:border-[#faa61a]/70"
     )}>
       <Handle type="target" position={Position.Top} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#faa61a] !transition-colors" />
-      <Handle type="source" position={Position.Bottom} id="yes" style={{ left: "30%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#3ba55c] !transition-colors" />
-      <Handle type="source" position={Position.Bottom} id="no" style={{ left: "70%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#ed4245] !transition-colors" />
+      <Handle type="source" position={Position.Bottom} id="yes" style={{ left: "30%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#3ba55c] !border-0 hover:!bg-[#3ba55c] !transition-colors" />
+      <Handle type="source" position={Position.Bottom} id="no" style={{ left: "70%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#ed4245] !border-0 hover:!bg-[#ed4245] !transition-colors" />
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-mono uppercase text-[#faa61a]">Condition</span>
+        <div className="flex items-center gap-1.5">
+          <GitBranch size={12} className="text-[#faa61a]" />
+          <span className="text-[10px] font-mono uppercase text-[#faa61a]">IF / ELSE</span>
+        </div>
         <button onClick={onDelete} className="p-1 rounded text-[#949ba4] hover:text-red-400 hover:bg-[#3f4147] transition-colors">
           <Trash2 size={11} />
         </button>
       </div>
-      <p className="text-sm font-medium text-[#f2f3f5]">{field.label}</p>
-      <div className="flex justify-between mt-3 text-[10px] font-mono">
-        <span className="text-[#3ba55c]">✓ Yes</span>
-        <span className="text-[#ed4245]">✗ No</span>
+      <p className="text-sm font-medium text-[#f2f3f5] mb-2">{field.label}</p>
+      <p className="text-[10px] text-[#949ba4] mb-3">Route based on answer value</p>
+      <div className="flex justify-between text-[10px] font-mono border-t border-[#3f4147] pt-2">
+        <span className="flex items-center gap-1 text-[#3ba55c]"><span className="w-1.5 h-1.5 rounded-full bg-[#3ba55c]" /> Yes</span>
+        <span className="flex items-center gap-1 text-[#ed4245]"><span className="w-1.5 h-1.5 rounded-full bg-[#ed4245]" /> No</span>
       </div>
     </div>
   );
@@ -218,16 +227,19 @@ export function FormBuilder() {
       data: { field: newField, selected: false, onDelete: () => deleteField(newField.id) },
     };
     setNodes(nds => [...nds, newNode]);
-    // Connect to last node
+    // Auto-connect only if neither the last field nor new field is a condition
     if (fields.length > 0) {
       const lastField = fields[fields.length - 1]!;
-      setEdges(eds => [...eds, {
-        id: `e-${lastField.id}-${newField.id}`,
-        source: lastField.id,
-        target: newField.id,
-        animated: true,
-        style: { stroke: "#5865f2", strokeWidth: 2 },
-      }]);
+      const shouldAutoConnect = lastField.type !== "condition" && newField.type !== "condition";
+      if (shouldAutoConnect) {
+        setEdges(eds => [...eds, {
+          id: `e-${lastField.id}-${newField.id}`,
+          source: lastField.id,
+          target: newField.id,
+          animated: true,
+          style: { stroke: "#5865f2", strokeWidth: 2 },
+        }]);
+      }
     }
     setSelectedId(newField.id);
     setSaved(false);
@@ -350,7 +362,7 @@ export function FormBuilder() {
           </span>
           {!saved && <span className="text-[10px] text-[#949ba4]">• unsaved</span>}
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={() => window.open(`/f/${form?.slug}`, '_blank')} className="px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+            <button onClick={async () => { if (!saved) await handleSave(); window.open(`/f/${form?.slug}`, '_blank'); }} className="px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
               Preview
             </button>
             <button onClick={handleSave} disabled={saved || updateForm.isPending} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors disabled:opacity-40">
@@ -513,9 +525,86 @@ export function FormBuilder() {
 
             {/* Condition settings */}
             {selectedField.type === "condition" && (
-              <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
+              <div className="space-y-3">
                 <p className="text-[11px] font-mono uppercase text-[#faa61a]">Condition Logic</p>
-                <p className="text-xs text-[#949ba4]">Connect the <span className="text-[#3ba55c]">Yes</span> and <span className="text-[#ed4245]">No</span> outputs to different fields to create branching paths.</p>
+
+                {/* Source field picker */}
+                <div>
+                  <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1.5">If field</label>
+                  <select
+                    value={selectedField.conditionConfig?.sourceFieldId ?? ""}
+                    onChange={(e) => updateFieldData({ ...selectedField, conditionConfig: { ...selectedField.conditionConfig!, sourceFieldId: e.target.value, operator: selectedField.conditionConfig?.operator ?? "equals", value: selectedField.conditionConfig?.value ?? "" } })}
+                    className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] appearance-none"
+                  >
+                    <option value="">Select a field...</option>
+                    {fields.filter(f => f.type !== "condition" && f.id !== selectedField.id).map(f => (
+                      <option key={f.id} value={f.id}>{f.label} ({f.type.replace("_", " ")})</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Operator */}
+                <div>
+                  <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1.5">Operator</label>
+                  <select
+                    value={selectedField.conditionConfig?.operator ?? "equals"}
+                    onChange={(e) => updateFieldData({ ...selectedField, conditionConfig: { ...selectedField.conditionConfig!, operator: e.target.value as any } })}
+                    className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] appearance-none"
+                  >
+                    <option value="equals">Equals</option>
+                    <option value="not_equals">Not equals</option>
+                    <option value="greater_than">Greater than</option>
+                    <option value="less_than">Less than</option>
+                    <option value="contains">Contains</option>
+                  </select>
+                </div>
+
+                {/* Value — show options from source field if it's a select */}
+                <div>
+                  <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1.5">Value</label>
+                  {(() => {
+                    const sourceField = fields.find(f => f.id === selectedField.conditionConfig?.sourceFieldId);
+                    if (sourceField && (sourceField.type === "single_select" || sourceField.type === "multi_select") && sourceField.options) {
+                      return (
+                        <select
+                          value={selectedField.conditionConfig?.value ?? ""}
+                          onChange={(e) => updateFieldData({ ...selectedField, conditionConfig: { ...selectedField.conditionConfig!, value: e.target.value } })}
+                          className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] appearance-none"
+                        >
+                          <option value="">Pick an option...</option>
+                          {sourceField.options.map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      );
+                    }
+                    if (sourceField?.type === "checkbox") {
+                      return (
+                        <select
+                          value={selectedField.conditionConfig?.value ?? ""}
+                          onChange={(e) => updateFieldData({ ...selectedField, conditionConfig: { ...selectedField.conditionConfig!, value: e.target.value } })}
+                          className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] appearance-none"
+                        >
+                          <option value="true">Checked</option>
+                          <option value="false">Unchecked</option>
+                        </select>
+                      );
+                    }
+                    return (
+                      <input
+                        value={selectedField.conditionConfig?.value ?? ""}
+                        onChange={(e) => updateFieldData({ ...selectedField, conditionConfig: { ...selectedField.conditionConfig!, value: e.target.value } })}
+                        placeholder={sourceField?.type === "rating" ? "e.g. 4" : "Enter value..."}
+                        className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]"
+                      />
+                    );
+                  })()}
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-[#1e1f22] text-[10px] text-[#949ba4]">
+                  Connect <span className="text-[#3ba55c]">Yes</span> handle → field shown when true<br/>
+                  Connect <span className="text-[#ed4245]">No</span> handle → field shown when false
+                </div>
               </div>
             )}
 
