@@ -14,7 +14,6 @@ export function PublicForm() {
   const submitMutation = trpc.public.submitResponse.useMutation();
 
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
-  const [currentStep, setCurrentStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -62,12 +61,11 @@ export function PublicForm() {
   const allFields = form.fields as Array<{ id: string; type: string; label: string; required: boolean; placeholder?: string; options?: string[]; conditionConfig?: { sourceFieldId: string; operator: string; value: string } }>;
   const settings = form.settings as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
   const flowEdges = settings?.edges ?? [];
+  const hasFlow = flowEdges.length > 0;
 
-  // Build the flow order by following edges from the first node
+  // Get next field ID following the flow
   function getNextFieldId(currentId: string): string | null {
     const currentField = allFields.find(f => f.id === currentId);
-
-    // If current is a condition, evaluate it
     if (currentField?.type === "condition" && currentField.conditionConfig) {
       const { sourceFieldId, operator, value } = currentField.conditionConfig;
       const answer = String(answers[sourceFieldId] ?? "");
@@ -78,54 +76,44 @@ export function PublicForm() {
         case "greater_than": result = Number(answer) > Number(value); break;
         case "less_than": result = Number(answer) < Number(value); break;
         case "contains": result = answer.includes(value); break;
-        default: result = answer === value;
       }
-      // Follow yes or no handle
       const handle = result ? "yes" : "no";
       const edge = flowEdges.find(e => e.source === currentId && e.sourceHandle === handle);
       return edge?.target ?? null;
     }
-
-    // Normal field — follow the single outgoing edge
     const edge = flowEdges.find(e => e.source === currentId);
     return edge?.target ?? null;
   }
 
-  // Build visible field sequence by following the flow
-  function buildFieldSequence(): typeof allFields {
-    if (flowEdges.length === 0) {
-      // No flow defined — show all non-condition fields in order
-      return allFields.filter(f => f.type !== "condition");
+  // Resolve next visible field (skip conditions)
+  function resolveNextVisible(fromId: string): string | null {
+    let nextId = getNextFieldId(fromId);
+    let safety = 20;
+    while (nextId && safety-- > 0) {
+      const f = allFields.find(x => x.id === nextId);
+      if (!f) return null;
+      if (f.type !== "condition") return nextId;
+      nextId = getNextFieldId(nextId);
     }
-    // Find the starting node (one with no incoming edge)
-    const targets = new Set(flowEdges.map(e => e.target));
-    const startField = allFields.find(f => !targets.has(f.id)) ?? allFields[0];
-    if (!startField) return [];
-
-    const sequence: typeof allFields = [];
-    let currentId: string | null = startField.id;
-    const visited = new Set<string>();
-
-    while (currentId && !visited.has(currentId)) {
-      visited.add(currentId);
-      const field = allFields.find(f => f.id === currentId);
-      if (!field) break;
-
-      if (field.type === "condition") {
-        // Evaluate and skip to next
-        currentId = getNextFieldId(currentId);
-      } else {
-        sequence.push(field);
-        currentId = getNextFieldId(currentId);
-      }
-    }
-    return sequence;
+    return null;
   }
 
-  const fields = buildFieldSequence();
-  const totalSteps = fields.length;
-  const field = fields[currentStep];
-  const progress = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
+  // Build path history as user navigates
+  const [fieldPath, setFieldPath] = useState<string[]>([]);
+
+  // Initialize first field
+  const visibleFields = hasFlow ? allFields.filter(f => f.type !== "condition") : allFields.filter(f => f.type !== "condition");
+  
+  // Get starting field (no incoming edges)
+  const startFieldId = hasFlow
+    ? (() => { const targets = new Set(flowEdges.map(e => e.target)); return allFields.find(f => !targets.has(f.id))?.id ?? visibleFields[0]?.id; })()
+    : visibleFields[0]?.id;
+
+  // Current field based on path
+  const currentFieldId = fieldPath.length > 0 ? fieldPath[fieldPath.length - 1] : startFieldId;
+  const field = allFields.find(f => f.id === currentFieldId);
+  const totalSteps = visibleFields.length;
+  const progress = totalSteps > 0 ? ((fieldPath.length + 1) / totalSteps) * 100 : 0;
 
   function setAnswer(value: unknown) {
     if (field) setAnswers(a => ({ ...a, [field.id]: value }));
@@ -142,15 +130,28 @@ export function PublicForm() {
   }
 
   function handleNext() {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(s => s + 1);
+    if (!currentFieldId) return;
+    if (hasFlow) {
+      const nextId = resolveNextVisible(currentFieldId);
+      if (nextId) {
+        setFieldPath(p => [...p, nextId]);
+      } else {
+        handleSubmit();
+      }
     } else {
-      handleSubmit();
+      const idx = visibleFields.findIndex(f => f.id === currentFieldId);
+      if (idx < visibleFields.length - 1) {
+        setFieldPath(p => [...p, visibleFields[idx + 1]!.id]);
+      } else {
+        handleSubmit();
+      }
     }
   }
 
   function handleBack() {
-    if (currentStep > 0) setCurrentStep(s => s - 1);
+    if (fieldPath.length > 0) {
+      setFieldPath(p => p.slice(0, -1));
+    }
   }
 
   if (!field) return null;
@@ -165,7 +166,7 @@ export function PublicForm() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-mono text-[#949ba4]">
-            {currentStep + 1} / {totalSteps}
+            {fieldPath.length + 1} / {totalSteps}
           </span>
         </div>
       </header>
@@ -179,7 +180,7 @@ export function PublicForm() {
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-lg">
           {/* Form title (only on first step) */}
-          {currentStep === 0 && (
+          {fieldPath.length === 0 && (
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">{form.title}</h1>
               {form.description && <p className="text-sm text-[#949ba4]">{form.description}</p>}
@@ -331,7 +332,7 @@ export function PublicForm() {
             {fieldErrors[field.id] && (
               <p className="text-sm text-red-400 mt-3">{fieldErrors[field.id]}</p>
             )}
-            {submitMutation.error && currentStep === totalSteps - 1 && !Object.keys(fieldErrors).length && (
+            {submitMutation.error && !Object.keys(fieldErrors).length && (
               <p className="text-sm text-red-400 mt-3">{submitMutation.error.message}</p>
             )}
           </div>
@@ -340,7 +341,7 @@ export function PublicForm() {
           <div className="flex items-center justify-between mt-12">
             <button
               onClick={handleBack}
-              disabled={currentStep === 0}
+              disabled={fieldPath.length === 0}
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-[#949ba4] hover:text-[#f2f3f5] hover:bg-[#2b2d31] transition-colors disabled:opacity-30 disabled:pointer-events-none"
             >
               <ArrowLeft size={16} /> Back
@@ -352,11 +353,10 @@ export function PublicForm() {
             >
               {submitMutation.isPending ? (
                 <Loader2 size={16} className="animate-spin" />
-              ) : currentStep === totalSteps - 1 ? (
-                <>Submit <CheckCircle size={16} /></>
-              ) : (
-                <>Next <ArrowRight size={16} /></>
-              )}
+              ) : (() => {
+                const isLast = hasFlow ? !resolveNextVisible(currentFieldId!) : visibleFields.findIndex(f => f.id === currentFieldId) >= visibleFields.length - 1;
+                return isLast ? <>Submit <CheckCircle size={16} /></> : <>Next <ArrowRight size={16} /></>;
+              })()}
             </button>
           </div>
 
