@@ -6,14 +6,19 @@ import Link from "next/link";
 import {
   ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
   useNodesState,
   useEdgesState,
   addEdge,
+  Handle,
+  Position,
   type Node,
   type Edge,
   type Connection,
   Panel,
+  ConnectionLineType,
+  MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -62,9 +67,11 @@ function FieldNode({ data }: { data: { field: FormField; selected: boolean; onDe
   const { field, onDelete } = data;
   return (
     <div className={cn(
-      "w-[280px] rounded-lg border bg-[#2b2d31] p-4 shadow-lg transition-all",
+      "w-[280px] rounded-lg border bg-[#2b2d31] p-4 shadow-lg transition-all relative",
       data.selected ? "border-[#5865f2] shadow-[0_0_15px_rgba(88,101,242,0.3)]" : "border-[#3f4147] hover:border-[#4e5058]"
     )}>
+      <Handle type="target" position={Position.Top} className="!w-3 !h-3 !bg-[#5865f2] !border-2 !border-[#2b2d31]" />
+      <Handle type="source" position={Position.Bottom} className="!w-3 !h-3 !bg-[#5865f2] !border-2 !border-[#2b2d31]" />
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <GripVertical size={12} className="text-[#4e5058] cursor-grab" />
@@ -315,10 +322,17 @@ export function FormBuilder() {
             onDrop={onDrop}
             onDragOver={onDragOver}
             nodeTypes={nodeTypes}
+            connectionLineType={ConnectionLineType.SmoothStep}
+            defaultEdgeOptions={{
+              animated: true,
+              type: "smoothstep",
+              style: { stroke: "#5865f2", strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: "#5865f2", width: 16, height: 16 },
+            }}
             fitView
-            className="bg-[#313338]"
+            className="bg-[#1e1f22]"
           >
-            <Background color="#3f4147" gap={20} size={1} />
+            <Background variant={BackgroundVariant.Dots} color="#3f4147" gap={20} size={1.5} />
             <Controls className="!bg-[#2b2d31] !border-[#3f4147] !shadow-none [&>button]:!bg-[#2b2d31] [&>button]:!border-[#3f4147] [&>button]:!text-[#949ba4] [&>button:hover]:!bg-[#3f4147]" />
             {nodes.length === 0 && (
               <Panel position="top-center" className="mt-20">
