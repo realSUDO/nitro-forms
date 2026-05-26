@@ -116,6 +116,68 @@ export function CreatorDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Right Panel */}
+      <aside className="w-[300px] shrink-0 bg-[#2b2d31] p-6 overflow-y-auto flex flex-col gap-6">
+        {/* Profile */}
+        <div className="flex flex-col items-center pb-6 border-b border-[#3f4147]/30">
+          <div className="relative w-20 h-20 mb-4">
+            <div className="w-full h-full rounded-2xl bg-[#5865f2] flex items-center justify-center text-3xl font-bold text-white border-2 border-[#5865f2]/50">A</div>
+            <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-[#2b2d31] rounded-full" />
+          </div>
+          <p className="text-lg font-semibold text-[#f2f3f5]">Alex Rivera</p>
+          <p className="text-[11px] font-mono text-[#949ba4] mt-0.5">Product Designer · Pro</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4] mb-3">Quick Actions</p>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Reports", href: "/dashboard" },
+              { label: "Invite", href: "#" },
+              { label: "API Docs", href: "http://localhost:5001/docs" },
+              { label: "Support", href: "#" },
+            ].map(a => (
+              <Link key={a.label} href={a.href} className="flex flex-col items-center gap-2 py-4 rounded-xl bg-[#313338] hover:bg-[#3f4147] transition-colors group">
+                <BarChart2 size={16} className="text-[#5865f2] group-hover:text-[#bec2ff]" />
+                <span className="text-[11px] font-mono text-[#949ba4] group-hover:text-[#f2f3f5]">{a.label}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Live Activity */}
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4] mb-3">Live Activity</p>
+          <div className="space-y-4">
+            {[
+              { bold: "New Response", text: " on Customer Feedback.", time: "Just now" },
+              { bold: "Nitro Update", text: " v2.4 is now live.", time: "45m ago" },
+              { bold: "John Doe", text: " joined Main Team.", time: "2h ago" },
+            ].map((a, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#5865f2]/10 shrink-0 flex items-center justify-center">
+                  <FileText size={14} className="text-[#5865f2]" />
+                </div>
+                <div>
+                  <p className="text-sm text-[#b5bac1] leading-snug"><span className="font-semibold text-[#f2f3f5]">{a.bold}</span>{a.text}</p>
+                  <p className="text-[10px] font-mono text-[#949ba4] mt-0.5">{a.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Upgrade */}
+        <div className="mt-auto p-5 rounded-xl" style={{ background: "linear-gradient(135deg, #5865f2 0%, #28418e 100%)" }}>
+          <p className="text-base font-semibold text-white mb-1">Upgrade Nitro</p>
+          <p className="text-xs text-white/80 mb-4">Unlock advanced logic and unlimited responses.</p>
+          <Link href="/pricing" className="block w-full py-2 text-center rounded-lg text-xs font-semibold text-white bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm">
+            Learn More
+          </Link>
+        </div>
+      </aside>
     </>
   );
 }
