@@ -70,8 +70,8 @@ function FieldNode({ data }: { data: { field: FormField; selected: boolean; onDe
       "w-[280px] rounded-lg border bg-[#2b2d31] p-4 shadow-lg transition-all relative",
       data.selected ? "border-[#5865f2] shadow-[0_0_15px_rgba(88,101,242,0.3)]" : "border-[#3f4147] hover:border-[#4e5058]"
     )}>
-      <Handle type="target" position={Position.Top} className="!w-3 !h-3 !bg-[#5865f2] !border-2 !border-[#2b2d31]" />
-      <Handle type="source" position={Position.Bottom} className="!w-3 !h-3 !bg-[#5865f2] !border-2 !border-[#2b2d31]" />
+      <Handle type="target" position={Position.Top} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#5865f2] !transition-colors" />
+      <Handle type="source" position={Position.Bottom} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#5865f2] !transition-colors" />
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <GripVertical size={12} className="text-[#4e5058] cursor-grab" />
@@ -168,7 +168,7 @@ export function FormBuilder() {
   }, [form]);
 
   const onConnect = useCallback((connection: Connection) => {
-    setEdges(eds => addEdge({ ...connection, animated: true, style: { stroke: "#5865f2", strokeWidth: 2 } }, eds));
+    setEdges(eds => addEdge(connection, eds));
     setSaved(false);
   }, [setEdges]);
 
@@ -323,6 +323,9 @@ export function FormBuilder() {
             onDragOver={onDragOver}
             nodeTypes={nodeTypes}
             connectionLineType={ConnectionLineType.SmoothStep}
+            connectionLineStyle={{ stroke: "#5865f2", strokeWidth: 2 }}
+            snapToGrid
+            snapGrid={[20, 20]}
             defaultEdgeOptions={{
               animated: true,
               type: "smoothstep",
@@ -332,7 +335,7 @@ export function FormBuilder() {
             fitView
             className="bg-[#1e1f22]"
           >
-            <Background variant={BackgroundVariant.Dots} color="#3f4147" gap={20} size={1.5} />
+            <Background variant={BackgroundVariant.Dots} color="#4e5058" gap={16} size={2} />
             <Controls className="!bg-[#2b2d31] !border-[#3f4147] !shadow-none [&>button]:!bg-[#2b2d31] [&>button]:!border-[#3f4147] [&>button]:!text-[#949ba4] [&>button:hover]:!bg-[#3f4147]" />
             {nodes.length === 0 && (
               <Panel position="top-center" className="mt-20">
