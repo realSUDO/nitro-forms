@@ -283,18 +283,6 @@ export function FormBuilder() {
       data: { field: newField, selected: false, onDelete: () => deleteField(newField.id) },
     };
     setNodes(nds => [...nds, newNode]);
-    // Auto-connect only if no condition nodes exist in the form
-    const hasConditions = fields.some(f => f.type === "condition") || newField.type === "condition";
-    if (fields.length > 0 && !hasConditions) {
-      const lastField = fields[fields.length - 1]!;
-      setEdges(eds => [...eds, {
-        id: `e-${lastField.id}-${newField.id}`,
-        source: lastField.id,
-        target: newField.id,
-        animated: true,
-        style: { stroke: "#5865f2", strokeWidth: 2 },
-      }]);
-    }
     setSelectedId(newField.id);
     setSaved(false);
     pushHistory();

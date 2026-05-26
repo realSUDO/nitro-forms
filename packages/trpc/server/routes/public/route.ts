@@ -5,10 +5,11 @@ import db, { eq, and, count } from "@repo/database";
 import { formsTable, responsesTable, formEventsTable, emailLogsTable } from "@repo/database/schema";
 import { validateResponse } from "../../validators/runtime-engine";
 import { canAcceptSubmission, canShowInExplore } from "../../validators/visibility-guard";
+import { checkRateLimitRedis } from "../../utils/redis";
 
-// Simple in-memory rate limiter
+// Fallback in-memory rate limiter (if Redis is down)
 const rateLimitMap = new Map<string, number[]>();
-function checkRateLimit(key: string, maxRequests = 5, windowMs = 600000): boolean {
+function checkRateLimitMemory(key: string, maxRequests = 5, windowMs = 600000): boolean {
   const now = Date.now();
   const timestamps = rateLimitMap.get(key) ?? [];
   const valid = timestamps.filter((t) => now - t < windowMs);
@@ -16,6 +17,12 @@ function checkRateLimit(key: string, maxRequests = 5, windowMs = 600000): boolea
   valid.push(now);
   rateLimitMap.set(key, valid);
   return true;
+}
+
+async function checkRateLimit(key: string): Promise<boolean> {
+  const redisResult = await checkRateLimitRedis(`ratelimit:${key}`);
+  if (redisResult !== null) return redisResult;
+  return checkRateLimitMemory(key);
 }
 
 export const publicRouter = router({
@@ -82,8 +89,8 @@ export const publicRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       }
 
-      // Rate limit by slug (in production, use IP hash)
-      if (!checkRateLimit(`submit:${input.slug}`)) {
+      // Rate limit by slug (Redis-backed with in-memory fallback)
+      if (!(await checkRateLimit(`submit:${input.slug}`))) {
         throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many submissions. Please try again later." });
       }
 

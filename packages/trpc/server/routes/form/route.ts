@@ -4,6 +4,7 @@ import { protectedProcedure, publicProcedure, router } from "../../trpc";
 import db, { eq, and, desc } from "@repo/database";
 import { formsTable } from "@repo/database/schema";
 import { nanoid } from "../../utils/nanoid";
+import { cacheDraft, getCachedDraft, clearDraftCache } from "../../utils/redis";
 
 const fieldSchema = z.object({
   id: z.string(),
@@ -145,5 +146,18 @@ export const formRouter = router({
         .returning();
       if (result.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
       return { success: true };
+    }),
+
+  saveDraft: protectedProcedure
+    .input(z.object({ formId: z.string(), fields: z.array(z.unknown()), edges: z.array(z.unknown()) }))
+    .mutation(async ({ input }) => {
+      await cacheDraft(input.formId, { fields: input.fields, edges: input.edges });
+      return { success: true };
+    }),
+
+  getDraft: protectedProcedure
+    .input(z.object({ formId: z.string() }))
+    .query(async ({ input }) => {
+      return getCachedDraft(input.formId);
     }),
 });
