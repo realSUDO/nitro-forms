@@ -101,10 +101,10 @@ export function CreatorDashboard() {
             <button className="flex items-center gap-1 w-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#8f8fa0] hover:text-[#c6c5d7] transition-colors">
               <ChevronDown size={11} /> TEMPLATES
             </button>
-            {[{ e: "🎮", n: "gaming-forms" }, { e: "🚀", n: "startup-forms" }].map(t => (
-              <Link key={t.n} href="/explore" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#8f8fa0] hover:bg-[#292a2d] hover:text-[#c6c5d7] transition-colors mt-0.5">
-                <span className="w-4 text-center text-sm">{t.e}</span>
-                <span className="truncate">{t.n}</span>
+            {[{ Icon: LayoutGrid, n: "gaming-forms" }, { Icon: Zap, n: "startup-forms" }].map(({ Icon: TplIcon, n }) => (
+              <Link key={n} href="/explore" className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#8f8fa0] hover:bg-[#292a2d] hover:text-[#c6c5d7] transition-colors mt-0.5">
+                <TplIcon size={14} className="text-[#454655]" />
+                <span className="truncate">{n}</span>
               </Link>
             ))}
           </div>
@@ -114,7 +114,7 @@ export function CreatorDashboard() {
         <div className="flex items-center gap-2 px-2 py-2 bg-[#121316] shrink-0 border-t border-[#343538]">
           <div className="relative">
             <div className="w-8 h-8 rounded-full bg-[#5865f2] flex items-center justify-center text-xs font-bold text-white">A</div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#23a55a] border-2 border-[#1a1b1e]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#5865f2] border-2 border-[#1a1b1e]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[#e3e2e6] truncate leading-tight">Alex Rivera</p>
@@ -167,7 +167,7 @@ export function CreatorDashboard() {
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold text-[#e3e2e6]">{value}</span>
-                      <span className={cn("flex items-center gap-0.5 text-xs font-semibold", up ? "text-[#23a55a]" : "text-[#ed4245]")}>
+                      <span className={cn("flex items-center gap-0.5 text-xs font-semibold", up ? "text-[#5865f2]" : "text-[#8f8fa0]")}>
                         {up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
                         {delta}
                       </span>
@@ -183,7 +183,7 @@ export function CreatorDashboard() {
               <div className="rounded-lg overflow-hidden bg-[#1f1f23] border border-[#343538]">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#343538]">
                   <span className="text-sm font-semibold text-[#e3e2e6]">Recent Forms</span>
-                  <Link href="#" className="text-xs text-[#00a8fc] hover:underline">View All</Link>
+                  <Link href="#" className="text-xs text-[#bec2ff] hover:underline">View All</Link>
                 </div>
                 <table className="w-full">
                   <thead>
@@ -207,7 +207,7 @@ export function CreatorDashboard() {
                         <td className="px-4 py-3">
                           <span className={cn(
                             "px-2 py-0.5 rounded text-[11px] font-semibold",
-                            status === "Published" ? "bg-[#23a55a]/15 text-[#23a55a]" : "bg-[#5865f2]/15 text-[#949cff]"
+                            status === "Published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#5865f2]/15 text-[#bec2ff]"
                           )}>
                             {status}
                           </span>
@@ -239,7 +239,7 @@ export function CreatorDashboard() {
               <div className="flex items-center gap-2.5 px-2 py-1.5 rounded hover:bg-[#292a2d] transition-colors cursor-pointer">
                 <div className="relative shrink-0">
                   <div className="w-8 h-8 rounded-full bg-[#5865f2] flex items-center justify-center text-xs font-bold text-white">A</div>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#23a55a] border-2 border-[#1a1b1e]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#5865f2] border-2 border-[#1a1b1e]" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[#e3e2e6] truncate">Alex Rivera</p>

@@ -4,12 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   BarChart2,
+  Calendar,
   Code2,
   Eye,
   LayoutGrid,
   Plus,
   Search,
   Settings,
+  ShieldCheck,
   Timer,
   Users,
   Zap,
@@ -27,7 +29,7 @@ const TEMPLATES = [
   {
     category: "Gaming",
     title: "Gaming Community Signup",
-    stats: [{ icon: Users, text: "840 responses" }, { icon: null, text: "Verified" }],
+    stats: [{ icon: Users, text: "840 responses" }, { icon: ShieldCheck, text: "Verified" }],
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDPtNLdYJSXRRCjkQamyjpGoSL6j_hm2NHZBQawgZga2ESMP7Us0XG0J5875ZIJ6djfKq46EM46YnKcIKtdJx1LmLyjVfcC5D-GNcKVcWz0NHcN7Vfyuqnu7w-SFFTDsXDJtEd7YwUUhXimDOg-kmFdBvoR_oO5y-FhKY0LNorbUG-bSHRGyMDweLS1ops3RJqp-fCnmn71a55uWscZZexTNB9ozNtIJyNTt1Yu06wBLsYkeikGv-5_X-Gr0la5NRu8K_uYedexvKo",
     badgeColor: "bg-[#28418e]/80 text-[#9db2ff]",
   },
@@ -41,7 +43,7 @@ const TEMPLATES = [
   {
     category: "Social",
     title: "Movie Night RSVP",
-    stats: [{ icon: null, text: "Upcoming" }],
+    stats: [{ icon: Calendar, text: "Upcoming" }],
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDLuo1ZH9fNiZpj4-YaBWGZVEmfhTbfxTqgPyYryv0T8OGSCnwzdIThvdMYoEgTafyfStLqvAoEa04dieyIRf07oswsuFm7RYVOst0NOFMb8vBqG3wBh9tFc8SBPADgbcT5v4oNStDvt0A1ej-n702Oas87unqP04RyaFMC_LOmj_QCGnaV0jxqpYsf8dKBw7jyMZq67oJXiw2xXu5f9hY-W3v8dEjiwPrGWoBbcGkhn2EI8FZHRAleg0SxkYEA2fHFNhR3HdTSj_k",
     badgeColor: "bg-[#93000a]/60 text-[#ffdad6]",
   },
@@ -151,7 +153,7 @@ export function ExploreTemplates() {
                     <div className="flex items-center gap-4 text-[#c6c5d7] mb-6">
                       {stats.map(({ icon: StatIcon, text }, si) => (
                         <div key={si} className="flex items-center gap-1">
-                          {StatIcon && <StatIcon size={13} />}
+                          <StatIcon size={13} />
                           <span className="text-[11px] font-mono">{text}</span>
                         </div>
                       ))}
