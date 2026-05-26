@@ -55,8 +55,8 @@ export function CreatorDashboard() {
         </div>
         {[
           { Icon: LayoutGrid, active: true, href: "/dashboard" },
-          { Icon: BarChart2, active: false, href: "/analytics" },
-          { Icon: Settings, active: false, href: "/explore" },
+          { Icon: BarChart2, active: false, href: "/explore" },
+          { Icon: Settings, active: false, href: "/pricing" },
         ].map(({ Icon, active, href }, i) => (
           <Link key={i} href={href} className={cn(
             "relative w-10 h-10 rounded-full flex items-center justify-center transition-colors",
