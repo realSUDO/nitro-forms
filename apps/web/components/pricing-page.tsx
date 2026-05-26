@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Zap } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 const PLANS = [
@@ -36,31 +36,8 @@ const PLANS = [
 
 export function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#313338] text-[#f2f3f5]">
-
-      {/* Nav */}
-      <header className="flex items-center justify-between px-8 h-16 ">
-        <Link href="/" className="flex items-center gap-2">
-          <Zap size={20} className="text-[#5865f2]" />
-          <span className="text-lg font-bold text-[#f2f3f5]">NitroForms</span>
-        </Link>
-        <nav className="flex items-center gap-6">
-          {["Builder", "Templates", "Docs", "Pricing"].map(item => (
-            <Link key={item} href={item === "Pricing" ? "/pricing" : item === "Builder" ? "/builder" : item === "Templates" ? "/explore" : "#"} className={cn(
-              "text-sm transition-colors",
-              item === "Pricing" ? "text-[#f2f3f5] font-semibold" : "text-[#949ba4] hover:text-[#f2f3f5]"
-            )}>
-              {item}
-            </Link>
-          ))}
-          <Link href="/dashboard" className="px-4 py-1.5 rounded-lg bg-[#5865f2] text-sm text-white font-medium hover:bg-[#4752c4] transition-colors">
-            Dashboard
-          </Link>
-        </nav>
-      </header>
-
-      {/* Content */}
-      <main className="max-w-5xl mx-auto px-6 py-20">
+    <main className="flex-1 overflow-y-auto bg-[#313338]">
+      <div className="max-w-5xl mx-auto px-6 py-16">
         <div className="text-center mb-14">
           <h1 className="text-4xl font-bold text-[#f2f3f5] mb-3">Simple, transparent pricing</h1>
           <p className="text-lg text-[#949ba4]">No hidden fees. Upgrade or downgrade anytime.</p>
@@ -72,7 +49,7 @@ export function PricingPage() {
               "rounded-xl p-6 flex flex-col",
               highlight
                 ? "bg-[#5865f2]/10 border-2 border-[#5865f2] shadow-[0_0_30px_rgba(88,101,242,0.15)]"
-                : "bg-[#383a40] border border-[#3f4147]"
+                : "bg-[#2b2d31] border border-[#3f4147]"
             )}>
               {highlight && <span className="text-[10px] font-mono uppercase tracking-widest text-[#bec2ff] mb-2">Most Popular</span>}
               <h3 className="text-xl font-bold text-[#f2f3f5]">{tier}</h3>
@@ -89,14 +66,14 @@ export function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <button className={cn(
-                "w-full py-2.5 rounded-lg text-sm font-semibold transition-colors",
+              <Link href="/dashboard" className={cn(
+                "block w-full py-2.5 rounded-lg text-sm font-semibold text-center transition-colors",
                 highlight
                   ? "bg-[#5865f2] text-white hover:bg-[#4752c4]"
                   : "border border-[#4e5058] text-[#b5bac1] hover:bg-[#3f4147]"
               )}>
                 {cta}
-              </button>
+              </Link>
             </div>
           ))}
         </div>
@@ -104,7 +81,7 @@ export function PricingPage() {
         <p className="text-center text-xs text-[#949ba4] mt-8">
           Payments are not implemented for this hackathon demo. All features are available for testing.
         </p>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

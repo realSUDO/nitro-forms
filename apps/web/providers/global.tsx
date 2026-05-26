@@ -2,11 +2,12 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Toaster } from "~/components/ui/sonner";
 
 import { trpc } from "~/trpc/client";
-import { createTRPCHttpBatchClientClient } from "~/trpc/create-client";
+import { createTRPCHttpBatchClientClient, setTokenGetter } from "~/trpc/create-client";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,6 +17,16 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+function TRPCTokenSync() {
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    setTokenGetter(() => getToken());
+  }, [getToken]);
+
+  return null;
+}
 
 export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trpcClient] = useState(() =>
@@ -27,11 +38,12 @@ export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ child
     <QueryClientProvider client={queryClient}>
       <NextThemesProvider
         attribute="class"
-        defaultTheme="light"
+        defaultTheme="dark"
         enableSystem
         disableTransitionOnChange
       >
         <trpc.Provider queryClient={queryClient} client={trpcClient}>
+          <TRPCTokenSync />
           {children}
           <Toaster />
         </trpc.Provider>
