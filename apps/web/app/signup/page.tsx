@@ -14,23 +14,7 @@ export default function SignUpPage() {
         <span className="text-lg font-bold text-[#f2f3f5]">NitroForms</span>
       </div>
       <div className="relative z-10">
-        <SignUp
-          appearance={{
-            elements: {
-              rootBox: "w-full max-w-sm",
-              card: "bg-[#383a40] border-none shadow-none",
-              headerTitle: "text-[#f2f3f5]",
-              headerSubtitle: "text-[#949ba4]",
-              formFieldLabel: "text-[#b5bac1] font-mono text-[11px] uppercase tracking-widest",
-              formFieldInput: "bg-[#1e1f22] border-[#1e1f22] text-[#f2f3f5] focus:border-[#5865f2]",
-              formButtonPrimary: "bg-[#5865f2] hover:bg-[#4752c4]",
-              footerActionLink: "text-[#5865f2] hover:text-[#bec2ff]",
-              socialButtonsBlockButton: "border-[#4e5058] text-[#b5bac1] hover:bg-[#3f4147]",
-              dividerLine: "bg-[#4e5058]",
-              dividerText: "text-[#949ba4]",
-            },
-          }}
-        />
+        <SignUp />
       </div>
     </div>
   );
