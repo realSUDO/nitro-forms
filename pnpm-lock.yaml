@@ -401,6 +401,12 @@ importers:
 
   packages/trpc:
     dependencies:
+      '@clerk/backend':
+        specifier: ^3.4.13
+        version: 3.4.13(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@repo/database':
+        specifier: workspace:^
+        version: link:../database
       '@repo/services':
         specifier: workspace:*
         version: link:../services
