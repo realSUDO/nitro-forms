@@ -97,7 +97,30 @@ export function FormBuilder() {
   const params = useParams();
   const router = useRouter();
   const formId = params.id as string;
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+
+  function onDragStart(event: React.DragEvent, type: FieldType) {
+    event.dataTransfer.setData("fieldType", type);
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  function onDragOver(event: React.DragEvent) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }
+
+  function onDrop(event: React.DragEvent) {
+    event.preventDefault();
+    const type = event.dataTransfer.getData("fieldType") as FieldType;
+    if (!type || !reactFlowInstance) return;
+
+    const position = reactFlowInstance.screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    addFieldAtPosition(type, position);
+  }
 
   const { data: form, isLoading } = trpc.form.getById.useQuery({ formId }, { enabled: !!formId });
   const updateForm = trpc.form.update.useMutation();
@@ -142,7 +165,8 @@ export function FormBuilder() {
     setSaved(false);
   }, [setEdges]);
 
-  function addField(type: FieldType) {
+  function addFieldAtPosition(type: FieldType, position?: { x: number; y: number }) {
+    const pos = position ?? { x: 100 + Math.random() * 200, y: fields.length * 140 + Math.random() * 50 };
     const newField: FormField = {
       id: `f_${Date.now()}`,
       type,
@@ -150,7 +174,7 @@ export function FormBuilder() {
       required: false,
       order: fields.length + 1,
       options: type === "single_select" || type === "multi_select" ? ["Option 1", "Option 2"] : undefined,
-      position: { x: 100 + Math.random() * 200, y: fields.length * 140 + Math.random() * 50 },
+      position: pos,
     };
     setFields(prev => [...prev, newField]);
     const newNode: Node = {
@@ -173,6 +197,10 @@ export function FormBuilder() {
     }
     setSelectedId(newField.id);
     setSaved(false);
+  }
+
+  function addField(type: FieldType) {
+    addFieldAtPosition(type);
   }
 
   function deleteField(id: string) {
@@ -234,8 +262,10 @@ export function FormBuilder() {
           {FIELD_TYPES.map(({ type, label, Icon }) => (
             <button
               key={type}
+              draggable
+              onDragStart={(e) => onDragStart(e, type)}
               onClick={() => addField(type)}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors cursor-grab active:cursor-grabbing"
             >
               <Icon size={14} />
               {label}
@@ -272,7 +302,7 @@ export function FormBuilder() {
         </header>
 
         {/* React Flow Canvas */}
-        <div ref={reactFlowWrapper} className="flex-1">
+        <div className="flex-1">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -281,6 +311,9 @@ export function FormBuilder() {
             onConnect={onConnect}
             onNodeClick={(_, node) => setSelectedId(node.id)}
             onPaneClick={() => setSelectedId(null)}
+            onInit={setReactFlowInstance}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
             nodeTypes={nodeTypes}
             fitView
             className="bg-[#313338]"
