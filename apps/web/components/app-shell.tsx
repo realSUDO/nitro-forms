@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
-import { Compass, LayoutGrid, LogOut, Settings, Zap } from "lucide-react";
+import { BarChart2, Compass, LayoutGrid, LogOut, Settings, Zap } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 const NAV_ITEMS = [
   { Icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
+  { Icon: BarChart2, href: "/analytics", label: "Analytics" },
   { Icon: Compass, href: "/explore", label: "Explore" },
   { Icon: Settings, href: "/pricing", label: "Pricing" },
 ];
