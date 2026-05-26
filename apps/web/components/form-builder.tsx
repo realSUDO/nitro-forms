@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   AlignLeft,
   ChevronDown,
   Copy,
   GripVertical,
+  Loader2,
   Mail,
   Plus,
   Settings2,
@@ -16,441 +19,250 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { trpc } from "~/trpc/client";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type FieldType = "text" | "email" | "textarea" | "dropdown" | "checkbox";
+type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "rating" | "date";
 
 interface FormField {
   id: string;
   type: FieldType;
   label: string;
-  placeholder: string;
+  placeholder?: string;
   required: boolean;
+  order: number;
+  options?: string[];
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const FIELD_ICONS: Record<FieldType, React.ElementType> = {
-  text: Type,
-  email: Mail,
-  textarea: AlignLeft,
-  dropdown: ChevronDown,
-  checkbox: ToggleLeft,
-};
-
-const FIELD_PALETTE: { type: FieldType; label: string }[] = [
-  { type: "text", label: "Short Text" },
-  { type: "email", label: "Email" },
-  { type: "textarea", label: "Long Text" },
-  { type: "dropdown", label: "Dropdown" },
-  { type: "checkbox", label: "Checkbox" },
+const FIELD_TYPES: { type: FieldType; label: string; Icon: React.ElementType }[] = [
+  { type: "short_text", label: "Short Text", Icon: Type },
+  { type: "long_text", label: "Long Text", Icon: AlignLeft },
+  { type: "email", label: "Email", Icon: Mail },
+  { type: "number", label: "Number", Icon: Type },
+  { type: "single_select", label: "Single Select", Icon: ChevronDown },
+  { type: "multi_select", label: "Multi Select", Icon: ChevronDown },
+  { type: "checkbox", label: "Checkbox", Icon: ToggleLeft },
+  { type: "rating", label: "Rating", Icon: Type },
+  { type: "date", label: "Date", Icon: Type },
 ];
-
-const INITIAL_FIELDS: FormField[] = [
-  { id: "f1", type: "text", label: "Full Name", placeholder: "Enter your full name", required: true },
-  { id: "f2", type: "email", label: "Email Address", placeholder: "you@example.com", required: true },
-  { id: "f3", type: "textarea", label: "Message", placeholder: "Write your message here…", required: false },
-  { id: "f4", type: "dropdown", label: "How did you hear?", placeholder: "Select an option", required: false },
-];
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function FieldPreview({ field }: { field: FormField }) {
-  if (field.type === "textarea") {
-    return (
-      <textarea
-        readOnly
-        placeholder={field.placeholder}
-        rows={3}
-        className="w-full resize-none rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
-      />
-    );
-  }
-  if (field.type === "dropdown") {
-    return (
-      <div className="flex items-center justify-between w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#4e5058]">
-        <span>{field.placeholder}</span>
-        <ChevronDown size={14} />
-      </div>
-    );
-  }
-  if (field.type === "checkbox") {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded border border-[#3f4147] bg-[#2b2d31]" />
-        <span className="text-sm text-[#b5bac1]">{field.placeholder}</span>
-      </div>
-    );
-  }
-  return (
-    <input
-      readOnly
-      placeholder={field.placeholder}
-      className="w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
-    />
-  );
-}
-
-function FieldCard({
-  field,
-  selected,
-  onSelect,
-  onDelete,
-  onDuplicate,
-}: {
-  field: FormField;
-  selected: boolean;
-  onSelect: () => void;
-  onDelete: () => void;
-  onDuplicate: () => void;
-}) {
-  const Icon = FIELD_ICONS[field.type];
-  return (
-    <div
-      onClick={onSelect}
-      className={cn(
-        "group relative rounded-xl border bg-[#383a40] p-4 cursor-pointer transition-all",
-        selected
-          ? "border-[#5865f2] shadow-[0_0_0_1px_rgba(88,101,242,0.3)]"
-          : "border-[#4e5058] hover:border-[#5865f2]/50"
-      )}
-    >
-      {/* Drag handle */}
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 text-[#4e5058] opacity-0 group-hover:opacity-100 transition-opacity">
-        <GripVertical size={14} />
-      </div>
-
-      {/* Hover toolbar */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-          className="p-1 rounded hover:bg-[#3f4147] text-[#949ba4] hover:text-[#f2f3f5] transition-colors"
-        >
-          <Copy size={12} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="p-1 rounded hover:bg-[#3f4147] text-[#949ba4] hover:text-red-400 transition-colors"
-        >
-          <Trash2 size={12} />
-        </button>
-      </div>
-
-      {/* Field header */}
-      <div className="flex items-center gap-2 mb-3 pl-3">
-        <Icon size={13} className="text-[#949ba4] shrink-0" />
-        <span className="text-xs font-mono uppercase tracking-widest text-[#949ba4]">
-          {field.type}
-        </span>
-        {field.required && (
-          <span className="ml-auto text-[10px] font-mono text-[#5865f2] bg-[#5865f2]/10 px-1.5 py-0.5 rounded">
-            REQUIRED
-          </span>
-        )}
-      </div>
-
-      {/* Label */}
-      <p className="text-sm font-medium text-[#f2f3f5] mb-2 pl-3">{field.label}</p>
-
-      {/* Input preview */}
-      <div className="pl-3">
-        <FieldPreview field={field} />
-      </div>
-    </div>
-  );
-}
-
-function InspectorPanel({
-  field,
-  onChange,
-}: {
-  field: FormField | null;
-  onChange: (updated: FormField) => void;
-}) {
-  if (!field) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-center px-6">
-        <Settings2 size={28} className="text-[#4e5058] mb-3" />
-        <p className="text-sm text-[#949ba4]">Select a field to edit its settings</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-4 space-y-5 overflow-y-auto h-full">
-      <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Field Settings</p>
-
-      {/* Label */}
-      <div className="space-y-1.5">
-        <label className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Label</label>
-        <input
-          value={field.label}
-          onChange={(e) => onChange({ ...field, label: e.target.value })}
-          className="w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
-        />
-      </div>
-
-      {/* Placeholder */}
-      <div className="space-y-1.5">
-        <label className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Placeholder</label>
-        <input
-          value={field.placeholder}
-          onChange={(e) => onChange({ ...field, placeholder: e.target.value })}
-          className="w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
-        />
-      </div>
-
-      {/* Required toggle */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-[#f2f3f5]">Required</p>
-          <p className="text-xs text-[#949ba4]">Respondents must fill this field</p>
-        </div>
-        <button
-          onClick={() => onChange({ ...field, required: !field.required })}
-          className={cn(
-            "relative w-10 h-5 rounded-full transition-colors",
-            field.required ? "bg-[#5865f2]" : "bg-[#3f4147]"
-          )}
-        >
-          <span
-            className={cn(
-              "absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform",
-              field.required ? "translate-x-5" : "translate-x-0.5"
-            )}
-          />
-        </button>
-      </div>
-
-      <div className=" pt-4 space-y-1.5">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Appearance</p>
-        <div className="flex gap-2 mt-2">
-          {(["Full", "Half"] as const).map((w) => (
-            <button
-              key={w}
-              className={cn(
-                "flex-1 py-1.5 rounded-md text-xs border transition-colors",
-                w === "Full"
-                  ? "border-[#5865f2] bg-[#5865f2]/10 text-[#bec2ff]"
-                  : "border-[#3f4147] text-[#949ba4] hover:border-[#4e5058]"
-              )}
-            >
-              {w}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className=" pt-4">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4] mb-3">Logic</p>
-        <button className="w-full py-2 rounded-md border border-dashed border-[#4e5058] text-xs text-[#949ba4] hover:border-[#5865f2] hover:text-[#bec2ff] transition-colors flex items-center justify-center gap-1.5">
-          <Zap size={12} />
-          Add Condition
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 
 export function FormBuilder() {
-  const [fields, setFields] = useState<FormField[]>(INITIAL_FIELDS);
-  const [selectedId, setSelectedId] = useState<string | null>("f2");
-  const [formTitle, setFormTitle] = useState("Contact Us");
-  const [activeTab, setActiveTab] = useState<"build" | "preview" | "logic" | "settings">("build");
+  const params = useParams();
+  const router = useRouter();
+  const formId = params.id as string;
 
-  const selectedField = fields.find((f) => f.id === selectedId) ?? null;
+  const { data: form, isLoading } = trpc.form.getById.useQuery(
+    { formId },
+    { enabled: !!formId }
+  );
+
+  const updateForm = trpc.form.update.useMutation();
+  const publishForm = trpc.form.publish.useMutation();
+  const unpublishForm = trpc.form.unpublish.useMutation();
+
+  const [title, setTitle] = useState("");
+  const [fields, setFields] = useState<FormField[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [saved, setSaved] = useState(true);
+
+  useEffect(() => {
+    if (form) {
+      setTitle(form.title);
+      setFields((form.fieldsJson as FormField[]) ?? []);
+    }
+  }, [form]);
+
+  const selectedField = fields.find(f => f.id === selectedId) ?? null;
 
   function addField(type: FieldType) {
     const newField: FormField = {
-      id: `f${Date.now()}`,
+      id: `f_${Date.now()}`,
       type,
-      label: FIELD_PALETTE.find((p) => p.type === type)?.label ?? "New Field",
-      placeholder: "Enter value…",
+      label: FIELD_TYPES.find(t => t.type === type)?.label ?? "New Field",
       required: false,
+      order: fields.length + 1,
+      options: type === "single_select" || type === "multi_select" ? ["Option 1", "Option 2"] : undefined,
     };
-    setFields((prev) => [...prev, newField]);
+    setFields(prev => [...prev, newField]);
     setSelectedId(newField.id);
-  }
-
-  function updateField(updated: FormField) {
-    setFields((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
+    setSaved(false);
   }
 
   function deleteField(id: string) {
-    setFields((prev) => prev.filter((f) => f.id !== id));
+    setFields(prev => prev.filter(f => f.id !== id));
     if (selectedId === id) setSelectedId(null);
+    setSaved(false);
   }
 
-  function duplicateField(id: string) {
-    const field = fields.find((f) => f.id === id);
-    if (!field) return;
-    const copy = { ...field, id: `f${Date.now()}` };
-    setFields((prev) => {
-      const idx = prev.findIndex((f) => f.id === id);
-      const next = [...prev];
-      next.splice(idx + 1, 0, copy);
-      return next;
-    });
-    setSelectedId(copy.id);
+  function updateField(updated: FormField) {
+    setFields(prev => prev.map(f => f.id === updated.id ? updated : f));
+    setSaved(false);
   }
 
-  const tabs = ["Build", "Preview", "Logic", "Settings"] as const;
+  async function handleSave() {
+    await updateForm.mutateAsync({ formId, title, fields });
+    setSaved(true);
+  }
+
+  async function handlePublish() {
+    if (!saved) await handleSave();
+    if (form?.status === "published") {
+      await unpublishForm.mutateAsync({ formId });
+    } else {
+      await publishForm.mutateAsync({ formId });
+    }
+  }
+
+  function handleShare() {
+    const url = `${window.location.origin}/f/${form?.slug}`;
+    navigator.clipboard.writeText(url);
+    alert(`Link copied: ${url}`);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-screen bg-[#313338] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#5865f2]" size={32} />
+      </div>
+    );
+  }
+
+  if (!form) {
+    return (
+      <div className="h-screen bg-[#313338] flex items-center justify-center text-[#949ba4]">
+        Form not found. <Link href="/dashboard" className="ml-2 text-[#5865f2] hover:underline">Go back</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#313338] text-[#f2f3f5] overflow-hidden">
-      {/* ── Left Rail ── */}
-      <aside className="w-[72px] shrink-0 bg-[#2b2d31]  flex flex-col items-center py-4 gap-3">
-        {/* Logo */}
-        <div className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
+
+      {/* Rail */}
+      <aside className="w-[72px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-4 gap-3">
+        <Link href="/dashboard" className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
           <Zap size={18} className="text-white" />
-        </div>
-        {/* Nav icons */}
-        {[
-          { icon: Settings2, active: true },
-          { icon: BarChart2Icon, active: false },
-          { icon: Share2, active: false },
-        ].map(({ icon: Icon, active }, i) => (
-          <button
-            key={i}
-            className={cn(
-              "relative w-10 h-10 rounded-full flex items-center justify-center transition-colors",
-              active
-                ? "bg-[#3f4147] text-[#f2f3f5]"
-                : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
-            )}
-          >
-            {active && (
-              <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-white" />
-            )}
-            <Icon size={18} />
-          </button>
-        ))}
+        </Link>
       </aside>
 
-      {/* ── Sidebar: Field Palette ── */}
-      <aside className="w-[220px] shrink-0 bg-[#2b2d31]  flex flex-col">
-        <div className="px-4 py-3 ">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Add Fields</p>
+      {/* Field palette sidebar */}
+      <aside className="w-[220px] shrink-0 bg-[#2b2d31] flex flex-col">
+        <div className="px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Add Fields</p>
         </div>
-        <div className="p-3 space-y-1 flex-1 overflow-y-auto">
-          {FIELD_PALETTE.map(({ type, label }) => {
-            const Icon = FIELD_ICONS[type];
-            return (
-              <button
-                key={type}
-                onClick={() => addField(type)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors group"
-              >
-                <Icon size={14} className="text-[#949ba4] group-hover:text-[#bec2ff]" />
-                {label}
-                <Plus size={12} className="ml-auto text-[#4e5058] group-hover:text-[#949ba4]" />
-              </button>
-            );
-          })}
-        </div>
-      </aside>
-
-      {/* ── Main Canvas ── */}
-      <main className="flex-1 flex flex-col min-w-0">
-        {/* Top toolbar */}
-        <header className="h-12  flex items-center px-4 gap-4 shrink-0">
-          {/* Form title */}
-          <input
-            value={formTitle}
-            onChange={(e) => setFormTitle(e.target.value)}
-            className="bg-transparent text-sm font-medium text-[#f2f3f5] focus:outline-none border-b border-transparent focus:border-[#5865f2] transition-colors px-1"
-          />
-
-          {/* Tabs */}
-          <div className="flex gap-1 ml-4">
-            {tabs.map((tab) => {
-              const key = tab.toLowerCase() as typeof activeTab;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(key)}
-                  className={cn(
-                    "px-3 py-1 rounded-md text-xs transition-colors",
-                    activeTab === key
-                      ? "bg-[#5865f2]/15 text-[#bec2ff]"
-                      : "text-[#949ba4] hover:text-[#f2f3f5]"
-                  )}
-                >
-                  {tab}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Right actions */}
-          <div className="ml-auto flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#3f4147] text-xs text-[#b5bac1] hover:border-[#4e5058] transition-colors">
-              <Share2 size={12} />
-              Share
+        <div className="flex-1 overflow-y-auto px-2 space-y-0.5">
+          {FIELD_TYPES.map(({ type, label, Icon }) => (
+            <button
+              key={type}
+              onClick={() => addField(type)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors"
+            >
+              <Icon size={14} />
+              {label}
+              <Plus size={12} className="ml-auto text-[#4e5058]" />
             </button>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#5865f2] text-xs text-white hover:bg-[#6875f5] transition-colors">
-              Publish
+          ))}
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Toolbar */}
+        <header className="h-12 flex items-center px-4 gap-4 shrink-0 bg-[#2b2d31]">
+          <input
+            value={title}
+            onChange={(e) => { setTitle(e.target.value); setSaved(false); }}
+            className="bg-transparent text-sm font-semibold text-[#f2f3f5] focus:outline-none border-b border-transparent focus:border-[#5865f2] px-1"
+          />
+          <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded capitalize", form.status === "published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#3f4147] text-[#949ba4]")}>
+            {form.status}
+          </span>
+          {!saved && <span className="text-[10px] text-[#949ba4]">unsaved</span>}
+
+          <div className="ml-auto flex items-center gap-2">
+            <button onClick={handleSave} disabled={saved || updateForm.isPending} className="px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors disabled:opacity-40">
+              {updateForm.isPending ? "Saving..." : "Save"}
+            </button>
+            <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+              <Share2 size={12} /> Share
+            </button>
+            <button onClick={handlePublish} disabled={publishForm.isPending || unpublishForm.isPending} className="px-3 py-1.5 rounded text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors disabled:opacity-50">
+              {form.status === "published" ? "Unpublish" : "Publish"}
             </button>
           </div>
         </header>
 
-        {/* Canvas area */}
-        <div
-          className="flex-1 overflow-y-auto p-8 bg-[#292b2f]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #3f4147 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-          }}
-        >
+        {/* Canvas */}
+        <div className="flex-1 overflow-y-auto p-8 bg-[#292b2f]" style={{ backgroundImage: "radial-gradient(circle, #3f4147 1px, transparent 1px)", backgroundSize: "20px 20px" }}>
           <div className="max-w-xl mx-auto space-y-3">
-            {fields.map((field) => (
-              <FieldCard
+            {fields.length === 0 && (
+              <div className="text-center py-16 text-[#949ba4]">
+                <p className="text-sm">No fields yet. Add fields from the sidebar.</p>
+              </div>
+            )}
+            {fields.map(field => (
+              <div
                 key={field.id}
-                field={field}
-                selected={selectedId === field.id}
-                onSelect={() => setSelectedId(field.id)}
-                onDelete={() => deleteField(field.id)}
-                onDuplicate={() => duplicateField(field.id)}
-              />
+                onClick={() => setSelectedId(field.id)}
+                className={cn(
+                  "group relative rounded-lg border p-4 cursor-pointer transition-all bg-[#2b2d31]",
+                  selectedId === field.id ? "border-[#5865f2]" : "border-[#3f4147] hover:border-[#4e5058]"
+                )}
+              >
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={(e) => { e.stopPropagation(); deleteField(field.id); }} className="p-1 rounded text-[#949ba4] hover:text-red-400 hover:bg-[#3f4147]">
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <GripVertical size={12} className="text-[#4e5058]" />
+                  <span className="text-[10px] font-mono uppercase text-[#949ba4]">{field.type.replace("_", " ")}</span>
+                  {field.required && <span className="text-[10px] font-mono text-[#5865f2]">REQUIRED</span>}
+                </div>
+                <p className="text-sm font-medium text-[#f2f3f5]">{field.label}</p>
+              </div>
             ))}
-
-            {/* Add field button */}
-            <button
-              onClick={() => addField("text")}
-              className="w-full py-3 rounded-xl border border-dashed border-[#4e5058] text-sm text-[#949ba4] hover:border-[#5865f2] hover:text-[#bec2ff] transition-colors flex items-center justify-center gap-2"
-            >
-              <Plus size={14} />
-              Add Field
+            <button onClick={() => addField("short_text")} className="w-full py-3 rounded-lg border border-dashed border-[#4e5058] text-sm text-[#949ba4] hover:border-[#5865f2] hover:text-[#5865f2] transition-colors flex items-center justify-center gap-2">
+              <Plus size={14} /> Add Field
             </button>
           </div>
         </div>
       </main>
 
-      {/* ── Right Inspector ── */}
-      <aside className="w-[260px] shrink-0 bg-[#2b2d31]  flex flex-col">
-        <div className="px-4 py-3 ">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Inspector</p>
+      {/* Inspector */}
+      <aside className="w-[260px] shrink-0 bg-[#2b2d31] flex flex-col overflow-y-auto">
+        <div className="px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Field Settings</p>
         </div>
-        <InspectorPanel
-          field={selectedField}
-          onChange={updateField}
-        />
+        {selectedField ? (
+          <div className="px-4 space-y-4">
+            <div>
+              <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1">Label</label>
+              <input value={selectedField.label} onChange={(e) => updateField({ ...selectedField, label: e.target.value })} className="w-full bg-[#1e1f22] rounded px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-[#b5bac1]">Required</span>
+              <button onClick={() => updateField({ ...selectedField, required: !selectedField.required })} className={cn("w-9 h-5 rounded-full transition-colors relative", selectedField.required ? "bg-[#5865f2]" : "bg-[#3f4147]")}>
+                <span className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform", selectedField.required ? "translate-x-4" : "translate-x-0.5")} />
+              </button>
+            </div>
+            {(selectedField.type === "single_select" || selectedField.type === "multi_select") && (
+              <div>
+                <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1">Options (one per line)</label>
+                <textarea
+                  value={(selectedField.options ?? []).join("\n")}
+                  onChange={(e) => updateField({ ...selectedField, options: e.target.value.split("\n").filter(Boolean) })}
+                  rows={4}
+                  className="w-full bg-[#1e1f22] rounded px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-none"
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-center px-6">
+            <p className="text-sm text-[#949ba4]">Select a field to edit</p>
+          </div>
+        )}
       </aside>
     </div>
-  );
-}
-
-// Inline icon to avoid extra import
-function BarChart2Icon({ size }: { size: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10" />
-      <line x1="12" y1="20" x2="12" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="14" />
-    </svg>
   );
 }

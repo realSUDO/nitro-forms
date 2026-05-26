@@ -1,10 +1,5 @@
-import { FormAnalytics } from "~/components/form-analytics";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Analytics | NitroForms",
-  description: "Form response analytics and insights.",
-};
-
-export default function AnalyticsPage() {
-  return <FormAnalytics />;
+export default function AnalyticsIndex() {
+  redirect("/dashboard");
 }
