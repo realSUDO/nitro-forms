@@ -44,7 +44,7 @@ export function CreatorDashboard() {
             <div className="pt-2">
               <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Drafts</p>
               {drafts.map(f => (
-                <Link key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <Link prefetch key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   <Hash size={14} className="text-[#4e5058]" /><span className="truncate">{f.title}</span>
                 </Link>
               ))}
@@ -54,7 +54,7 @@ export function CreatorDashboard() {
             <div className="pt-2">
               <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Published</p>
               {published.map(f => (
-                <Link key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <Link prefetch key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   <Hash size={14} className="text-[#5865f2]" /><span className="truncate">{f.title}</span>
                 </Link>
               ))}
@@ -104,10 +104,10 @@ export function CreatorDashboard() {
                 <tbody>
                   {formList.map((form, i) => (
                     <tr key={form.id} className={cn("hover:bg-[#3f4147]/30 transition-colors", i < formList.length - 1 && "border-b border-[#3f4147]/40")}>
-                      <td className="px-4 py-3"><Link href={`/builder/${form.id}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link></td>
+                      <td className="px-4 py-3"><Link prefetch href={`/builder/${form.id}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link></td>
                       <td className="px-4 py-3"><span className={cn("px-2 py-0.5 rounded text-[11px] font-semibold capitalize", form.status === "published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#3f4147] text-[#949ba4]")}>{form.status}</span></td>
                       <td className="px-4 py-3 text-xs text-[#949ba4] capitalize">{form.visibility}</td>
-                      <td className="px-4 py-3 text-right"><Link href={`/analytics/${form.id}`} className="text-[#949ba4] hover:text-[#f2f3f5]"><BarChart2 size={14} /></Link></td>
+                      <td className="px-4 py-3 text-right"><Link prefetch href={`/analytics/${form.id}`} className="text-[#949ba4] hover:text-[#f2f3f5]"><BarChart2 size={14} /></Link></td>
                     </tr>
                   ))}
                 </tbody>
