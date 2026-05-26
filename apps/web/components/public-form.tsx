@@ -16,6 +16,7 @@ export function PublicForm() {
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [submitted, setSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [fieldPath, setFieldPath] = useState<string[]>([]);
 
   if (isLoading) {
     return (
@@ -66,19 +67,29 @@ export function PublicForm() {
   // Get next field ID following the flow
   function getNextFieldId(currentId: string): string | null {
     const currentField = allFields.find(f => f.id === currentId);
-    if (currentField?.type === "condition" && currentField.conditionConfig) {
-      const { sourceFieldId, operator, value } = currentField.conditionConfig;
-      const answer = String(answers[sourceFieldId] ?? "");
-      let result = false;
-      switch (operator) {
-        case "equals": result = answer === value; break;
-        case "not_equals": result = answer !== value; break;
-        case "greater_than": result = Number(answer) > Number(value); break;
-        case "less_than": result = Number(answer) < Number(value); break;
-        case "contains": result = answer.includes(value); break;
+    if (currentField?.type === "condition") {
+      if (currentField.conditionConfig?.sourceFieldId) {
+        const { sourceFieldId, operator, value } = currentField.conditionConfig;
+        const answer = String(answers[sourceFieldId] ?? "");
+        let result = false;
+        switch (operator) {
+          case "equals": result = answer === value; break;
+          case "not_equals": result = answer !== value; break;
+          case "greater_than": result = Number(answer) > Number(value); break;
+          case "less_than": result = Number(answer) < Number(value); break;
+          case "contains": result = answer.includes(value); break;
+        }
+        // "yes" path = sourceHandle is null or "yes", "no" path = sourceHandle is "no"
+        if (result) {
+          const edge = flowEdges.find(e => e.source === currentId && (e.sourceHandle === "yes" || e.sourceHandle === null));
+          return edge?.target ?? null;
+        } else {
+          const edge = flowEdges.find(e => e.source === currentId && e.sourceHandle === "no");
+          return edge?.target ?? null;
+        }
       }
-      const handle = result ? "yes" : "no";
-      const edge = flowEdges.find(e => e.source === currentId && e.sourceHandle === handle);
+      // No condition configured — follow default (null handle) path
+      const edge = flowEdges.find(e => e.source === currentId && (e.sourceHandle === null || e.sourceHandle === "yes"));
       return edge?.target ?? null;
     }
     const edge = flowEdges.find(e => e.source === currentId);
@@ -97,9 +108,6 @@ export function PublicForm() {
     }
     return null;
   }
-
-  // Build path history as user navigates
-  const [fieldPath, setFieldPath] = useState<string[]>([]);
 
   // Initialize first field
   const visibleFields = hasFlow ? allFields.filter(f => f.type !== "condition") : allFields.filter(f => f.type !== "condition");
