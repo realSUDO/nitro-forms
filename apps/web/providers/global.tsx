@@ -13,7 +13,8 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnMount: true,
-      staleTime: Infinity,
+      staleTime: 5000,
+      retry: 1,
     },
   },
 });
@@ -22,7 +23,7 @@ function TRPCTokenSync() {
   const { getToken } = useAuth();
 
   useEffect(() => {
-    setTokenGetter(() => getToken());
+    setTokenGetter(getToken);
   }, [getToken]);
 
   return null;
