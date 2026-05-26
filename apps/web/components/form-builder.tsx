@@ -321,6 +321,20 @@ export function FormBuilder() {
           </div>
         </div>
       </aside>
+      <div className="w-1 cursor-col-resize bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+        onMouseDown={(e) => {
+          const startX = e.clientX;
+          const aside = e.currentTarget.previousElementSibling as HTMLElement;
+          const startW = aside.offsetWidth;
+          const onMove = (ev: MouseEvent) => {
+            const diff = ev.clientX - startX;
+            aside.style.width = `${Math.min(Math.max(startW + diff, 160), 400)}px`;
+          };
+          const onUp = () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onUp);
+        }}
+      />
 
       {/* Canvas */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -392,45 +406,133 @@ export function FormBuilder() {
         </div>
       </div>
 
-      {/* Inspector */}
-      <aside className="w-[260px] shrink-0 bg-[#2b2d31] flex flex-col overflow-y-auto">
-        <div className="px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Field Settings</p>
+      {/* Inspector - drag left edge to resize */}
+      <div className="w-1 cursor-col-resize bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+        onMouseDown={(e) => {
+          const startX = e.clientX;
+          const aside = e.currentTarget.nextElementSibling as HTMLElement;
+          const startW = aside.offsetWidth;
+          const onMove = (ev: MouseEvent) => {
+            const diff = startX - ev.clientX;
+            aside.style.width = `${Math.min(Math.max(startW + diff, 220), 500)}px`;
+          };
+          const onUp = () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onUp);
+        }}
+      />
+      <aside className="w-[300px] shrink-0 bg-[#2b2d31] flex flex-col overflow-y-auto">
+        <div className="px-4 py-3 border-b border-[#3f4147]">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">
+            {selectedField ? "Field Settings" : "Inspector"}
+          </p>
         </div>
         {selectedField ? (
-          <div className="px-4 space-y-4">
+          <div className="px-4 py-4 space-y-5 flex-1">
+            {/* Type badge */}
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "px-2 py-1 rounded text-[10px] font-mono uppercase",
+                selectedField.type === "condition" ? "bg-[#faa61a]/10 text-[#faa61a]" : "bg-[#5865f2]/10 text-[#5865f2]"
+              )}>
+                {selectedField.type.replace("_", " ")}
+              </span>
+              {selectedField.required && <span className="px-2 py-1 rounded text-[10px] font-mono bg-red-500/10 text-red-400">Required</span>}
+            </div>
+
+            {/* Label */}
             <div>
-              <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1">Label</label>
-              <input value={selectedField.label} onChange={(e) => updateFieldData({ ...selectedField, label: e.target.value })} className="w-full bg-[#1e1f22] rounded px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
+              <label className="block text-[11px] font-mono uppercase text-[#949ba4] mb-1.5">Label</label>
+              <input
+                value={selectedField.label}
+                onChange={(e) => updateFieldData({ ...selectedField, label: e.target.value })}
+                className="w-full bg-[#1e1f22] rounded-lg px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] transition-shadow"
+              />
             </div>
-            <div>
-              <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1">Placeholder</label>
-              <input value={selectedField.placeholder ?? ""} onChange={(e) => updateFieldData({ ...selectedField, placeholder: e.target.value })} className="w-full bg-[#1e1f22] rounded px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-[#b5bac1]">Required</span>
-              <button onClick={() => updateFieldData({ ...selectedField, required: !selectedField.required })} className={cn("w-9 h-5 rounded-full transition-colors relative", selectedField.required ? "bg-[#5865f2]" : "bg-[#3f4147]")}>
-                <span className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform", selectedField.required ? "translate-x-4" : "translate-x-0.5")} />
-              </button>
-            </div>
-            {(selectedField.type === "single_select" || selectedField.type === "multi_select") && (
+
+            {/* Placeholder */}
+            {selectedField.type !== "condition" && (
               <div>
-                <label className="block text-[10px] font-mono uppercase text-[#949ba4] mb-1">Options (one per line)</label>
-                <textarea
-                  value={(selectedField.options ?? []).join("\n")}
-                  onChange={(e) => updateFieldData({ ...selectedField, options: e.target.value.split("\n").filter(Boolean) })}
-                  rows={4}
-                  className="w-full bg-[#1e1f22] rounded px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-none"
+                <label className="block text-[11px] font-mono uppercase text-[#949ba4] mb-1.5">Placeholder</label>
+                <input
+                  value={selectedField.placeholder ?? ""}
+                  onChange={(e) => updateFieldData({ ...selectedField, placeholder: e.target.value })}
+                  placeholder="Hint text for respondent..."
+                  className="w-full bg-[#1e1f22] rounded-lg px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2] transition-shadow"
                 />
               </div>
             )}
-            <button onClick={() => deleteField(selectedField.id)} className="w-full py-2 rounded text-xs text-red-400 border border-red-400/30 hover:bg-red-400/10 transition-colors">
-              Delete Field
-            </button>
+
+            {/* Required toggle */}
+            <div className="flex items-center justify-between gap-4 py-2.5 px-3 rounded-lg bg-[#1e1f22] overflow-hidden">
+              <span className="text-sm text-[#b5bac1] whitespace-nowrap">Required</span>
+              <div onClick={() => updateFieldData({ ...selectedField, required: !selectedField.required })} className={cn("w-8 h-4 rounded-full cursor-pointer shrink-0 relative transition-colors duration-200", selectedField.required ? "bg-[#5865f2]" : "bg-[#3f4147]")}>
+                <span className={cn("absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all duration-200", selectedField.required ? "left-4" : "left-0.5")} />
+              </div>
+            </div>
+
+            {/* Options (for select fields) */}
+            {(selectedField.type === "single_select" || selectedField.type === "multi_select") && (
+              <div>
+                <label className="block text-[11px] font-mono uppercase text-[#949ba4] mb-2">Options</label>
+                <div className="space-y-1.5">
+                  {(selectedField.options ?? []).map((opt, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold bg-[#3f4147] text-[#949ba4] shrink-0">
+                        {String.fromCharCode(65 + i)}
+                      </span>
+                      <input
+                        value={opt}
+                        onChange={(e) => {
+                          const newOpts = [...(selectedField.options ?? [])];
+                          newOpts[i] = e.target.value;
+                          updateFieldData({ ...selectedField, options: newOpts });
+                        }}
+                        className="flex-1 bg-[#1e1f22] rounded px-2.5 py-1.5 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2]"
+                      />
+                      <button
+                        onClick={() => {
+                          const newOpts = (selectedField.options ?? []).filter((_, idx) => idx !== i);
+                          updateFieldData({ ...selectedField, options: newOpts });
+                        }}
+                        className="text-[#4e5058] hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => updateFieldData({ ...selectedField, options: [...(selectedField.options ?? []), `Option ${(selectedField.options?.length ?? 0) + 1}`] })}
+                    className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-[#3f4147] text-xs text-[#949ba4] hover:border-[#5865f2] hover:text-[#5865f2] transition-colors"
+                  >
+                    <Plus size={12} /> Add Option
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Condition settings */}
+            {selectedField.type === "condition" && (
+              <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
+                <p className="text-[11px] font-mono uppercase text-[#faa61a]">Condition Logic</p>
+                <p className="text-xs text-[#949ba4]">Connect the <span className="text-[#3ba55c]">Yes</span> and <span className="text-[#ed4245]">No</span> outputs to different fields to create branching paths.</p>
+              </div>
+            )}
+
+            {/* Danger zone */}
+            <div className="pt-4 border-t border-[#3f4147]">
+              <button onClick={() => deleteField(selectedField.id)} className="w-full py-2.5 rounded-lg text-xs font-medium text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors">
+                Delete Field
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center px-6">
-            <p className="text-sm text-[#949ba4]">Click a node to edit its settings</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+            <div className="w-12 h-12 rounded-xl bg-[#3f4147] flex items-center justify-center mb-3">
+              <Type size={20} className="text-[#4e5058]" />
+            </div>
+            <p className="text-sm text-[#949ba4] mb-1">No field selected</p>
+            <p className="text-xs text-[#4e5058]">Click a node on the canvas to edit its settings</p>
           </div>
         )}
       </aside>
