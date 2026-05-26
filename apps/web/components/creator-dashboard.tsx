@@ -20,14 +20,8 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { trpc } from "~/trpc/client";
 import { cn } from "~/lib/utils";
-
-const FORMS = [
-  { id: "1", name: "customer-feedback",     label: "Customer Feedback Survey",   status: "Draft",     responses: 124,  lastActive: "2 mins ago",  Icon: MessageSquare },
-  { id: "2", name: "internship-application", label: "Internship Application 2024", status: "Published", responses: 892,  lastActive: "1 hour ago",  Icon: FileText },
-  { id: "3", name: "beta-signup",            label: "Beta Access Signup",          status: "Draft",     responses: 12,   lastActive: "Yesterday",   Icon: Users },
-  { id: "4", name: "event-rsvp",             label: "Community Event RSVP",        status: "Published", responses: 341,  lastActive: "3 hours ago", Icon: FileText },
-];
 
 const ACTIVITY = [
   { Icon: MessageSquare, bold: "New Response", text: " on Customer Feedback.", time: "Just now" },
@@ -36,6 +30,8 @@ const ACTIVITY = [
 ];
 
 export function CreatorDashboard() {
+  const { data: forms, isLoading } = trpc.form.listMine.useQuery();
+  const formList = forms ?? [];
   return (
     <div className="flex h-screen overflow-hidden bg-[#313338] text-[#f2f3f5]">
 
@@ -77,8 +73,8 @@ export function CreatorDashboard() {
           </div>
 
           {[
-            { label: "DRAFTS",    forms: FORMS.filter(f => f.status === "Draft") },
-            { label: "PUBLISHED", forms: FORMS.filter(f => f.status === "Published") },
+            { label: "DRAFTS",    forms: formList.filter(f => f.status === "draft") },
+            { label: "PUBLISHED", forms: formList.filter(f => f.status === "published") },
           ].map(({ label, forms }) => (
             <div key={label} className="pt-3">
               <button className="flex items-center gap-1 w-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4] hover:text-[#b5bac1] transition-colors">
@@ -92,7 +88,7 @@ export function CreatorDashboard() {
                     : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#b5bac1]"
                 )}>
                   <Hash size={15} className={cn("shrink-0", i === 0 && label === "DRAFTS" ? "text-[#b5bac1]" : "text-[#4e5058]")} />
-                  <span className="truncate">{f.name}</span>
+                  <span className="truncate">{f.slug}</span>
                 </Link>
               ))}
             </div>
@@ -195,28 +191,28 @@ export function CreatorDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {FORMS.map(({ id, label, status, responses, lastActive, Icon }, i) => (
-                      <tr key={id} className={cn("hover:bg-[#3f4147]/40 transition-colors", i < FORMS.length - 1 && "/60")}>
+                    {formList.map((form, i) => (
+                      <tr key={form.id} className={cn("hover:bg-[#3f4147]/40 transition-colors", i < formList.length - 1 && "border-b border-[#3f4147]/60")}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-7 h-7 rounded bg-[#3f4147] flex items-center justify-center shrink-0">
-                              <Icon size={13} className="text-[#949ba4]" />
+                              <FileText size={13} className="text-[#949ba4]" />
                             </div>
-                            <span className="text-sm text-[#b5bac1]">{label}</span>
+                            <span className="text-sm text-[#b5bac1]">{form.title}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3">
                           <span className={cn(
-                            "px-2 py-0.5 rounded text-[11px] font-semibold",
-                            status === "Published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#5865f2]/15 text-[#bec2ff]"
+                            "px-2 py-0.5 rounded text-[11px] font-semibold capitalize",
+                            form.status === "published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#3f4147] text-[#949ba4]"
                           )}>
-                            {status}
+                            {form.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-[#b5bac1]">{responses.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-sm text-[#b5bac1]">—</td>
                         <td className="px-4 py-3">
                           <span className="flex items-center gap-1.5 text-xs text-[#949ba4]">
-                            <Clock size={11} />{lastActive}
+                            <Clock size={11} />{form.updatedAt ? new Date(form.updatedAt).toLocaleDateString() : "—"}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">

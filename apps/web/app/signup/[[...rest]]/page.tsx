@@ -3,7 +3,7 @@
 import { SignUp } from "@clerk/nextjs";
 import { Zap } from "lucide-react";
 
-export default function SignUpPage() {
+export default function SignUpCatchAll() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#313338] relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#5865f2]/10 rounded-full blur-[120px] pointer-events-none" />
