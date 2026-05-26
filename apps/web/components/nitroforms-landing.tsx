@@ -133,15 +133,12 @@ function Navigation() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            className="hidden h-9 px-5 font-mono text-[13px] font-medium tracking-wide text-[#c6c5d7] hover:text-[#bec2ff] sm:inline-flex"
-            variant="ghost"
-          >
+          <a href="/login" className="hidden h-9 items-center px-5 font-mono text-[13px] font-medium tracking-wide text-[#c6c5d7] hover:text-[#bec2ff] sm:inline-flex">
             Log In
-          </Button>
-          <Button className="h-9 rounded-lg bg-[#5865f2] px-5 font-mono text-[13px] font-medium tracking-wide text-white shadow-[0_0_20px_rgba(88,101,242,0.2)] hover:bg-[#4752c4]">
+          </a>
+          <a href="/dashboard" className="flex h-9 items-center rounded-lg bg-[#5865f2] px-5 font-mono text-[13px] font-medium tracking-wide text-white shadow-[0_0_20px_rgba(88,101,242,0.2)] hover:bg-[#4752c4]">
             Start Building
-          </Button>
+          </a>
         </div>
       </nav>
     </header>
@@ -174,13 +171,13 @@ function Hero() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4 pt-2">
-          <Button className="flex h-14 items-center gap-2 rounded-xl bg-[#5865f2] px-8 font-mono text-[13px] font-bold tracking-wide text-white shadow-[0_0_20px_rgba(88,101,242,0.2)] hover:bg-[#4752c4]">
+          <a href="/dashboard" className="flex h-14 items-center gap-2 rounded-xl bg-[#5865f2] px-8 font-mono text-[13px] font-bold tracking-wide text-white shadow-[0_0_20px_rgba(88,101,242,0.2)] hover:bg-[#4752c4]">
             Start Building
             <ArrowRight className="size-4" />
-          </Button>
-          <Button className="h-14 rounded-xl border border-[#454655] bg-[#1a1b1e] px-8 font-mono text-[13px] font-bold tracking-wide text-[#e3e2e6] hover:bg-[#292a2d]">
+          </a>
+          <a href="/explore" className="flex h-14 items-center rounded-xl border border-[#454655] bg-[#1a1b1e] px-8 font-mono text-[13px] font-bold tracking-wide text-[#e3e2e6] hover:bg-[#292a2d]">
             Explore Templates
-          </Button>
+          </a>
         </div>
       </div>
 
@@ -495,16 +492,17 @@ function PricingSection() {
               ))}
             </ul>
 
-            <Button
+            <a
+              href="/dashboard"
               className={cn(
-                "w-full rounded-xl py-3 font-mono text-[13px] font-medium tracking-wide",
+                "block w-full rounded-xl py-3 text-center font-mono text-[13px] font-medium tracking-wide",
                 highlight
                   ? "bg-[#5865f2] text-white shadow-[0_0_20px_rgba(88,101,242,0.2)] hover:bg-[#4752c4]"
                   : "border border-[#454655] bg-transparent text-[#e3e2e6] hover:bg-[#292a2d]",
               )}
             >
               {cta}
-            </Button>
+            </a>
           </div>
         ))}
       </div>
