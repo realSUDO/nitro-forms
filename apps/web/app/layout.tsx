@@ -13,8 +13,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Streamyst",
-  description: "Media Forwarding",
+  title: "NitroForms | Forms, but faster.",
+  description: "Create, publish, and analyze dynamic forms from one community-native workspace.",
 };
 
 export default function RootLayout({
