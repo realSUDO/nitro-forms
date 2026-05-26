@@ -63,13 +63,13 @@ function FieldPreview({ field }: { field: FormField }) {
         readOnly
         placeholder={field.placeholder}
         rows={3}
-        className="w-full resize-none rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
+        className="w-full resize-none rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
       />
     );
   }
   if (field.type === "dropdown") {
     return (
-      <div className="flex items-center justify-between w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#4e5058]">
+      <div className="flex items-center justify-between w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#4e5058]">
         <span>{field.placeholder}</span>
         <ChevronDown size={14} />
       </div>
@@ -78,7 +78,7 @@ function FieldPreview({ field }: { field: FormField }) {
   if (field.type === "checkbox") {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded border border-[#4e5058] bg-[#1e1f22]" />
+        <div className="w-4 h-4 rounded border border-[#3f4147] bg-[#2b2d31]" />
         <span className="text-sm text-[#b5bac1]">{field.placeholder}</span>
       </div>
     );
@@ -87,7 +87,7 @@ function FieldPreview({ field }: { field: FormField }) {
     <input
       readOnly
       placeholder={field.placeholder}
-      className="w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
+      className="w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
     />
   );
 }
@@ -187,7 +187,7 @@ function InspectorPanel({
         <input
           value={field.label}
           onChange={(e) => onChange({ ...field, label: e.target.value })}
-          className="w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
+          className="w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
         />
       </div>
 
@@ -197,7 +197,7 @@ function InspectorPanel({
         <input
           value={field.placeholder}
           onChange={(e) => onChange({ ...field, placeholder: e.target.value })}
-          className="w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
+          className="w-full rounded-md bg-[#2b2d31] border border-[#3f4147] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
         />
       </div>
 
@@ -399,7 +399,7 @@ export function FormBuilder() {
 
         {/* Canvas area */}
         <div
-          className="flex-1 overflow-y-auto p-8"
+          className="flex-1 overflow-y-auto p-8 bg-[#2b2d31]"
           style={{
             backgroundImage:
               "radial-gradient(circle, #3f4147 1px, transparent 1px)",
