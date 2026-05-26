@@ -1,5 +1,6 @@
 import { httpLink, httpBatchStreamLink } from "@repo/trpc/client";
-import { env } from "~/env.js";
+
+const API_URL = "/api/trpc";
 
 interface CreateTRPCHttpBatchClientClientOpts {
   enableStreaming?: boolean;
@@ -8,9 +9,8 @@ interface CreateTRPCHttpBatchClientClientOpts {
 export const createTRPCHttpBatchClientClient = (opts?: CreateTRPCHttpBatchClientClientOpts) => {
   const c = opts?.enableStreaming ? httpBatchStreamLink : httpLink;
   return c({
-    url: env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/trpc",
+    url: API_URL,
     async headers() {
-      // Get Clerk token from the browser
       if (typeof window !== "undefined") {
         const token = await window.Clerk?.session?.getToken();
         if (token) {

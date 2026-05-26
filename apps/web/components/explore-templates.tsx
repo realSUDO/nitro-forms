@@ -53,7 +53,11 @@ function getTemplateAssets(slug: string) {
 }
 
 export function ExploreTemplates() {
-  const { data: forms, isLoading } = trpc.public.listExploreForms.useQuery();
+  const { data: forms, isLoading, error } = trpc.public.listExploreForms.useQuery();
+
+  if (error) {
+    return <div className="min-h-screen bg-[#313338] flex items-center justify-center text-red-400">Error: {error.message}</div>;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#313338] text-[#f2f3f5]">
