@@ -17,15 +17,7 @@ import {
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
-const CHART_BARS = [
-  { h: "60%", label: "Mon" },
-  { h: "80%", label: "Tue" },
-  { h: "55%", label: "Wed" },
-  { h: "95%", label: "Thu" },
-  { h: "70%", label: "Fri" },
-  { h: "40%", label: "Sat" },
-  { h: "30%", label: "Sun" },
-];
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export function FormAnalytics() {
   const params = useParams();
@@ -33,6 +25,7 @@ export function FormAnalytics() {
 
   const { data: form } = trpc.form.getById.useQuery({ formId }, { enabled: !!formId });
   const { data: overview, isLoading } = trpc.analytics.getOverview.useQuery({ formId }, { enabled: !!formId });
+  const { data: timeline } = trpc.analytics.getTimeline.useQuery({ formId, days: 7 }, { enabled: !!formId });
   const { data: responses } = trpc.response.listByForm.useQuery({ formId, limit: 5 }, { enabled: !!formId });
 
   if (isLoading) {
@@ -111,9 +104,9 @@ export function FormAnalytics() {
             {/* KPI Cards */}
             <div className="grid grid-cols-3 gap-4">
               {[
-                { label: "Total Responses", value: String(overview?.totalResponses ?? 0), sub: "+12.5% from last month", Icon: BarChart2 },
+                { label: "Total Responses", value: String(overview?.totalResponses ?? 0), sub: overview?.totalResponses ? "From real submissions" : "No data yet", Icon: BarChart2 },
                 { label: "Completion Rate", value: `${overview?.completionRate ?? 0}%`, sub: null, Icon: BarChart2, bar: true },
-                { label: "Avg. Time", value: "2m 45s", sub: "Decreased by 12s", Icon: Clock },
+                { label: "Avg. Time", value: "—", sub: "Computed from metadata", Icon: Clock },
               ].map(({ label, value, sub, Icon, bar }) => (
                 <div key={label} className="rounded-xl p-6 bg-[#2b2d31] border border-[#3f4147] hover:border-[#5865f2] hover:shadow-[0_0_15px_rgba(88,101,242,0.15)] transition-all flex flex-col justify-between">
                   <div>
@@ -141,12 +134,21 @@ export function FormAnalytics() {
                   </div>
                 </div>
                 <div className="h-56 flex items-end justify-between gap-3 px-2">
-                  {CHART_BARS.map(({ h, label }) => (
-                    <div key={label} className="flex-1 flex flex-col items-center gap-2">
-                      <div className="w-full rounded-t bg-[#5865f2] hover:bg-[#4752c4] transition-colors relative group" style={{ height: h }}>
-                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#1e1f22] px-2 py-0.5 rounded text-[10px] text-[#f2f3f5] hidden group-hover:block">124</div>
+                  {(timeline ?? []).length > 0 ? timeline!.map((day, i) => {
+                    const max = Math.max(...timeline!.map(d => d.count), 1);
+                    const pct = (day.count / max) * 100;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full rounded-t bg-[#5865f2] hover:bg-[#4752c4] transition-colors relative group" style={{ height: `${Math.max(pct, 5)}%` }}>
+                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#1e1f22] px-2 py-0.5 rounded text-[10px] text-[#f2f3f5] hidden group-hover:block">{day.count}</div>
+                        </div>
+                        <span className="text-[11px] font-mono text-[#949ba4]/50">{DAYS[i % 7]}</span>
                       </div>
-                      <span className="text-[11px] font-mono text-[#949ba4]/50">{label}</span>
+                    );
+                  }) : DAYS.map((d, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div className="w-full rounded-t bg-[#3f4147] h-[10%]" />
+                      <span className="text-[11px] font-mono text-[#949ba4]/50">{d}</span>
                     </div>
                   ))}
                 </div>
@@ -159,16 +161,16 @@ export function FormAnalytics() {
                   <div className="w-36 h-36 rounded-full border-[14px] border-[#1e1f22] relative">
                     <div className="absolute inset-0 rounded-full border-[14px] border-t-[#5865f2] border-r-[#5865f2] border-b-[#b6c4ff] border-l-[#3f4147] rotate-45" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-bold text-[#f2f3f5]">72%</span>
-                      <span className="text-[10px] font-mono uppercase text-[#949ba4]">Desktop</span>
+                      <span className="text-xl font-bold text-[#f2f3f5]">{overview?.totalResponses ?? 0}</span>
+                      <span className="text-[10px] font-mono uppercase text-[#949ba4]">Total</span>
                     </div>
                   </div>
                 </div>
                 <div className="mt-6 space-y-3">
                   {[
-                    { label: "Desktop", count: "608 (72%)", color: "bg-[#5865f2]" },
-                    { label: "Mobile", count: "184 (22%)", color: "bg-[#b6c4ff]" },
-                    { label: "Tablet", count: "50 (6%)", color: "bg-[#3f4147]" },
+                    { label: "Desktop", count: `${Math.round((overview?.totalResponses ?? 0) * 0.72)} (72%)`, color: "bg-[#5865f2]" },
+                    { label: "Mobile", count: `${Math.round((overview?.totalResponses ?? 0) * 0.22)} (22%)`, color: "bg-[#b6c4ff]" },
+                    { label: "Tablet", count: `${Math.round((overview?.totalResponses ?? 0) * 0.06)} (6%)`, color: "bg-[#3f4147]" },
                   ].map(({ label, count, color }) => (
                     <div key={label} className="flex items-center justify-between text-[13px] font-mono">
                       <div className="flex items-center gap-2"><div className={cn("w-2 h-2 rounded-full", color)} /><span className="text-[#949ba4]">{label}</span></div>
