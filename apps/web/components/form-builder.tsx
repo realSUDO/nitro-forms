@@ -399,7 +399,7 @@ export function FormBuilder() {
 
         {/* Canvas area */}
         <div
-          className="flex-1 overflow-y-auto p-8 bg-[#2b2d31]"
+          className="flex-1 overflow-y-auto p-8 bg-[#292b2f]"
           style={{
             backgroundImage:
               "radial-gradient(circle, #3f4147 1px, transparent 1px)",
