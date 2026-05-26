@@ -1,0 +1,148 @@
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
+import { protectedProcedure, publicProcedure, router } from "../../trpc";
+import db, { eq, and, desc } from "@repo/database";
+import { formsTable } from "@repo/database/schema";
+import { nanoid } from "../../utils/nanoid";
+
+const fieldSchema = z.object({
+  id: z.string(),
+  type: z.enum(["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date"]),
+  label: z.string().min(1),
+  description: z.string().optional(),
+  placeholder: z.string().optional(),
+  required: z.boolean(),
+  order: z.number(),
+  options: z.array(z.string()).optional(),
+  validation: z.object({
+    minLength: z.number().optional(),
+    maxLength: z.number().optional(),
+    min: z.number().optional(),
+    max: z.number().optional(),
+    minSelected: z.number().optional(),
+    maxSelected: z.number().optional(),
+  }).optional(),
+});
+
+export const formRouter = router({
+  create: protectedProcedure
+    .input(z.object({
+      title: z.string().min(1).max(200),
+      description: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+      const [form] = await db.insert(formsTable).values({
+        ownerId: ctx.userId,
+        title: input.title,
+        description: input.description ?? null,
+        slug,
+        fieldsJson: [],
+        settingsJson: {},
+      }).returning();
+      return form;
+    }),
+
+  listMine: protectedProcedure.query(async ({ ctx }) => {
+    return db.select().from(formsTable)
+      .where(eq(formsTable.ownerId, ctx.userId))
+      .orderBy(desc(formsTable.createdAt));
+  }),
+
+  getById: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [form] = await db.select().from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .limit(1);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+      return form;
+    }),
+
+  update: protectedProcedure
+    .input(z.object({
+      formId: z.string().uuid(),
+      title: z.string().min(1).max(200).optional(),
+      description: z.string().optional(),
+      fields: z.array(fieldSchema).optional(),
+      settings: z.record(z.string(), z.unknown()).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const [form] = await db.select().from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .limit(1);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+
+      const updates: Record<string, unknown> = {};
+      if (input.title) updates.title = input.title;
+      if (input.description !== undefined) updates.description = input.description;
+      if (input.fields) updates.fieldsJson = input.fields;
+      if (input.settings) updates.settingsJson = input.settings;
+
+      const [updated] = await db.update(formsTable).set(updates).where(eq(formsTable.id, input.formId)).returning();
+      return updated;
+    }),
+
+  publish: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [form] = await db.select().from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .limit(1);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+
+      const fields = form.fieldsJson as unknown[];
+      if (!fields || fields.length === 0) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot publish a form with no fields" });
+      }
+
+      const [updated] = await db.update(formsTable)
+        .set({ status: "published", publishedAt: new Date() })
+        .where(eq(formsTable.id, input.formId))
+        .returning();
+      return updated;
+    }),
+
+  unpublish: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [updated] = await db.update(formsTable)
+        .set({ status: "draft", publishedAt: null })
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .returning();
+      if (!updated) throw new TRPCError({ code: "NOT_FOUND" });
+      return updated;
+    }),
+
+  setVisibility: protectedProcedure
+    .input(z.object({ formId: z.string().uuid(), visibility: z.enum(["public", "unlisted"]) }))
+    .mutation(async ({ ctx, input }) => {
+      const [updated] = await db.update(formsTable)
+        .set({ visibility: input.visibility })
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .returning();
+      if (!updated) throw new TRPCError({ code: "NOT_FOUND" });
+      return updated;
+    }),
+
+  archive: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [updated] = await db.update(formsTable)
+        .set({ status: "archived" })
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .returning();
+      if (!updated) throw new TRPCError({ code: "NOT_FOUND" });
+      return updated;
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await db.delete(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .returning();
+      if (result.length === 0) throw new TRPCError({ code: "NOT_FOUND" });
+      return { success: true };
+    }),
+});
