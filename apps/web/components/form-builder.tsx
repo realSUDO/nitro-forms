@@ -177,6 +177,47 @@ export function FormBuilder() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saved, setSaved] = useState(true);
 
+  // Undo/Redo history
+  const historyRef = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
+  const historyIndexRef = useRef(-1);
+
+  function pushHistory() {
+    const snapshot = { nodes: [...nodes], edges: [...edges] };
+    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
+    historyRef.current.push(snapshot);
+    historyIndexRef.current++;
+  }
+
+  function undo() {
+    if (historyIndexRef.current > 0) {
+      historyIndexRef.current--;
+      const { nodes: n, edges: e } = historyRef.current[historyIndexRef.current]!;
+      setNodes(n);
+      setEdges(e);
+      setFields(n.map(node => node.data.field as FormField));
+    }
+  }
+
+  function redo() {
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current++;
+      const { nodes: n, edges: e } = historyRef.current[historyIndexRef.current]!;
+      setNodes(n);
+      setEdges(e);
+      setFields(n.map(node => node.data.field as FormField));
+    }
+  }
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "y") { e.preventDefault(); redo(); }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Load form data
   useEffect(() => {
     if (form) {
@@ -204,9 +245,24 @@ export function FormBuilder() {
   }, [form]);
 
   const onConnect = useCallback((connection: Connection) => {
+    pushHistory();
     setEdges(eds => addEdge(connection, eds));
+    // Auto-set condition source when connecting to a condition node
+    if (connection.target) {
+      const targetField = fields.find(f => f.id === connection.target);
+      if (targetField?.type === "condition" && connection.source) {
+        updateFieldData({
+          ...targetField,
+          conditionConfig: {
+            sourceFieldId: connection.source,
+            operator: targetField.conditionConfig?.operator ?? "equals",
+            value: targetField.conditionConfig?.value ?? "",
+          },
+        });
+      }
+    }
     setSaved(false);
-  }, [setEdges]);
+  }, [setEdges, fields]);
 
   function addFieldAtPosition(type: FieldType, position?: { x: number; y: number }) {
     const pos = position ?? { x: 100 + Math.random() * 200, y: fields.length * 140 + Math.random() * 50 };
@@ -227,22 +283,21 @@ export function FormBuilder() {
       data: { field: newField, selected: false, onDelete: () => deleteField(newField.id) },
     };
     setNodes(nds => [...nds, newNode]);
-    // Auto-connect only if neither the last field nor new field is a condition
-    if (fields.length > 0) {
+    // Auto-connect only if no condition nodes exist in the form
+    const hasConditions = fields.some(f => f.type === "condition") || newField.type === "condition";
+    if (fields.length > 0 && !hasConditions) {
       const lastField = fields[fields.length - 1]!;
-      const shouldAutoConnect = lastField.type !== "condition" && newField.type !== "condition";
-      if (shouldAutoConnect) {
-        setEdges(eds => [...eds, {
-          id: `e-${lastField.id}-${newField.id}`,
-          source: lastField.id,
-          target: newField.id,
-          animated: true,
-          style: { stroke: "#5865f2", strokeWidth: 2 },
-        }]);
-      }
+      setEdges(eds => [...eds, {
+        id: `e-${lastField.id}-${newField.id}`,
+        source: lastField.id,
+        target: newField.id,
+        animated: true,
+        style: { stroke: "#5865f2", strokeWidth: 2 },
+      }]);
     }
     setSelectedId(newField.id);
     setSaved(false);
+    pushHistory();
   }
 
   function addField(type: FieldType) {
@@ -250,6 +305,7 @@ export function FormBuilder() {
   }
 
   function deleteField(id: string) {
+    pushHistory();
     setFields(prev => prev.filter(f => f.id !== id));
     setNodes(nds => nds.filter(n => n.id !== id));
     setEdges(eds => eds.filter(e => e.source !== id && e.target !== id));
@@ -384,6 +440,10 @@ export function FormBuilder() {
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
+            onNodesDelete={(deleted) => {
+              deleted.forEach(n => { setFields(prev => prev.filter(f => f.id !== n.id)); });
+              setSaved(false);
+            }}
             onConnect={onConnect}
             onNodeClick={(_, node) => setSelectedId(node.id)}
             onPaneClick={() => setSelectedId(null)}
@@ -395,6 +455,9 @@ export function FormBuilder() {
             connectionLineStyle={{ stroke: "#5865f2", strokeWidth: 2 }}
             snapToGrid
             snapGrid={[20, 20]}
+            deleteKeyCode={["Backspace", "Delete"]}
+            panOnDrag
+            selectionKeyCode="Shift"
             defaultEdgeOptions={{
               animated: true,
               type: "smoothstep",
