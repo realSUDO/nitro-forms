@@ -177,54 +177,17 @@ export function FormBuilder() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [saved, setSaved] = useState(true);
 
-  // Undo/Redo history
-  const historyRef = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
-  const historyIndexRef = useRef(-1);
-
-  function pushHistory() {
-    const snapshot = { nodes: [...nodes], edges: [...edges] };
-    historyRef.current = historyRef.current.slice(0, historyIndexRef.current + 1);
-    historyRef.current.push(snapshot);
-    historyIndexRef.current++;
-  }
-
-  function undo() {
-    if (historyIndexRef.current > 0) {
-      historyIndexRef.current--;
-      const { nodes: n, edges: e } = historyRef.current[historyIndexRef.current]!;
-      setNodes(n);
-      setEdges(e);
-      setFields(n.map(node => node.data.field as FormField));
-    }
-  }
-
-  function redo() {
-    if (historyIndexRef.current < historyRef.current.length - 1) {
-      historyIndexRef.current++;
-      const { nodes: n, edges: e } = historyRef.current[historyIndexRef.current]!;
-      setNodes(n);
-      setEdges(e);
-      setFields(n.map(node => node.data.field as FormField));
-    }
-  }
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
-      if ((e.ctrlKey || e.metaKey) && e.key === "y") { e.preventDefault(); redo(); }
-    }
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  // History (placeholder for future undo/redo)
+  function pushHistory() { /* noop */ }
 
   // Load form data
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    if (form) {
+    if (form && !loaded) {
+      setLoaded(true);
       setTitle(form.title);
       const loadedFields = (form.fieldsJson as FormField[]) ?? [];
       setFields(loadedFields);
-      // Convert fields to nodes
       const newNodes: Node[] = loadedFields.map((field, i) => ({
         id: field.id,
         type: field.type === "condition" ? "conditionNode" : "fieldNode",
@@ -232,15 +195,20 @@ export function FormBuilder() {
         data: { field, selected: false, onDelete: () => deleteField(field.id) },
       }));
       setNodes(newNodes);
-      // Auto-connect sequential nodes
-      const newEdges: Edge[] = loadedFields.slice(1).map((field, i) => ({
-        id: `e-${loadedFields[i]!.id}-${field.id}`,
-        source: loadedFields[i]!.id,
-        target: field.id,
-        animated: true,
-        style: { stroke: "#5865f2", strokeWidth: 2 },
-      }));
-      setEdges(newEdges);
+      // Load saved edges from settings, or empty
+      const savedSettings = form.settingsJson as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
+      if (savedSettings?.edges?.length) {
+        const newEdges: Edge[] = savedSettings.edges.map((e, i) => ({
+          id: `e-${i}-${e.source}-${e.target}`,
+          source: e.source,
+          target: e.target,
+          sourceHandle: e.sourceHandle,
+          animated: true,
+          type: "smoothstep",
+          style: { stroke: "#5865f2", strokeWidth: 2 },
+        }));
+        setEdges(newEdges);
+      }
     }
   }, [form]);
 
@@ -308,12 +276,12 @@ export function FormBuilder() {
   }
 
   async function handleSave() {
-    // Save positions from nodes
     const fieldsWithPositions = fields.map(f => {
       const node = nodes.find(n => n.id === f.id);
       return { ...f, position: node?.position ?? f.position };
     });
-    await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions });
+    const flowEdges = edges.map(e => ({ source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? null }));
+    await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { edges: flowEdges } });
     setSaved(true);
   }
 

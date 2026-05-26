@@ -59,7 +59,70 @@ export function PublicForm() {
     );
   }
 
-  const fields = (form.fields as Array<{ id: string; type: string; label: string; required: boolean; placeholder?: string; options?: string[] }>).filter(f => f.type !== "condition");
+  const allFields = form.fields as Array<{ id: string; type: string; label: string; required: boolean; placeholder?: string; options?: string[]; conditionConfig?: { sourceFieldId: string; operator: string; value: string } }>;
+  const settings = form.settings as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
+  const flowEdges = settings?.edges ?? [];
+
+  // Build the flow order by following edges from the first node
+  function getNextFieldId(currentId: string): string | null {
+    const currentField = allFields.find(f => f.id === currentId);
+
+    // If current is a condition, evaluate it
+    if (currentField?.type === "condition" && currentField.conditionConfig) {
+      const { sourceFieldId, operator, value } = currentField.conditionConfig;
+      const answer = String(answers[sourceFieldId] ?? "");
+      let result = false;
+      switch (operator) {
+        case "equals": result = answer === value; break;
+        case "not_equals": result = answer !== value; break;
+        case "greater_than": result = Number(answer) > Number(value); break;
+        case "less_than": result = Number(answer) < Number(value); break;
+        case "contains": result = answer.includes(value); break;
+        default: result = answer === value;
+      }
+      // Follow yes or no handle
+      const handle = result ? "yes" : "no";
+      const edge = flowEdges.find(e => e.source === currentId && e.sourceHandle === handle);
+      return edge?.target ?? null;
+    }
+
+    // Normal field — follow the single outgoing edge
+    const edge = flowEdges.find(e => e.source === currentId);
+    return edge?.target ?? null;
+  }
+
+  // Build visible field sequence by following the flow
+  function buildFieldSequence(): typeof allFields {
+    if (flowEdges.length === 0) {
+      // No flow defined — show all non-condition fields in order
+      return allFields.filter(f => f.type !== "condition");
+    }
+    // Find the starting node (one with no incoming edge)
+    const targets = new Set(flowEdges.map(e => e.target));
+    const startField = allFields.find(f => !targets.has(f.id)) ?? allFields[0];
+    if (!startField) return [];
+
+    const sequence: typeof allFields = [];
+    let currentId: string | null = startField.id;
+    const visited = new Set<string>();
+
+    while (currentId && !visited.has(currentId)) {
+      visited.add(currentId);
+      const field = allFields.find(f => f.id === currentId);
+      if (!field) break;
+
+      if (field.type === "condition") {
+        // Evaluate and skip to next
+        currentId = getNextFieldId(currentId);
+      } else {
+        sequence.push(field);
+        currentId = getNextFieldId(currentId);
+      }
+    }
+    return sequence;
+  }
+
+  const fields = buildFieldSequence();
   const totalSteps = fields.length;
   const field = fields[currentStep];
   const progress = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
