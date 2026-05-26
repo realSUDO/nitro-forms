@@ -63,13 +63,13 @@ function FieldPreview({ field }: { field: FormField }) {
         readOnly
         placeholder={field.placeholder}
         rows={3}
-        className="w-full resize-none rounded-md bg-[#0d0e11] border border-[#454655] px-3 py-2 text-sm text-[#c6c5d7] placeholder:text-[#454655] focus:outline-none"
+        className="w-full resize-none rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
       />
     );
   }
   if (field.type === "dropdown") {
     return (
-      <div className="flex items-center justify-between w-full rounded-md bg-[#0d0e11] border border-[#454655] px-3 py-2 text-sm text-[#454655]">
+      <div className="flex items-center justify-between w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#4e5058]">
         <span>{field.placeholder}</span>
         <ChevronDown size={14} />
       </div>
@@ -78,8 +78,8 @@ function FieldPreview({ field }: { field: FormField }) {
   if (field.type === "checkbox") {
     return (
       <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded border border-[#454655] bg-[#0d0e11]" />
-        <span className="text-sm text-[#c6c5d7]">{field.placeholder}</span>
+        <div className="w-4 h-4 rounded border border-[#4e5058] bg-[#1e1f22]" />
+        <span className="text-sm text-[#b5bac1]">{field.placeholder}</span>
       </div>
     );
   }
@@ -87,7 +87,7 @@ function FieldPreview({ field }: { field: FormField }) {
     <input
       readOnly
       placeholder={field.placeholder}
-      className="w-full rounded-md bg-[#0d0e11] border border-[#454655] px-3 py-2 text-sm text-[#c6c5d7] placeholder:text-[#454655] focus:outline-none"
+      className="w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#b5bac1] placeholder:text-[#4e5058] focus:outline-none"
     />
   );
 }
@@ -110,14 +110,14 @@ function FieldCard({
     <div
       onClick={onSelect}
       className={cn(
-        "group relative rounded-xl border bg-[#1f1f23] p-4 cursor-pointer transition-all",
+        "group relative rounded-xl border bg-[#383a40] p-4 cursor-pointer transition-all",
         selected
           ? "border-[#5865f2] shadow-[0_0_0_1px_rgba(88,101,242,0.3)]"
-          : "border-[#454655] hover:border-[#5865f2]/50"
+          : "border-[#4e5058] hover:border-[#5865f2]/50"
       )}
     >
       {/* Drag handle */}
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 text-[#454655] opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute left-2 top-1/2 -translate-y-1/2 text-[#4e5058] opacity-0 group-hover:opacity-100 transition-opacity">
         <GripVertical size={14} />
       </div>
 
@@ -125,13 +125,13 @@ function FieldCard({
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-          className="p-1 rounded hover:bg-[#292a2d] text-[#8f8fa0] hover:text-[#e3e2e6] transition-colors"
+          className="p-1 rounded hover:bg-[#3f4147] text-[#949ba4] hover:text-[#f2f3f5] transition-colors"
         >
           <Copy size={12} />
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          className="p-1 rounded hover:bg-[#292a2d] text-[#8f8fa0] hover:text-red-400 transition-colors"
+          className="p-1 rounded hover:bg-[#3f4147] text-[#949ba4] hover:text-red-400 transition-colors"
         >
           <Trash2 size={12} />
         </button>
@@ -139,8 +139,8 @@ function FieldCard({
 
       {/* Field header */}
       <div className="flex items-center gap-2 mb-3 pl-3">
-        <Icon size={13} className="text-[#8f8fa0] shrink-0" />
-        <span className="text-xs font-mono uppercase tracking-widest text-[#8f8fa0]">
+        <Icon size={13} className="text-[#949ba4] shrink-0" />
+        <span className="text-xs font-mono uppercase tracking-widest text-[#949ba4]">
           {field.type}
         </span>
         {field.required && (
@@ -151,7 +151,7 @@ function FieldCard({
       </div>
 
       {/* Label */}
-      <p className="text-sm font-medium text-[#e3e2e6] mb-2 pl-3">{field.label}</p>
+      <p className="text-sm font-medium text-[#f2f3f5] mb-2 pl-3">{field.label}</p>
 
       {/* Input preview */}
       <div className="pl-3">
@@ -171,47 +171,47 @@ function InspectorPanel({
   if (!field) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center px-6">
-        <Settings2 size={28} className="text-[#454655] mb-3" />
-        <p className="text-sm text-[#8f8fa0]">Select a field to edit its settings</p>
+        <Settings2 size={28} className="text-[#4e5058] mb-3" />
+        <p className="text-sm text-[#949ba4]">Select a field to edit its settings</p>
       </div>
     );
   }
 
   return (
     <div className="p-4 space-y-5 overflow-y-auto h-full">
-      <p className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Field Settings</p>
+      <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Field Settings</p>
 
       {/* Label */}
       <div className="space-y-1.5">
-        <label className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Label</label>
+        <label className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Label</label>
         <input
           value={field.label}
           onChange={(e) => onChange({ ...field, label: e.target.value })}
-          className="w-full rounded-md bg-[#0d0e11] border border-[#454655] px-3 py-2 text-sm text-[#e3e2e6] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
+          className="w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
         />
       </div>
 
       {/* Placeholder */}
       <div className="space-y-1.5">
-        <label className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Placeholder</label>
+        <label className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Placeholder</label>
         <input
           value={field.placeholder}
           onChange={(e) => onChange({ ...field, placeholder: e.target.value })}
-          className="w-full rounded-md bg-[#0d0e11] border border-[#454655] px-3 py-2 text-sm text-[#e3e2e6] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
+          className="w-full rounded-md bg-[#1e1f22] border border-[#4e5058] px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:border-[#5865f2] focus:shadow-[0_0_0_1px_rgba(88,101,242,0.2)] transition-all"
         />
       </div>
 
       {/* Required toggle */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-[#e3e2e6]">Required</p>
-          <p className="text-xs text-[#8f8fa0]">Respondents must fill this field</p>
+          <p className="text-sm text-[#f2f3f5]">Required</p>
+          <p className="text-xs text-[#949ba4]">Respondents must fill this field</p>
         </div>
         <button
           onClick={() => onChange({ ...field, required: !field.required })}
           className={cn(
             "relative w-10 h-5 rounded-full transition-colors",
-            field.required ? "bg-[#5865f2]" : "bg-[#343538]"
+            field.required ? "bg-[#5865f2]" : "bg-[#3f4147]"
           )}
         >
           <span
@@ -223,8 +223,8 @@ function InspectorPanel({
         </button>
       </div>
 
-      <div className="border-t border-[#343538] pt-4 space-y-1.5">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Appearance</p>
+      <div className=" pt-4 space-y-1.5">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Appearance</p>
         <div className="flex gap-2 mt-2">
           {(["Full", "Half"] as const).map((w) => (
             <button
@@ -233,7 +233,7 @@ function InspectorPanel({
                 "flex-1 py-1.5 rounded-md text-xs border transition-colors",
                 w === "Full"
                   ? "border-[#5865f2] bg-[#5865f2]/10 text-[#bec2ff]"
-                  : "border-[#343538] text-[#8f8fa0] hover:border-[#454655]"
+                  : "border-[#3f4147] text-[#949ba4] hover:border-[#4e5058]"
               )}
             >
               {w}
@@ -242,9 +242,9 @@ function InspectorPanel({
         </div>
       </div>
 
-      <div className="border-t border-[#343538] pt-4">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0] mb-3">Logic</p>
-        <button className="w-full py-2 rounded-md border border-dashed border-[#454655] text-xs text-[#8f8fa0] hover:border-[#5865f2] hover:text-[#bec2ff] transition-colors flex items-center justify-center gap-1.5">
+      <div className=" pt-4">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4] mb-3">Logic</p>
+        <button className="w-full py-2 rounded-md border border-dashed border-[#4e5058] text-xs text-[#949ba4] hover:border-[#5865f2] hover:text-[#bec2ff] transition-colors flex items-center justify-center gap-1.5">
           <Zap size={12} />
           Add Condition
         </button>
@@ -300,11 +300,11 @@ export function FormBuilder() {
   const tabs = ["Build", "Preview", "Logic", "Settings"] as const;
 
   return (
-    <div className="flex h-screen bg-[#121316] text-[#e3e2e6] overflow-hidden">
+    <div className="flex h-screen bg-[#313338] text-[#f2f3f5] overflow-hidden">
       {/* ── Left Rail ── */}
-      <aside className="w-[72px] shrink-0 bg-[#1a1b1e] border-r border-[#343538] flex flex-col items-center py-4 gap-3">
+      <aside className="w-[72px] shrink-0 bg-[#2b2d31]  flex flex-col items-center py-4 gap-3">
         {/* Logo */}
-        <div className="w-10 h-10 rounded-xl bg-[#5865f2] flex items-center justify-center mb-2">
+        <div className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
           <Zap size={18} className="text-white" />
         </div>
         {/* Nav icons */}
@@ -316,10 +316,10 @@ export function FormBuilder() {
           <button
             key={i}
             className={cn(
-              "relative w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+              "relative w-10 h-10 rounded-full flex items-center justify-center transition-colors",
               active
-                ? "bg-[#5865f2]/20 text-[#bec2ff]"
-                : "text-[#8f8fa0] hover:bg-[#292a2d] hover:text-[#e3e2e6]"
+                ? "bg-[#3f4147] text-[#f2f3f5]"
+                : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
             )}
           >
             {active && (
@@ -331,9 +331,9 @@ export function FormBuilder() {
       </aside>
 
       {/* ── Sidebar: Field Palette ── */}
-      <aside className="w-[220px] shrink-0 bg-[#1a1b1e] border-r border-[#343538] flex flex-col">
-        <div className="px-4 py-3 border-b border-[#343538]">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Add Fields</p>
+      <aside className="w-[220px] shrink-0 bg-[#2b2d31]  flex flex-col">
+        <div className="px-4 py-3 ">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Add Fields</p>
         </div>
         <div className="p-3 space-y-1 flex-1 overflow-y-auto">
           {FIELD_PALETTE.map(({ type, label }) => {
@@ -342,11 +342,11 @@ export function FormBuilder() {
               <button
                 key={type}
                 onClick={() => addField(type)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#c6c5d7] hover:bg-[#292a2d] hover:text-[#e3e2e6] transition-colors group"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors group"
               >
-                <Icon size={14} className="text-[#8f8fa0] group-hover:text-[#bec2ff]" />
+                <Icon size={14} className="text-[#949ba4] group-hover:text-[#bec2ff]" />
                 {label}
-                <Plus size={12} className="ml-auto text-[#454655] group-hover:text-[#8f8fa0]" />
+                <Plus size={12} className="ml-auto text-[#4e5058] group-hover:text-[#949ba4]" />
               </button>
             );
           })}
@@ -356,12 +356,12 @@ export function FormBuilder() {
       {/* ── Main Canvas ── */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top toolbar */}
-        <header className="h-12 border-b border-[#343538] flex items-center px-4 gap-4 shrink-0">
+        <header className="h-12  flex items-center px-4 gap-4 shrink-0">
           {/* Form title */}
           <input
             value={formTitle}
             onChange={(e) => setFormTitle(e.target.value)}
-            className="bg-transparent text-sm font-medium text-[#e3e2e6] focus:outline-none border-b border-transparent focus:border-[#5865f2] transition-colors px-1"
+            className="bg-transparent text-sm font-medium text-[#f2f3f5] focus:outline-none border-b border-transparent focus:border-[#5865f2] transition-colors px-1"
           />
 
           {/* Tabs */}
@@ -376,7 +376,7 @@ export function FormBuilder() {
                     "px-3 py-1 rounded-md text-xs transition-colors",
                     activeTab === key
                       ? "bg-[#5865f2]/15 text-[#bec2ff]"
-                      : "text-[#8f8fa0] hover:text-[#e3e2e6]"
+                      : "text-[#949ba4] hover:text-[#f2f3f5]"
                   )}
                 >
                   {tab}
@@ -387,7 +387,7 @@ export function FormBuilder() {
 
           {/* Right actions */}
           <div className="ml-auto flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#343538] text-xs text-[#c6c5d7] hover:border-[#454655] transition-colors">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#3f4147] text-xs text-[#b5bac1] hover:border-[#4e5058] transition-colors">
               <Share2 size={12} />
               Share
             </button>
@@ -402,7 +402,7 @@ export function FormBuilder() {
           className="flex-1 overflow-y-auto p-8"
           style={{
             backgroundImage:
-              "radial-gradient(circle, #343538 1px, transparent 1px)",
+              "radial-gradient(circle, #3f4147 1px, transparent 1px)",
             backgroundSize: "20px 20px",
           }}
         >
@@ -421,7 +421,7 @@ export function FormBuilder() {
             {/* Add field button */}
             <button
               onClick={() => addField("text")}
-              className="w-full py-3 rounded-xl border border-dashed border-[#454655] text-sm text-[#8f8fa0] hover:border-[#5865f2] hover:text-[#bec2ff] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl border border-dashed border-[#4e5058] text-sm text-[#949ba4] hover:border-[#5865f2] hover:text-[#bec2ff] transition-colors flex items-center justify-center gap-2"
             >
               <Plus size={14} />
               Add Field
@@ -431,9 +431,9 @@ export function FormBuilder() {
       </main>
 
       {/* ── Right Inspector ── */}
-      <aside className="w-[260px] shrink-0 bg-[#1a1b1e] border-l border-[#343538] flex flex-col">
-        <div className="px-4 py-3 border-b border-[#343538]">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Inspector</p>
+      <aside className="w-[260px] shrink-0 bg-[#2b2d31]  flex flex-col">
+        <div className="px-4 py-3 ">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Inspector</p>
         </div>
         <InspectorPanel
           field={selectedField}

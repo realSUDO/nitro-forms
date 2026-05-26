@@ -58,11 +58,11 @@ const TEMPLATES = [
 
 export function ExploreTemplates() {
   return (
-    <div className="flex h-screen overflow-hidden bg-[#121316] text-[#e3e2e6]">
+    <div className="flex h-screen overflow-hidden bg-[#313338] text-[#f2f3f5]">
 
       {/* Rail */}
-      <aside className="w-[72px] shrink-0 bg-[#1a1b1e] border-r border-[#343538] flex flex-col items-center py-4 gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[#5865f2] flex items-center justify-center mb-2">
+      <aside className="w-[72px] shrink-0 bg-[#2b2d31]  flex flex-col items-center py-4 gap-3">
+        <div className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
           <Zap size={18} className="text-white" />
         </div>
         {[
@@ -71,8 +71,8 @@ export function ExploreTemplates() {
           { Icon: Settings, active: false },
         ].map(({ Icon, active }, i) => (
           <button key={i} className={cn(
-            "relative w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-            active ? "bg-[#5865f2]/20 text-[#bec2ff]" : "text-[#8f8fa0] hover:bg-[#292a2d] hover:text-[#e3e2e6]"
+            "relative w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+            active ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
           )}>
             {active && <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-white" />}
             <Icon size={18} />
@@ -83,10 +83,10 @@ export function ExploreTemplates() {
       </aside>
 
       {/* Sidebar */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1a1b1e] border-r border-[#343538]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31] ">
         <div className="px-6 pt-6 pb-4">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-[#8f8fa0]">Templates</p>
-          <p className="text-xs text-[#8f8fa0] mt-0.5">Nitro Pro Gallery</p>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-[#949ba4]">Templates</p>
+          <p className="text-xs text-[#949ba4] mt-0.5">Nitro Pro Gallery</p>
         </div>
         <nav className="flex-1 px-2 space-y-1">
           {[
@@ -97,14 +97,14 @@ export function ExploreTemplates() {
           ].map(({ label, active }) => (
             <Link key={label} href="#" className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-mono transition-colors",
-              active ? "bg-[#28418e]/30 text-[#e3e2e6] font-semibold" : "text-[#8f8fa0] hover:bg-[#292a2d] hover:text-[#e3e2e6]"
+              active ? "bg-[#28418e]/30 text-[#f2f3f5] font-semibold" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
             )}>
               {label}
             </Link>
           ))}
         </nav>
         <div className="px-4 pb-4">
-          <Link href="/builder" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[#5865f2] text-white text-sm font-medium hover:bg-[#4752c4] transition-colors">
+          <Link href="/builder" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[#3f4147] text-[#f2f3f5] text-sm font-medium hover:bg-[#4752c4] transition-colors">
             <Plus size={15} /> Create New Form
           </Link>
         </div>
@@ -113,34 +113,34 @@ export function ExploreTemplates() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-12 shrink-0 flex items-center justify-between px-6 bg-[#1f1f23] border-b border-[#343538]">
+        <header className="h-12 shrink-0 flex items-center justify-between px-6 bg-[#383a40] ">
           <div className="flex items-center gap-4">
             <span className="text-lg font-extrabold text-[#bec2ff]">Templates</span>
-            <div className="flex items-center bg-[#0d0e11] border border-[#454655] rounded-lg px-3 py-1">
-              <Search size={14} className="text-[#8f8fa0]" />
-              <input className="bg-transparent border-none focus:ring-0 text-sm w-44 text-[#e3e2e6] placeholder:text-[#8f8fa0] outline-none ml-2" placeholder="Search templates..." />
+            <div className="flex items-center bg-[#1e1f22] border border-[#4e5058] rounded-lg px-3 py-1">
+              <Search size={14} className="text-[#949ba4]" />
+              <input className="bg-transparent border-none focus:ring-0 text-sm w-44 text-[#f2f3f5] placeholder:text-[#949ba4] outline-none ml-2" placeholder="Search templates..." />
             </div>
           </div>
           <nav className="flex items-center gap-6">
-            <Link href="#" className="text-[13px] font-mono text-[#8f8fa0] hover:text-[#e3e2e6] transition-colors">Community</Link>
-            <Link href="#" className="text-[13px] font-mono text-[#8f8fa0] hover:text-[#e3e2e6] transition-colors">Tutorials</Link>
+            <Link href="#" className="text-[13px] font-mono text-[#949ba4] hover:text-[#f2f3f5] transition-colors">Community</Link>
+            <Link href="#" className="text-[13px] font-mono text-[#949ba4] hover:text-[#f2f3f5] transition-colors">Tutorials</Link>
           </nav>
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-[#121316] p-8">
+        <main className="flex-1 overflow-y-auto bg-[#313338] p-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-10">
-              <h1 className="text-[32px] font-bold leading-tight tracking-tight text-[#e3e2e6] mb-2">Explore Templates</h1>
-              <p className="text-base text-[#c6c5d7] max-w-2xl">Jumpstart your workflow with hand-crafted templates designed for high-conversion data collection and community engagement.</p>
+              <h1 className="text-[32px] font-bold leading-tight tracking-tight text-[#f2f3f5] mb-2">Explore Templates</h1>
+              <p className="text-base text-[#b5bac1] max-w-2xl">Jumpstart your workflow with hand-crafted templates designed for high-conversion data collection and community engagement.</p>
             </div>
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {TEMPLATES.map(({ category, title, stats, image, badgeColor }) => (
-                <div key={title} className="rounded-xl overflow-hidden flex flex-col bg-[#2b2d31]/70 border border-white/5 hover:border-[#5865f2] hover:shadow-[0_0_20px_rgba(88,101,242,0.15)] hover:-translate-y-1 transition-all duration-300 group backdrop-blur-xl">
+                <div key={title} className="rounded-xl overflow-hidden flex flex-col bg-[#383a40]/70 border border-white/5 hover:border-[#5865f2] hover:shadow-[0_0_20px_rgba(88,101,242,0.15)] hover:-translate-y-1 transition-all duration-300 group backdrop-blur-xl">
                   {/* Image */}
-                  <div className="h-40 relative overflow-hidden bg-[#292a2d]">
+                  <div className="h-40 relative overflow-hidden bg-[#3f4147]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <span className={cn("absolute top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider", badgeColor)}>
@@ -149,8 +149,8 @@ export function ExploreTemplates() {
                   </div>
                   {/* Content */}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-lg font-semibold text-[#e3e2e6] mb-2">{title}</h3>
-                    <div className="flex items-center gap-4 text-[#c6c5d7] mb-6">
+                    <h3 className="text-lg font-semibold text-[#f2f3f5] mb-2">{title}</h3>
+                    <div className="flex items-center gap-4 text-[#b5bac1] mb-6">
                       {stats.map(({ icon: StatIcon, text }, si) => (
                         <div key={si} className="flex items-center gap-1">
                           <StatIcon size={13} />
@@ -159,10 +159,10 @@ export function ExploreTemplates() {
                       ))}
                     </div>
                     <div className="mt-auto flex items-center gap-2">
-                      <Link href="/f/demo" className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#343538]/50 text-[#e3e2e6] border border-[#454655]/30 hover:bg-[#343538] transition-colors">
+                      <Link href="/f/demo" className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#3f4147]/50 text-[#f2f3f5] border border-[#4e5058]/30 hover:bg-[#3f4147] transition-colors">
                         Preview
                       </Link>
-                      <button className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#5865f2] text-white hover:brightness-110 transition-all">
+                      <button className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#3f4147] text-[#f2f3f5] hover:brightness-110 transition-all">
                         Use template
                       </button>
                     </div>
@@ -171,12 +171,12 @@ export function ExploreTemplates() {
               ))}
 
               {/* Blank card */}
-              <Link href="/builder" className="border-2 border-dashed border-[#454655]/30 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:border-[#5865f2]/50 transition-all cursor-pointer group min-h-[300px]">
-                <div className="w-12 h-12 rounded-full bg-[#343538]/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Link href="/builder" className="border-2 border-dashed border-[#4e5058]/30 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:border-[#5865f2]/50 transition-all cursor-pointer group min-h-[300px]">
+                <div className="w-12 h-12 rounded-full bg-[#3f4147]/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Plus size={24} className="text-[#5865f2]" />
                 </div>
-                <h4 className="text-lg font-semibold text-[#e3e2e6]">Custom Template</h4>
-                <p className="text-xs text-[#8f8fa0] mt-1">Start from a blank canvas</p>
+                <h4 className="text-lg font-semibold text-[#f2f3f5]">Custom Template</h4>
+                <p className="text-xs text-[#949ba4] mt-1">Start from a blank canvas</p>
               </Link>
             </div>
           </div>
