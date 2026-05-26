@@ -135,15 +135,7 @@ export function FormBuilder() {
   }
 
   return (
-    <div className="flex h-screen bg-[#313338] text-[#f2f3f5] overflow-hidden">
-
-      {/* Rail */}
-      <aside className="w-[72px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-4 gap-3">
-        <Link href="/dashboard" className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
-          <Zap size={18} className="text-white" />
-        </Link>
-      </aside>
-
+    <>
       {/* Field palette sidebar */}
       <aside className="w-[220px] shrink-0 bg-[#2b2d31] flex flex-col">
         <div className="px-4 py-3">
@@ -263,6 +255,6 @@ export function FormBuilder() {
           </div>
         )}
       </aside>
-    </div>
+    </>
   );
 }

@@ -2,18 +2,9 @@
 
 import Link from "next/link";
 import {
-  BarChart2,
-  Calendar,
-  Code2,
-  Eye,
-  LayoutGrid,
   Plus,
   Search,
-  Settings,
-  ShieldCheck,
-  Timer,
   Users,
-  Zap,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
@@ -60,32 +51,7 @@ export function ExploreTemplates() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#313338] text-[#f2f3f5]">
-
-      {/* Rail */}
-      <aside className="w-[72px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-4 gap-3">
-        <div className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
-          <Zap size={18} className="text-white" />
-        </div>
-        {[
-          { Icon: LayoutGrid, active: false },
-          { Icon: BarChart2, active: true },
-          { Icon: Settings, active: false },
-        ].map(({ Icon, active }, i) => (
-          <button key={i} className={cn(
-            "relative w-10 h-10 rounded-full flex items-center justify-center transition-colors",
-            active ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
-          )}>
-            {active && <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-white" />}
-            <Icon size={18} />
-          </button>
-        ))}
-        <div className="flex-1" />
-        <div className="w-8 h-8 rounded-full bg-[#5865f2] flex items-center justify-center text-xs font-bold text-white">A</div>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto">
+    <main className="flex-1 overflow-y-auto bg-[#313338]">
         <header className="sticky top-0 z-10 h-14 flex items-center justify-between px-6 bg-[#2b2d31]">
           <span className="text-lg font-bold text-[#f2f3f5]">Explore Templates</span>
           <div className="flex items-center gap-3">
@@ -154,6 +120,5 @@ export function ExploreTemplates() {
           )}
         </div>
       </main>
-    </div>
   );
 }
