@@ -11,6 +11,7 @@ async function seed() {
 
   // 1. Demo user
   const [user] = await db.insert(usersTable).values({
+    id: "demo_user_nitroforms",
     fullName: "Nitro Explorer",
     email: "demo@nitroforms.dev",
     passwordHash: hashSync("password123", 10),

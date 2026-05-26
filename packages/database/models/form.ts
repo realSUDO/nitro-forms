@@ -7,7 +7,7 @@ export const formVisibilityEnum = pgEnum("form_visibility", ["public", "unlisted
 
 export const formsTable = pgTable("forms", {
   id: uuid("id").primaryKey().defaultRandom(),
-  ownerId: uuid("owner_id").notNull().references(() => usersTable.id),
+  ownerId: text("owner_id").notNull().references(() => usersTable.id),
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
   slug: varchar("slug", { length: 100 }).notNull().unique(),

@@ -1,7 +1,7 @@
 CREATE TYPE "public"."form_status" AS ENUM('draft', 'published', 'archived');--> statement-breakpoint
 CREATE TYPE "public"."form_visibility" AS ENUM('public', 'unlisted');--> statement-breakpoint
 CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"full_name" varchar(80) NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"password_hash" text NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE "themes" (
 --> statement-breakpoint
 CREATE TABLE "forms" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"owner_id" uuid NOT NULL,
+	"owner_id" text NOT NULL,
 	"title" varchar(200) NOT NULL,
 	"description" text,
 	"slug" varchar(100) NOT NULL,

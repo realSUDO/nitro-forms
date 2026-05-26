@@ -22,8 +22,10 @@ const trpcClient = trpc.createClient({
         try {
           const clerk = (window as any)?.Clerk;
           const token = await clerk?.session?.getToken();
+          console.log("[tRPC] token:", token ? `${token.slice(0, 20)}...` : "null");
           return token ? { Authorization: `Bearer ${token}` } : {};
-        } catch {
+        } catch (e) {
+          console.error("[tRPC] token error:", e);
           return {};
         }
       },
