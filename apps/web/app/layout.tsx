@@ -27,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${dmSans.variable} ${spaceGrotesk.variable} font-sans`}>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className={`${dmSans.variable} ${spaceGrotesk.variable} font-sans`} suppressHydrationWarning>
         <ClerkProvider
           appearance={{
             variables: {
