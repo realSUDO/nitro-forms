@@ -7,7 +7,7 @@ import { nanoid } from "../../utils/nanoid";
 
 const fieldSchema = z.object({
   id: z.string(),
-  type: z.enum(["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date"]),
+  type: z.enum(["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date", "condition"]),
   label: z.string().min(1),
   description: z.string().optional(),
   placeholder: z.string().optional(),
@@ -22,6 +22,7 @@ const fieldSchema = z.object({
     minSelected: z.number().optional(),
     maxSelected: z.number().optional(),
   }).optional(),
+  position: z.object({ x: z.number(), y: z.number() }).optional(),
 });
 
 export const formRouter = router({

@@ -24,6 +24,7 @@ import "@xyflow/react/dist/style.css";
 import {
   AlignLeft,
   ChevronDown,
+  GitBranch,
   GripVertical,
   Loader2,
   Mail,
@@ -37,7 +38,7 @@ import {
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
-type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "rating" | "date";
+type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "rating" | "date" | "condition";
 
 interface FormField {
   id: string;
@@ -61,6 +62,32 @@ const FIELD_TYPES: { type: FieldType; label: string; Icon: React.ElementType }[]
   { type: "rating", label: "Rating", Icon: Type },
   { type: "date", label: "Date", Icon: Type },
 ];
+
+// Condition node — IF/ELSE branching
+function ConditionNode({ data }: { data: { field: FormField; selected: boolean; onDelete: () => void } }) {
+  const { field, onDelete } = data;
+  return (
+    <div className={cn(
+      "w-[240px] rounded-lg border p-4 shadow-lg transition-all relative",
+      data.selected ? "border-[#faa61a] shadow-[0_0_15px_rgba(250,166,26,0.3)] bg-[#2b2d31]" : "border-[#faa61a]/40 bg-[#2b2d31] hover:border-[#faa61a]/70"
+    )}>
+      <Handle type="target" position={Position.Top} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#faa61a] !transition-colors" />
+      <Handle type="source" position={Position.Bottom} id="yes" style={{ left: "30%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#3ba55c] !transition-colors" />
+      <Handle type="source" position={Position.Bottom} id="no" style={{ left: "70%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#ed4245] !transition-colors" />
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] font-mono uppercase text-[#faa61a]">Condition</span>
+        <button onClick={onDelete} className="p-1 rounded text-[#949ba4] hover:text-red-400 hover:bg-[#3f4147] transition-colors">
+          <Trash2 size={11} />
+        </button>
+      </div>
+      <p className="text-sm font-medium text-[#f2f3f5]">{field.label}</p>
+      <div className="flex justify-between mt-3 text-[10px] font-mono">
+        <span className="text-[#3ba55c]">✓ Yes</span>
+        <span className="text-[#ed4245]">✗ No</span>
+      </div>
+    </div>
+  );
+}
 
 // Custom node component for form fields
 function FieldNode({ data }: { data: { field: FormField; selected: boolean; onDelete: () => void } }) {
@@ -98,7 +125,7 @@ function FieldNode({ data }: { data: { field: FormField; selected: boolean; onDe
   );
 }
 
-const nodeTypes = { fieldNode: FieldNode };
+const nodeTypes = { fieldNode: FieldNode, conditionNode: ConditionNode };
 
 export function FormBuilder() {
   const params = useParams();
@@ -150,7 +177,7 @@ export function FormBuilder() {
       // Convert fields to nodes
       const newNodes: Node[] = loadedFields.map((field, i) => ({
         id: field.id,
-        type: "fieldNode",
+        type: field.type === "condition" ? "conditionNode" : "fieldNode",
         position: field.position ?? { x: 100, y: i * 140 },
         data: { field, selected: false, onDelete: () => deleteField(field.id) },
       }));
@@ -177,7 +204,7 @@ export function FormBuilder() {
     const newField: FormField = {
       id: `f_${Date.now()}`,
       type,
-      label: FIELD_TYPES.find(t => t.type === type)?.label ?? "New Field",
+      label: type === "condition" ? "If condition" : (FIELD_TYPES.find(t => t.type === type)?.label ?? "New Field"),
       required: false,
       order: fields.length + 1,
       options: type === "single_select" || type === "multi_select" ? ["Option 1", "Option 2"] : undefined,
@@ -186,7 +213,7 @@ export function FormBuilder() {
     setFields(prev => [...prev, newField]);
     const newNode: Node = {
       id: newField.id,
-      type: "fieldNode",
+      type: newField.type === "condition" ? "conditionNode" : "fieldNode",
       position: newField.position!,
       data: { field: newField, selected: false, onDelete: () => deleteField(newField.id) },
     };
@@ -263,7 +290,7 @@ export function FormBuilder() {
       {/* Field palette sidebar */}
       <aside className="w-[220px] shrink-0 bg-[#2b2d31] flex flex-col">
         <div className="px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Drag to Canvas</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Fields</p>
         </div>
         <div className="flex-1 overflow-y-auto px-2 space-y-0.5">
           {FIELD_TYPES.map(({ type, label, Icon }) => (
@@ -279,6 +306,19 @@ export function FormBuilder() {
               <Plus size={12} className="ml-auto text-[#4e5058]" />
             </button>
           ))}
+          <div className="pt-3 mt-3 border-t border-[#3f4147]">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4] px-3 pb-2">Logic</p>
+            <button
+              draggable
+              onDragStart={(e) => onDragStart(e, "condition")}
+              onClick={() => addField("condition")}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm text-[#faa61a] hover:bg-[#3f4147] hover:text-[#faa61a] transition-colors cursor-grab active:cursor-grabbing"
+            >
+              <GitBranch size={14} />
+              Condition
+              <Plus size={12} className="ml-auto text-[#4e5058]" />
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -296,6 +336,9 @@ export function FormBuilder() {
           </span>
           {!saved && <span className="text-[10px] text-[#949ba4]">• unsaved</span>}
           <div className="ml-auto flex items-center gap-2">
+            <button onClick={() => window.open(`/f/${form?.slug}`, '_blank')} className="px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+              Preview
+            </button>
             <button onClick={handleSave} disabled={saved || updateForm.isPending} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors disabled:opacity-40">
               <Save size={12} /> {updateForm.isPending ? "..." : "Save"}
             </button>
