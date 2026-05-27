@@ -2,6 +2,7 @@
 
 import type { CSSProperties, MouseEvent } from "react";
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import {
   ArrowRight,
   BarChart2,
@@ -15,7 +16,8 @@ import {
 } from "lucide-react";
 
 import { cn } from "~/lib/utils";
-import FloatingGhost from "~/components/floating-ghost";
+
+const FloatingGhost = dynamic(() => import("~/components/floating-ghost"), { ssr: false });
 
 const navItems = ["Builder", "Templates", "Docs", "Pricing"];
 const navHrefs: Record<string, string> = {
