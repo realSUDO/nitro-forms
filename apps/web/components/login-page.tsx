@@ -32,7 +32,7 @@ export function LoginPage() {
 
       <div className="flex items-center gap-2 mb-6 relative z-10">
         <div className="w-10 h-10 rounded-2xl bg-[#2b2d31] flex items-center justify-center">
-          <img src="/nitro.png" alt="NitroForms" className="w-7 h-7" />
+          <img src="/nitro.svg" alt="NitroForms" className="w-7 h-7" />
         </div>
         <span className="text-lg font-bold text-[#f2f3f5]">NitroForms</span>
       </div>

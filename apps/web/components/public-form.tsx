@@ -34,7 +34,7 @@ export function PublicForm() {
     return (
       <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-6">
-          <img src="/nitro.png" alt="NitroForms" className="w-8 h-8 opacity-50" />
+          <img src="/nitro.svg" alt="NitroForms" className="w-8 h-8 opacity-50" />
         </div>
         <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Form Not Available</h1>
         <p className="text-sm text-[#949ba4] mb-8 max-w-sm">{error?.message ?? "This form is not published or does not exist."}</p>

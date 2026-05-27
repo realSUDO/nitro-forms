@@ -238,7 +238,7 @@ function DashboardMockup() {
       {/* Server rail */}
       <div className="w-[42px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-3 gap-2">
         <div className="w-7 h-7 rounded-lg bg-[#2b2d31] flex items-center justify-center">
-          <img src="/nitro.png" alt="" className="w-5 h-5" />
+          <img src="/nitro.svg" alt="" className="w-5 h-5" />
         </div>
         <div className="w-5 h-0.5 rounded bg-[#3f4147] my-1" />
         <div className="w-7 h-7 rounded-full bg-[#3f4147]" />

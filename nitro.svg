@@ -1,0 +1,30 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="cutouts">
+      <rect width="1024" height="1024" fill="white"/>
+      <ellipse cx="600" cy="472.5" rx="30" ry="62.5" fill="black"/>
+      <ellipse cx="735" cy="477.5" rx="25" ry="52.5" fill="black"/>
+      <rect x="615" y="585" width="120" height="27" rx="13.5" fill="black"/>
+      <circle cx="614" cy="599" r="26" fill="black"/>
+      <circle cx="736" cy="599" r="26" fill="black"/>
+    </mask>
+  </defs>
+  <g mask="url(#cutouts)" fill="#FFFFFF">
+    <line x1="430" y1="360" x2="360" y2="250" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round"/>
+    <circle cx="352.5" cy="237.5" r="32.5"/>
+    <line x1="485" y1="330" x2="475" y2="205" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round"/>
+    <circle cx="472.5" cy="187.5" r="32.5"/>
+    <path d="M390 365
+      C445 245 650 230 760 330
+      C865 420 860 520 850 560
+      C930 570 930 675 850 680
+      C805 790 700 825 625 890
+      C555 950 510 1015 555 990
+      C475 970 455 875 510 810
+      C420 780 345 730 330 650
+      C260 645 260 550 330 550
+      C320 465 335 410 390 365 Z"/>
+    <ellipse cx="332.5" cy="582.5" rx="47.5" ry="47.5"/>
+    <ellipse cx="867.5" cy="587.5" rx="47.5" ry="47.5"/>
+  </g>
+</svg>
