@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Plus, Search, Users } from "lucide-react";
+import { ChevronDown, Hash, Plus, Search, Users } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
@@ -53,20 +53,20 @@ export function ExploreTemplates() {
       <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
         <div className="px-6 pt-6 pb-4">
           <p className="text-[11px] font-mono uppercase tracking-widest text-[#949ba4] font-bold">Templates</p>
-          <p className="text-xs text-[#949ba4] mt-0.5">Nitro Pro Gallery</p>
+          <p className="text-xs text-[#949ba4] mt-0.5">Browse &amp; use</p>
         </div>
         <nav className="flex-1 px-2 space-y-0.5">
-          {[
-            { label: "TEMPLATES", href: "/explore", active: true },
-            { label: "MY FORMS", href: "/dashboard", active: false },
-            { label: "ANALYTICS", href: "/analytics", active: false },
-          ].map(({ label, href, active }) => (
-            <Link key={label} href={href} className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-mono transition-colors",
-              active ? "bg-[#3f4147] text-[#f2f3f5] font-semibold" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#f2f3f5]"
+          <p className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Categories</p>
+          {["All", "Entertainment", "Gaming", "Product", "Social", "Hiring"].map((cat, i) => (
+            <button key={cat} onClick={() => setSearch(i === 0 ? "" : cat)} className={cn(
+              "flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors",
+              (i === 0 && !search) || search === cat
+                ? "bg-[#3f4147] text-[#f2f3f5]"
+                : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]"
             )}>
-              {label}
-            </Link>
+              <Hash size={14} className="text-[#4e5058]" />
+              {cat}
+            </button>
           ))}
         </nav>
         <div className="px-4 pb-4">
@@ -75,6 +75,17 @@ export function ExploreTemplates() {
           </Link>
         </div>
       </aside>
+      <div className="w-1 cursor-col-resize bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+        onMouseDown={(e) => {
+          const startX = e.clientX;
+          const aside = e.currentTarget.previousElementSibling as HTMLElement;
+          const startW = aside.offsetWidth;
+          const onMove = (ev: MouseEvent) => { aside.style.width = `${Math.min(Math.max(startW + (ev.clientX - startX), 160), 400)}px`; };
+          const onUp = () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onUp);
+        }}
+      />
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-[#313338] relative">
