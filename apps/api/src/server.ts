@@ -1,6 +1,9 @@
 import express from "express";
 import { logger } from "@repo/logger";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import crypto from "crypto";
 
 import * as trpcExpress from "@trpc/server/adapters/express";
 import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to-openapi";
@@ -18,15 +21,19 @@ const openApiDocument = generateOpenApiDocument(serverRouter, {
   description: "REST API for NitroForms — https://nitroforms.fun",
 });
 
-if (env.NODE_ENV !== "prod") {
-  app.use(
-    cors({
-      origin: "*",
-    }),
-  );
-}
+// Security headers
+app.use(helmet());
 
-app.use(express.json());
+// Explicit CORS
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  }),
+);
+
+// Body size limit
+app.use(express.json({ limit: "100kb" }));
 
 app.get("/", (req, res) => {
   return res.json({ message: "NitroForms API is running" });
@@ -65,18 +72,30 @@ import db, { eq, and } from "@repo/database";
 import { apiKeysTable, formsTable, responsesTable } from "@repo/database/schema";
 import { buildResponseSchema } from "@repo/trpc/server/validators/runtime-engine";
 
+// Rate limit for REST v2: 60 req/min per IP
+const v2Limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 async function authenticateApiKey(req: express.Request, res: express.Response, next: express.NextFunction) {
   const auth = req.headers.authorization;
   if (!auth?.startsWith("Bearer nitro_sk_")) {
     return res.status(401).json({ error: "Missing or invalid API key. Use: Authorization: Bearer nitro_sk_..." });
   }
   const key = auth.slice(7);
-  const [apiKey] = await db.select().from(apiKeysTable).where(and(eq(apiKeysTable.key, key), eq(apiKeysTable.active, true))).limit(1);
+  const hashedKey = crypto.createHash("sha256").update(key).digest("hex");
+  const [apiKey] = await db.select().from(apiKeysTable).where(and(eq(apiKeysTable.key, hashedKey), eq(apiKeysTable.active, true))).limit(1);
   if (!apiKey) return res.status(401).json({ error: "Invalid or revoked API key" });
   await db.update(apiKeysTable).set({ lastUsedAt: new Date() }).where(eq(apiKeysTable.id, apiKey.id));
   (req as any).ownerId = apiKey.ownerId;
   next();
 }
+
+// Apply rate limiter to all /api/v2 routes
+app.use("/api/v2", v2Limiter);
 
 // GET /api/v2/forms — list your forms
 app.get("/api/v2/forms", authenticateApiKey, async (req, res) => {
@@ -122,6 +141,12 @@ app.post("/api/v2/forms/:slug/submit", async (req, res) => {
     formId: form.id, answersJson: answers, metadataJson: { source: "api", device: req.headers["user-agent"] ?? "unknown" },
   }).returning();
   res.status(201).json({ message: "Response submitted", responseId: response!.id });
+});
+
+// Global error handler
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error(err);
+  res.status(500).json({ error: "Internal server error" });
 });
 
 export default app;

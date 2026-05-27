@@ -4,10 +4,11 @@ import db, { eq } from "@repo/database";
 import { usersTable } from "@repo/database/schema";
 
 export async function createContext({ req }: CreateExpressContextOptions) {
+  const ip = (req.headers["x-forwarded-for"] as string) || req.socket?.remoteAddress || "unknown";
   const token = req.headers.authorization?.replace("Bearer ", "");
 
   if (!token) {
-    return { userId: null, clerkUserId: null };
+    return { userId: null, clerkUserId: null, ip };
   }
 
   try {
@@ -28,10 +29,10 @@ export async function createContext({ req }: CreateExpressContextOptions) {
       }).onConflictDoNothing();
     }
 
-    return { userId, clerkUserId: userId };
+    return { userId, clerkUserId: userId, ip };
   } catch (err: any) {
     console.error("[Auth] token verification failed:", err?.message || err);
-    return { userId: null, clerkUserId: null };
+    return { userId: null, clerkUserId: null, ip };
   }
 }
 

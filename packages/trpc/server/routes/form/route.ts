@@ -155,14 +155,20 @@ export const formRouter = router({
 
   saveDraft: protectedProcedure
     .input(z.object({ formId: z.string(), fields: z.array(z.unknown()), edges: z.array(z.unknown()) }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const [form] = await db.select({ id: formsTable.id }).from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId))).limit(1);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       await cacheDraft(input.formId, { fields: input.fields, edges: input.edges });
       return { success: true };
     }),
 
   getDraft: protectedProcedure
     .input(z.object({ formId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      const [form] = await db.select({ id: formsTable.id }).from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId))).limit(1);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       return getCachedDraft(input.formId);
     }),
 

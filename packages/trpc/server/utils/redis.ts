@@ -39,6 +39,18 @@ export async function checkRateLimitRedis(key: string, maxRequests = 5, windowSe
     if (current === 1) await redis.expire(key, windowSec);
     return current <= maxRequests;
   } catch {
-    return true; // fail open if Redis is down
+    return false; // fail closed if Redis is down
   }
 }
+
+// In-memory rate limit cleanup — clear expired entries every 60s
+export const rateLimitMemoryStore = new Map<string, number[]>();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamps] of rateLimitMemoryStore) {
+    const valid = timestamps.filter((t) => now - t < 600000);
+    if (valid.length === 0) rateLimitMemoryStore.delete(key);
+    else rateLimitMemoryStore.set(key, valid);
+  }
+}, 60000);

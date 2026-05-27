@@ -5,17 +5,16 @@ import db, { eq, and, count, sql } from "@repo/database";
 import { formsTable, responsesTable, formEventsTable, emailLogsTable } from "@repo/database/schema";
 import { validateResponse } from "../../validators/runtime-engine";
 import { canAcceptSubmission, canShowInExplore } from "../../validators/visibility-guard";
-import { checkRateLimitRedis } from "../../utils/redis";
+import { checkRateLimitRedis, rateLimitMemoryStore } from "../../utils/redis";
 
 // Fallback in-memory rate limiter (if Redis is down)
-const rateLimitMap = new Map<string, number[]>();
 function checkRateLimitMemory(key: string, maxRequests = 5, windowMs = 600000): boolean {
   const now = Date.now();
-  const timestamps = rateLimitMap.get(key) ?? [];
+  const timestamps = rateLimitMemoryStore.get(key) ?? [];
   const valid = timestamps.filter((t) => now - t < windowMs);
   if (valid.length >= maxRequests) return false;
   valid.push(now);
-  rateLimitMap.set(key, valid);
+  rateLimitMemoryStore.set(key, valid);
   return true;
 }
 
@@ -96,8 +95,8 @@ export const publicRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required to submit this form" });
       }
 
-      // Rate limit by slug (Redis-backed with in-memory fallback)
-      if (!(await checkRateLimit(`submit:${input.slug}`))) {
+      // Rate limit by slug + IP (Redis-backed with in-memory fallback)
+      if (!(await checkRateLimit(`submit:${input.slug}:${ctx.ip ?? 'unknown'}`))) {
         throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many submissions. Please try again later." });
       }
 

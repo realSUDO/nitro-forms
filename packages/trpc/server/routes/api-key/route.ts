@@ -7,17 +7,19 @@ import { apiKeysTable } from "@repo/database/schema";
 
 export const apiKeyRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
-    return db.select({ id: apiKeysTable.id, name: apiKeysTable.name, key: apiKeysTable.key, active: apiKeysTable.active, createdAt: apiKeysTable.createdAt, lastUsedAt: apiKeysTable.lastUsedAt })
+    const keys = await db.select({ id: apiKeysTable.id, name: apiKeysTable.name, key: apiKeysTable.key, active: apiKeysTable.active, createdAt: apiKeysTable.createdAt, lastUsedAt: apiKeysTable.lastUsedAt })
       .from(apiKeysTable)
       .where(eq(apiKeysTable.ownerId, ctx.userId));
+    return keys.map((k) => ({ ...k, key: k.key.slice(0, 8) + "..." }));
   }),
 
   generate: protectedProcedure
     .input(z.object({ name: z.string().max(100).default("Default") }))
     .mutation(async ({ ctx, input }) => {
       const key = `nitro_sk_${crypto.randomBytes(24).toString("hex")}`;
-      const [row] = await db.insert(apiKeysTable).values({ ownerId: ctx.userId, name: input.name, key }).returning();
-      return row;
+      const hashedKey = crypto.createHash("sha256").update(key).digest("hex");
+      const [row] = await db.insert(apiKeysTable).values({ ownerId: ctx.userId, name: input.name, key: hashedKey }).returning();
+      return { ...row!, key };
     }),
 
   revoke: protectedProcedure
