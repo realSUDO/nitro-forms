@@ -14,6 +14,7 @@ import {
   Loader2,
   Pencil,
   Plus,
+  Sparkles,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -280,12 +281,28 @@ export function CreatorDashboard() {
         </div>
 
         {/* Upgrade */}
-        <div className="mt-auto p-5 rounded-xl" style={{ background: "linear-gradient(135deg, #5865f2 0%, #28418e 100%)" }}>
-          <p className="text-base font-semibold text-white mb-1">Upgrade Nitro</p>
-          <p className="text-xs text-white/80 mb-4">Unlock advanced logic and unlimited responses.</p>
-          <Link href="/pricing" className="block w-full py-2 text-center rounded-lg text-xs font-semibold text-white bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm">
-            Learn More
-          </Link>
+        <div className="mt-auto rounded-xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#4b1f58] via-[#252340] to-[#1b1d27]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(168,85,247,0.3),transparent_50%)]" />
+          <div className="relative p-4">
+            <p className="text-sm font-bold text-white">PRO</p>
+            <p className="text-[10px] text-white/50 mt-0.5">$9.99/mo</p>
+            <ul className="mt-3 space-y-1.5">
+              {[
+                { icon: Sparkles, text: "100 AI forms" },
+                { icon: FileText, text: "Unlimited forms" },
+                { icon: BarChart2, text: "Advanced analytics" },
+              ].map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-center gap-2">
+                  <Icon size={12} className="text-white/70" />
+                  <span className="text-[11px] text-white/80">{text}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/pricing" className="block w-full mt-3 py-1.5 text-center rounded-lg text-xs font-semibold text-white bg-white/15 hover:bg-white/25 transition-colors">
+              Upgrade
+            </Link>
+          </div>
         </div>
       </aside>
     </>
