@@ -14,6 +14,10 @@ const nextConfig = {
         source: "/docs/:path*",
         destination: "http://localhost:5001/docs/:path*",
       },
+      {
+        source: "/openapi.json",
+        destination: "http://localhost:5001/openapi.json",
+      },
     ];
   },
 };
