@@ -22,7 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Shared Rail */}
       <aside className="w-[72px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-4 gap-3">
         <Link href="/dashboard" prefetch className="w-12 h-12 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-2">
-          <img src="/nitro.svg" alt="NitroForms" className="w-8 h-8" />
+          <img src="/nitro.svg" alt="NitroForms" className="w-9 h-9" />
         </Link>
 
         {NAV_ITEMS.map(({ Icon, href, label }) => {
