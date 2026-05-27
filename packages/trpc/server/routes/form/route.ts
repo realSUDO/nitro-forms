@@ -165,4 +165,35 @@ export const formRouter = router({
     .query(async ({ input }) => {
       return getCachedDraft(input.formId);
     }),
+
+  rename: protectedProcedure
+    .input(z.object({ formId: z.string().uuid(), title: z.string().min(1).max(200) }))
+    .mutation(async ({ ctx, input }) => {
+      const [form] = await db.update(formsTable)
+        .set({ title: input.title })
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .returning();
+      if (!form) throw new TRPCError({ code: "NOT_FOUND" });
+      return form;
+    }),
+
+  duplicate: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [original] = await db.select().from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .limit(1);
+      if (!original) throw new TRPCError({ code: "NOT_FOUND" });
+      const slug = `${original.slug}-copy-${nanoid(6)}`;
+      const [copy] = await db.insert(formsTable).values({
+        title: `${original.title} (copy)`,
+        slug,
+        ownerId: ctx.userId,
+        status: "draft",
+        visibility: original.visibility,
+        fieldsJson: original.fieldsJson,
+        settingsJson: original.settingsJson,
+      }).returning();
+      return copy;
+    }),
 });

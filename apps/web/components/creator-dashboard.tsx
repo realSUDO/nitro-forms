@@ -1,25 +1,55 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import {
   BarChart2,
   ChevronDown,
+  Copy,
   FileText,
   Gamepad2,
+  Globe,
   Hash,
   Loader2,
+  Pencil,
   Plus,
+  Trash2,
+  Upload,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
+import { ContextMenu, type MenuItem } from "~/components/context-menu";
 
 export function CreatorDashboard() {
   const router = useRouter();
+  const utils = trpc.useUtils();
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const { data: forms, isLoading } = trpc.form.listMine.useQuery();
   const createForm = trpc.form.create.useMutation({
     onSuccess: (form) => router.push(`/builder/${form!.id}`),
   });
+  const publishForm = trpc.form.publish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const unpublishForm = trpc.form.unpublish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const deleteForm = trpc.form.delete.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const renameForm = trpc.form.rename.useMutation({ onSuccess: () => { utils.form.listMine.invalidate(); setRenaming(null); } });
+  const duplicateForm = trpc.form.duplicate.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+
+  function getMenuItems(form: { id: string; title: string; status: string; slug: string }): MenuItem[] {
+    return [
+      { label: "Rename", icon: <Pencil size={14} />, onClick: () => { setRenaming(form.id); setRenameValue(form.title); } },
+      { label: "Duplicate", icon: <Copy size={14} />, onClick: () => duplicateForm.mutate({ formId: form.id }) },
+      { label: "Open Builder", icon: <FileText size={14} />, onClick: () => router.push(`/builder/${form.id}`) },
+      { label: "View Analytics", icon: <BarChart2 size={14} />, onClick: () => router.push(`/analytics/${form.id}`) },
+      ...(form.status === "published"
+        ? [{ label: "Unpublish", icon: <Globe size={14} />, onClick: () => unpublishForm.mutate({ formId: form.id }) }]
+        : [{ label: "Publish", icon: <Upload size={14} />, onClick: () => publishForm.mutate({ formId: form.id }) }]
+      ),
+      { label: "", onClick: () => {}, separator: true },
+      { label: "Delete", icon: <Trash2 size={14} />, onClick: () => deleteForm.mutate({ formId: form.id }), danger: true },
+    ];
+  }
 
   const formList = forms ?? [];
   const published = formList.filter(f => f.status === "published");
@@ -42,9 +72,11 @@ export function CreatorDashboard() {
             <div className="pt-2">
               <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Drafts</p>
               {drafts.map(f => (
-                <Link prefetch key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <ContextMenu key={f.id} items={getMenuItems(f)}>
+                <Link prefetch href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   <Hash size={14} className="text-[#4e5058]" /><span className="truncate">{f.title}</span>
                 </Link>
+                </ContextMenu>
               ))}
             </div>
           )}
@@ -52,9 +84,11 @@ export function CreatorDashboard() {
             <div className="pt-2">
               <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Published</p>
               {published.map(f => (
-                <Link prefetch key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <ContextMenu key={f.id} items={getMenuItems(f)}>
+                <Link prefetch href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   <Hash size={14} className="text-[#f2f3f5]" /><span className="truncate">{f.title}</span>
                 </Link>
+                </ContextMenu>
               ))}
             </div>
           )}
@@ -113,12 +147,23 @@ export function CreatorDashboard() {
                 <thead><tr className="border-t border-[#3f4147]">{["Form", "Status", "Visibility", ""].map(h => <th key={h} className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">{h}</th>)}</tr></thead>
                 <tbody>
                   {formList.map((form, i) => (
-                    <tr key={form.id} className={cn("hover:bg-[#3f4147]/30 transition-colors", i < formList.length - 1 && "border-b border-[#3f4147]/40")}>
-                      <td className="px-4 py-3"><Link prefetch href={`/builder/${form.id}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link></td>
+                    <ContextMenu key={form.id} items={getMenuItems(form)}>
+                    <tr className={cn("hover:bg-[#3f4147]/30 transition-colors", i < formList.length - 1 && "border-b border-[#3f4147]/40")}>
+                      <td className="px-4 py-3">
+                        {renaming === form.id ? (
+                          <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                            onBlur={() => { if (renameValue.trim()) renameForm.mutate({ formId: form.id, title: renameValue.trim() }); else setRenaming(null); }}
+                            onKeyDown={e => { if (e.key === "Enter") { e.currentTarget.blur(); } if (e.key === "Escape") setRenaming(null); }}
+                            className="bg-[#1e1f22] rounded px-2 py-0.5 text-sm text-[#f2f3f5] outline-none ring-1 ring-[#5865f2] w-full" />
+                        ) : (
+                          <Link prefetch href={`/builder/${form.id}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link>
+                        )}
+                      </td>
                       <td className="px-4 py-3"><span className={cn("px-2 py-0.5 rounded text-[11px] font-semibold capitalize", form.status === "published" ? "bg-[#3ba55c]/15 text-[#3ba55c]" : "bg-[#3f4147] text-[#949ba4]")}>{form.status}</span></td>
                       <td className="px-4 py-3 text-xs text-[#949ba4] capitalize">{form.visibility}</td>
                       <td className="px-4 py-3 text-right"><Link prefetch href={`/analytics/${form.id}`} className="text-[#949ba4] hover:text-[#f2f3f5]"><BarChart2 size={14} /></Link></td>
                     </tr>
+                    </ContextMenu>
                   ))}
                 </tbody>
               </table>
