@@ -334,7 +334,7 @@ export function FormBuilder() {
       const newFields: FormField[] = data.fields.map((f: any, i: number) => ({
         ...f,
         order: fields.length + i + 1,
-        position: { x: 300, y: 80 + i * 140 },
+        position: { x: 300, y: 100 + i * 200 },
       }));
       setFields(prev => [...prev, ...newFields]);
       // Create nodes
