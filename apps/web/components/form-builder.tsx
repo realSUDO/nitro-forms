@@ -33,6 +33,7 @@ import {
   QrCode,
   Save,
   Share2,
+  Sparkles,
   ToggleLeft,
   Trash2,
   Type,
@@ -324,6 +325,23 @@ export function FormBuilder() {
     alert(`Link copied!`);
   }
 
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [showAi, setShowAi] = useState(false);
+  const aiGenerate = trpc.ai.generateForm.useMutation({
+    onSuccess: (data) => {
+      const newNodes = data.fields.map((f: any, i: number) => ({
+        id: f.id,
+        type: "fieldNode",
+        position: { x: 300, y: 80 + i * 140 },
+        data: { field: { ...f, position: { x: 300, y: 80 + i * 140 } }, selected: false, onDelete: () => deleteField(f.id), onUpdate: (updated: any) => updateFieldData(updated) },
+      }));
+      setNodes(prev => [...prev, ...newNodes]);
+      setShowAi(false);
+      setAiPrompt("");
+      setSaved(false);
+    },
+  });
+
   const selectedField = fields.find(f => f.id === selectedId) ?? null;
 
   if (isLoading) {
@@ -411,6 +429,9 @@ export function FormBuilder() {
             </button>
             <button onClick={() => setShowQr(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
               <QrCode size={12} /> QR
+            </button>
+            <button onClick={() => setShowAi(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs bg-[#5865f2]/10 text-[#bec2ff] border border-[#5865f2]/30 hover:bg-[#5865f2]/20 transition-colors">
+              <Sparkles size={12} /> AI Generate
             </button>
             <button onClick={handlePublish} className="px-3 py-1.5 rounded text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
               {form.status === "published" ? "Unpublish" : "Publish"}
@@ -754,6 +775,32 @@ export function FormBuilder() {
             <QRCodeCanvas id="qr-canvas" value={`${typeof window !== "undefined" ? window.location.origin : ""}/f/${form?.slug}`} size={200} bgColor="#ffffff" fgColor="#000000" />
             <button onClick={() => { const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement | null; if (!canvas) return; const url = canvas.toDataURL("image/png"); const a = document.createElement("a"); a.href = url; a.download = `${form?.slug ?? "form"}-qr.png`; a.click(); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
               <Download size={12} /> Download PNG
+            </button>
+          </div>
+        </div>
+      )}
+      {showAi && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowAi(false)}>
+          <div className="bg-[#2b2d31] rounded-xl p-6 shadow-xl border border-[#3f4147] w-[400px]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-[#f2f3f5] flex items-center gap-2"><Sparkles size={14} className="text-[#5865f2]" /> AI Form Generator</p>
+              <button onClick={() => setShowAi(false)} className="text-[#949ba4] hover:text-[#f2f3f5]"><X size={16} /></button>
+            </div>
+            <p className="text-xs text-[#949ba4] mb-3">Describe your form and AI will generate the fields. 2 free generations per account.</p>
+            <textarea
+              value={aiPrompt}
+              onChange={e => setAiPrompt(e.target.value)}
+              placeholder="e.g. A customer feedback form with name, email, rating, and comments..."
+              className="w-full h-24 bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-none mb-3"
+            />
+            {aiGenerate.error && <p className="text-xs text-[#ed4245] mb-2">{aiGenerate.error.message}</p>}
+            <button
+              onClick={() => aiGenerate.mutate({ prompt: aiPrompt })}
+              disabled={!aiPrompt.trim() || aiGenerate.isPending}
+              className="w-full py-2 rounded-lg text-sm font-medium bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {aiGenerate.isPending ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              {aiGenerate.isPending ? "Generating..." : "Generate Fields"}
             </button>
           </div>
         </div>

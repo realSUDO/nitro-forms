@@ -7,6 +7,7 @@ import { formRouter } from "./routes/form/route";
 import { publicRouter } from "./routes/public/route";
 import { analyticsRouter, responseRouter } from "./routes/analytics/route";
 import { apiKeyRouter } from "./routes/api-key/route";
+import { aiRouter } from "./routes/ai/route";
 
 export const serverRouter = router({
   health: healthRouter,
@@ -17,6 +18,7 @@ export const serverRouter = router({
   analytics: analyticsRouter,
   response: responseRouter,
   apiKey: apiKeyRouter,
+  ai: aiRouter,
 });
 
 export { createContext } from "./context";
