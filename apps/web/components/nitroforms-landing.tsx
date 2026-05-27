@@ -87,11 +87,11 @@ const pricingPlans = [
 
 const codeLines = [
   { text: "curl", color: "#bec2ff" },
-  { text: "  -X POST https://api.nitroforms.com/v2/forms \\", color: "#e3e2e6" },
-  { text: '  -H "Authorization: Bearer ', color: "#e3e2e6", highlight: "NITRO_SK_..." },
+  { text: "  -X POST https://nitroforms.fun/api/v2/forms \\", color: "#e3e2e6" },
+  { text: '  -H "Authorization: Bearer ', color: "#e3e2e6", highlight: "nitro_sk_..." },
   { text: "  -d '{", color: "#e3e2e6" },
   { text: '    "title": "Beta Signup",', color: "#e3e2e6" },
-  { text: '    "schema": [ ... ]', color: "#e3e2e6" },
+  { text: '    "fields": [{ "type": "email", "label": "Email" }]', color: "#e3e2e6" },
   { text: "  }'", color: "#e3e2e6" },
 ];
 

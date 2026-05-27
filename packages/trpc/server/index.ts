@@ -6,6 +6,7 @@ import { userRouter } from "./routes/user/route";
 import { formRouter } from "./routes/form/route";
 import { publicRouter } from "./routes/public/route";
 import { analyticsRouter, responseRouter } from "./routes/analytics/route";
+import { apiKeyRouter } from "./routes/api-key/route";
 
 export const serverRouter = router({
   health: healthRouter,
@@ -15,6 +16,7 @@ export const serverRouter = router({
   public: publicRouter,
   analytics: analyticsRouter,
   response: responseRouter,
+  apiKey: apiKeyRouter,
 });
 
 export { createContext } from "./context";
