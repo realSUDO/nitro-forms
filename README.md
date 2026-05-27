@@ -4,8 +4,8 @@
 
 ## Live Demo
 
-- **Frontend:** [deployed-url]
-- **API Docs:** [deployed-url]/docs
+- **Frontend:** https://nitroforms.fun
+- **API Docs:** https://nitroforms.fun/docs
 - **Demo Credentials:** `demo@nitroforms.dev` / `password123`
 
 ## Features
@@ -33,7 +33,7 @@
 | Database | PostgreSQL, Drizzle ORM |
 | Validation | Zod v4 (runtime dynamic schemas) |
 | API Docs | Scalar (OpenAPI) |
-| Deployment | Vercel (web) + Railway (api) + Neon (db) |
+| Deployment | Azure VM (self-hosted) |
 
 ## Monorepo Structure
 

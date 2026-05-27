@@ -18,7 +18,51 @@ const openApiDocument = generateOpenApiDocument(serverRouter, {
   title: "NitroForms API",
   version: "2.0.0",
   baseUrl: env.BASE_URL.concat("/trpc"),
-  description: "REST API for NitroForms — https://nitroforms.fun",
+  description: `# NitroForms API
+
+The official REST API for NitroForms — the Discord-inspired form builder.
+
+**Base URL:** https://nitroforms.fun/api/v2
+
+## Authentication
+
+All authenticated endpoints require an API key passed via the Authorization header:
+
+\`\`\`
+Authorization: Bearer nitro_sk_your_key_here
+\`\`\`
+
+Generate API keys from your dashboard at https://nitroforms.fun/pricing (Settings > API Keys).
+
+## Public Endpoints
+
+Form submission (\`POST /api/v2/forms/:slug/submit\`) does NOT require authentication — anyone can submit responses to published forms.
+
+## Rate Limits
+
+- Authenticated: 60 requests/minute per IP
+- Public submit: 5 submissions per 10 minutes per IP per form
+
+## Resources
+
+- **Forms** — Create, list, and manage your forms
+- **Submissions** — Submit responses to published forms
+- **Health** — Server status check
+
+## SDKs
+
+Install the official SDK:
+\`\`\`bash
+npm install @nitroforms/sdk
+\`\`\`
+
+Usage:
+\`\`\`typescript
+import { NitroForms } from '@nitroforms/sdk';
+const nitro = new NitroForms('nitro_sk_your_key');
+const forms = await nitro.forms.list();
+\`\`\`
+`,
 });
 
 // Security headers
