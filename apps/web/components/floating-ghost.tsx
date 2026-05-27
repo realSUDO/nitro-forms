@@ -90,8 +90,8 @@ export default function FloatingGhost({
         aria-hidden="true"
         className="pointer-events-auto cursor-pointer select-none"
         style={{ width: size, height: size, filter: "drop-shadow(0 10px 25px rgba(88,101,242,0.12))", opacity: 0.85 }}
-        animate={clicked ? clickAnims[clicked] : { y: [0, -10, 3, -6, 0], x: [0, 3, -2, 1, 0] }}
-        transition={clicked ? { duration: 0.5, ease: "easeOut" } : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        animate={clicked ? clickAnims[clicked] : { y: [0, -8, 2, -5, 0], x: [0, 2, -1, 1, 0] }}
+        transition={clicked ? { duration: 0.5, ease: "easeOut" } : { duration: 10, repeat: Infinity, ease: "easeInOut" }}
       >
         <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none">
           {/* wings */}
