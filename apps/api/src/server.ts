@@ -66,7 +66,7 @@ const forms = await nitro.forms.list();
 });
 
 // Security headers
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false, crossOriginResourcePolicy: false }));
 
 // Explicit CORS
 app.use(
@@ -93,7 +93,7 @@ app.get("/openapi.json", (req, res) => {
 });
 
 logger.debug(`docs: ${env.BASE_URL}/docs`);
-app.use("/docs", apiReference({ url: "/openapi.json" }));
+app.use("/docs", (req, res, next) => { res.removeHeader("Content-Security-Policy"); next(); }, apiReference({ url: "/openapi.json" }));
 
 app.use(
   "/api/rpc",

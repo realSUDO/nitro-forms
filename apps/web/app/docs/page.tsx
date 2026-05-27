@@ -4,6 +4,9 @@ import { useEffect } from "react";
 
 export default function DocsPage() {
   useEffect(() => {
+    // Redirect to API server docs
+    // In production, nginx proxies /docs to API directly (this page won't be reached)
+    // In dev, redirect to port 5001
     window.location.href = window.location.origin.replace(":3000", ":5001") + "/docs";
   }, []);
   return <div className="min-h-screen bg-[#313338] flex items-center justify-center text-[#949ba4] text-sm">Redirecting to API docs...</div>;
