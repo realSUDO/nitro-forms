@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Plus, Search, Users } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -16,6 +17,7 @@ const STATIC_TEMPLATES = [
 
 export function ExploreTemplates() {
   const router = useRouter();
+  const [search, setSearch] = useState("");
   const { data: apiForms } = trpc.public.listExploreForms.useQuery();
   const createForm = trpc.form.create.useMutation();
   const updateForm = trpc.form.update.useMutation();
@@ -82,7 +84,7 @@ export function ExploreTemplates() {
           <div className="flex items-center gap-4">
             <div className="flex items-center bg-[#1e1f22] px-3 py-1 rounded-lg">
               <Search size={14} className="text-[#949ba4]" />
-              <input className="bg-transparent border-none text-sm w-44 text-[#f2f3f5] placeholder:text-[#949ba4] outline-none ml-2" placeholder="Search templates..." />
+              <input value={search} onChange={e => setSearch(e.target.value)} className="bg-transparent border-none text-sm w-44 text-[#f2f3f5] placeholder:text-[#949ba4] outline-none ml-2" placeholder="Search templates..." />
             </div>
           </div>
         </header>
@@ -96,7 +98,7 @@ export function ExploreTemplates() {
 
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {STATIC_TEMPLATES.map(({ slug, title, category, stat, image, badgeColor }) => (
+            {STATIC_TEMPLATES.filter(t => !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase())).map(({ slug, title, category, stat, image, badgeColor }) => (
               <div key={slug} className="rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:-translate-y-1" style={{ background: "rgba(43,45,49,0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.05)" }}>
                 <div className="h-40 relative overflow-hidden bg-[#292a2d]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
