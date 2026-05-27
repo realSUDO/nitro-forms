@@ -278,7 +278,7 @@ function DashboardMockup() {
           <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #8f8fa0 0.5px, transparent 0.5px)", backgroundSize: "20px 20px" }} />
 
           {/* Node 1 — Name */}
-          <div className="absolute left-[20%] top-[12%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3">
+          <div className="absolute left-[20%] top-[12%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3 transition-all hover:border-[#5865f2] hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] hover:-translate-y-0.5 cursor-default">
             <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SHORT TEXT</p>
             <p className="text-[11px] text-white">Your Name</p>
             <div className="mt-2 h-5 rounded bg-[#1f1f23]" />
@@ -286,15 +286,16 @@ function DashboardMockup() {
 
           {/* Edge 1→2 */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            <path d="M 170 85 C 170 120 170 120 170 140" stroke="#5865f2" strokeWidth="2" fill="none" opacity="0.6" />
-            <path d="M 170 195 C 170 220 250 220 250 245" stroke="#5865f2" strokeWidth="2" fill="none" opacity="0.6" />
+            <style>{`@keyframes dash { to { stroke-dashoffset: -16; } }`}</style>
+            <path d="M 170 85 C 170 120 170 120 170 140" stroke="#5865f2" strokeWidth="2" fill="none" opacity="0.6" strokeDasharray="4 4" style={{ animation: "dash 2s linear infinite" }} />
+            <path d="M 170 195 C 170 220 250 220 250 245" stroke="#5865f2" strokeWidth="2" fill="none" opacity="0.6" strokeDasharray="4 4" style={{ animation: "dash 2s linear infinite" }} />
             {/* Condition edges */}
-            <path d="M 235 310 C 235 340 150 340 150 360" stroke="#3ba55c" strokeWidth="2" fill="none" opacity="0.7" />
-            <path d="M 275 310 C 275 340 350 340 350 360" stroke="#ed4245" strokeWidth="2" fill="none" opacity="0.7" />
+            <path d="M 235 310 C 235 340 150 340 150 360" stroke="#3ba55c" strokeWidth="2" fill="none" opacity="0.7" strokeDasharray="4 4" style={{ animation: "dash 1.5s linear infinite" }} />
+            <path d="M 275 310 C 275 340 350 340 350 360" stroke="#ed4245" strokeWidth="2" fill="none" opacity="0.7" strokeDasharray="4 4" style={{ animation: "dash 1.5s linear infinite" }} />
           </svg>
 
           {/* Node 2 — Genre Select */}
-          <div className="absolute left-[18%] top-[38%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3">
+          <div className="absolute left-[18%] top-[38%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3 transition-all hover:border-[#5865f2] hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] hover:-translate-y-0.5 cursor-default">
             <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SINGLE SELECT</p>
             <p className="text-[11px] text-white">Fav Genre</p>
             <div className="mt-1.5 space-y-1">
@@ -304,7 +305,7 @@ function DashboardMockup() {
           </div>
 
           {/* Node 3 — Condition */}
-          <div className="absolute left-[30%] top-[65%] w-[120px] rounded-lg border border-[#faa61a]/40 bg-[#2b2d31] p-2.5">
+          <div className="absolute left-[30%] top-[65%] w-[120px] rounded-lg border border-[#faa61a]/40 bg-[#2b2d31] p-2.5 transition-all hover:border-[#faa61a] hover:shadow-[0_0_12px_rgba(250,166,26,0.3)] hover:-translate-y-0.5 cursor-default">
             <div className="flex items-center gap-1 mb-1">
               <span className="text-[9px] font-mono text-[#faa61a]">IF</span>
             </div>
@@ -316,14 +317,14 @@ function DashboardMockup() {
           </div>
 
           {/* Node 4 — Rating (yes branch) */}
-          <div className="absolute left-[10%] top-[85%] w-[110px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-2.5">
+          <div className="absolute left-[10%] top-[85%] w-[110px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-2.5 transition-all hover:border-[#3ba55c] hover:shadow-[0_0_12px_rgba(59,165,92,0.3)] hover:-translate-y-0.5 cursor-default">
             <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">RATING</p>
             <p className="text-[10px] text-white">Rate Shonen</p>
             <div className="flex gap-0.5 mt-1">{[1,2,3,4,5].map(n => <span key={n} className="text-[10px] text-[#faa61a]">★</span>)}</div>
           </div>
 
           {/* Node 5 — Thank you (no branch) */}
-          <div className="absolute left-[55%] top-[85%] w-[110px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-2.5">
+          <div className="absolute left-[55%] top-[85%] w-[110px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-2.5 transition-all hover:border-[#ed4245] hover:shadow-[0_0_12px_rgba(237,66,69,0.3)] hover:-translate-y-0.5 cursor-default">
             <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SHORT TEXT</p>
             <p className="text-[10px] text-white">Any feedback?</p>
             <div className="mt-1.5 h-4 rounded bg-[#1f1f23]" />
