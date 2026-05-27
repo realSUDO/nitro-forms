@@ -4,37 +4,42 @@ import { protectedProcedure, router } from "../../trpc";
 
 const FIELD_TYPES = ["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date"] as const;
 
-const SYSTEM_PROMPT = `You are NitroForms AI — an expert form builder. You generate complete form structures with fields, conditional logic, and connections.
+const SYSTEM_PROMPT = `You are NitroForms AI — an expert form builder. Generate complete form structures.
 
-OUTPUT FORMAT: Return ONLY a valid JSON object (no markdown, no explanation):
+OUTPUT: Return ONLY a valid JSON object:
 {
-  "title": "Form Title Here",
+  "title": "Descriptive Form Title",
   "fields": [...],
   "edges": [...]
 }
 
-FIELD SCHEMA:
-{ "id": "f1", "type": "...", "label": "...", "required": true/false, "options": ["..."] }
-Valid types: ${FIELD_TYPES.join(", ")}, condition
+FIELD TYPES: ${FIELD_TYPES.join(", ")}
+Plus "condition" for IF/ELSE branching.
 
-CONDITION FIELDS:
-For branching logic, use type "condition":
-{ "id": "c1", "type": "condition", "label": "Route by answer", "required": false, "conditionConfig": { "sourceFieldId": "f3", "operator": "equals", "value": "Yes" } }
-Operators: equals, not_equals, contains, greater_than, less_than
+FIELD FORMAT:
+{ "id": "f1", "type": "short_text", "label": "What is your full name?", "required": true }
+{ "id": "f2", "type": "single_select", "label": "Which category?", "required": true, "options": ["A", "B", "C"] }
+{ "id": "c1", "type": "condition", "label": "Route by category", "required": false, "conditionConfig": { "sourceFieldId": "f2", "operator": "equals", "value": "A" } }
 
-EDGES (connections between fields):
-{ "source": "f1", "target": "f2", "sourceHandle": null }
-For condition nodes, use sourceHandle "yes" or "no":
-{ "source": "c1", "target": "f4", "sourceHandle": "yes" }
-{ "source": "c1", "target": "f5", "sourceHandle": "no" }
+CONDITION RULES:
+- conditionConfig.sourceFieldId MUST reference an earlier field's id
+- operators: equals, not_equals, contains, greater_than, less_than
+- value: the answer to compare against (for select fields, must be one of the options)
 
-RULES:
-- Generate 4-10 fields with descriptive, professional labels (not single words)
-- Title should be descriptive and engaging (e.g. "Community Hackathon Registration 2025")
-- Use conditions when the form topic naturally has branching (e.g. "Are you a student?" → different paths)
-- Connect ALL fields with edges in logical order
-- For select types include 3-6 realistic options
-- NEVER output anything other than the JSON object`;
+EDGES (connections):
+- Normal: { "source": "f1", "target": "f2", "sourceHandle": null }
+- From condition YES: { "source": "c1", "target": "f3", "sourceHandle": "yes" }
+- From condition NO: { "source": "c1", "target": "f4", "sourceHandle": "no" }
+- Every field must be connected. The first field has no incoming edge.
+- A condition node receives one incoming edge and outputs two (yes/no).
+
+GUIDELINES:
+- 4-10 fields total
+- Use descriptive multi-word labels (not "Name" but "What is your full name?")
+- Use conditions ONLY when the topic naturally branches (e.g. "Are you a student?" → yes path asks school, no path asks company)
+- For single_select/multi_select: 3-6 realistic options
+- Title should be engaging and specific
+- ONLY output the JSON object, nothing else`;
 
 // External guardrails — runs BEFORE the LLM call
 const BLOCKED_PATTERNS = [
@@ -108,17 +113,25 @@ export const aiRouter = router({
           type: [...FIELD_TYPES, "condition"].includes(f.type) ? f.type : "short_text",
           label: String(f.label || "Field").slice(0, 100),
           required: Boolean(f.required),
-          ...(f.options ? { options: (Array.isArray(f.options) ? f.options : []).slice(0, 10).map((o: any) => typeof o === "string" ? o : o.label ?? o.value ?? String(o)) } : {}),
+          ...(f.options ? { options: (Array.isArray(f.options) ? f.options : []).slice(0, 10).map((o: any) => typeof o === "string" ? o : (o.label ?? o.value ?? o.id ?? String(o))) } : {}),
           ...(f.conditionConfig ? { conditionConfig: f.conditionConfig } : {}),
         }));
 
-        // Validate edges
+        // Validate edges — normalize from/to to source/target
         const fieldIds = new Set(validated.map((f: any) => f.id));
-        const validEdges = (edges as any[]).filter((e: any) => fieldIds.has(e.source) && fieldIds.has(e.target)).map((e: any) => ({
-          source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? null,
+        const rawEdges = (edges as any[]).map((e: any) => ({
+          source: e.source ?? e.from,
+          target: e.target ?? e.to,
+          sourceHandle: e.sourceHandle ?? null,
+        }));
+        const validEdges = rawEdges.filter((e: any) => fieldIds.has(e.source) && fieldIds.has(e.target));
+
+        // If AI didn't generate proper edges, auto-connect sequentially
+        const finalEdges = validEdges.length > 0 ? validEdges : validated.slice(1).map((f: any, i: number) => ({
+          source: validated[i].id, target: f.id, sourceHandle: null,
         }));
 
-        return { fields: validated, edges: validEdges, title, source: "ai" };
+        return { fields: validated, edges: finalEdges, title, source: "ai" };
       } catch {
         return generateFallback(input.prompt);
       }
