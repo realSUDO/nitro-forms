@@ -289,6 +289,7 @@ export function FormBuilder() {
   }
 
   function deleteField(id: string) {
+    if (id === "email_field") return; // Can't delete the email field
     pushHistory();
     setFields(prev => prev.filter(f => f.id !== id));
     setNodes(nds => nds.filter(n => n.id !== id));

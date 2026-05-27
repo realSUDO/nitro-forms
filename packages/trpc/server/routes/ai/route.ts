@@ -35,6 +35,8 @@ EDGES (connections):
 
 GUIDELINES:
 - 4-10 fields total
+- The FIRST field (id "email_field") MUST always be: {"id": "email_field", "type": "email", "label": "Your email address", "required": true}
+- Remaining fields start from id "f1", "f2", etc.
 - Use descriptive multi-word labels (not "Name" but "What is your full name?")
 - Use conditions ONLY when the topic naturally branches (e.g. "Are you a student?" → yes path asks school, no path asks company)
 - For single_select/multi_select: 3-6 realistic options
@@ -154,6 +156,9 @@ export const aiRouter = router({
           source: validated[i].id, target: f.id, sourceHandle: null,
         }));
 
+        // Ensure email_field is first
+        const hasEmail = validated.some((f: any) => f.id === "email_field");
+        if (!hasEmail) validated.unshift({ id: "email_field", type: "email", label: "Your email address", required: true });
         return { fields: validated, edges: finalEdges, title, source: "ai" };
       } catch {
         return generateFallback(input.prompt);
@@ -165,12 +170,13 @@ function generateFallback(prompt: string) {
   const lower = prompt.toLowerCase();
   let fields: any[];
   let title: string;
+  const emailField = { id: "email_field", type: "email", label: "Your email address", required: true };
 
   if (lower.includes("feedback") || lower.includes("review")) {
     title = "Customer Feedback Form";
     fields = [
+      emailField,
       { id: "f1", type: "short_text", label: "Your Full Name", required: true },
-      { id: "f2", type: "email", label: "Email Address", required: true },
       { id: "f3", type: "rating", label: "How would you rate your experience?", required: true },
       { id: "f4", type: "single_select", label: "What area are you providing feedback on?", required: true, options: ["Product", "Service", "Support", "Pricing", "Other"] },
       { id: "f5", type: "long_text", label: "Tell us more about your experience", required: false },

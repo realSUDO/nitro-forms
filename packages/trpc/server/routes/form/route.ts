@@ -44,7 +44,7 @@ export const formRouter = router({
         title: input.title,
         description: input.description ?? null,
         slug,
-        fieldsJson: [],
+        fieldsJson: [{ id: "email_field", type: "email", label: "Your email address", required: true, order: 0 }],
         settingsJson: {},
       }).returning();
       return form;
