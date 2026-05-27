@@ -23,6 +23,7 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
   const params = useParams();
   const formId = formIdProp ?? (params.id as string);
+  const inline = !!formIdProp; // rendered inside analytics index — skip inner sidebar
   const [activeSection, setActiveSection] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -75,6 +76,7 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
   return (
     <>
       {/* Sidebar */}
+      {!inline && (
       <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
         <div className="px-4 pt-6 pb-4">
           <h2 className="text-lg font-semibold text-[#f2f3f5]">{form?.title ?? "Analytics"}</h2>
@@ -102,6 +104,7 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
           </Link>
         </div>
       </aside>
+      )}
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
