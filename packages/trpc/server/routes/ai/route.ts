@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../../trpc";
 
-const FIELD_TYPES = ["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date"] as const;
+const FIELD_TYPES = ["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date", "file_upload", "url", "phone", "time"] as const;
 
 const SYSTEM_PROMPT = `You are NitroForms AI — an expert form builder. Generate complete form structures.
 

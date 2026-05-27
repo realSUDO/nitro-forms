@@ -24,12 +24,17 @@ import "@xyflow/react/dist/style.css";
 import {
   AlignLeft,
   Brain,
+  Calendar,
   ChevronDown,
+  Clock,
   Download,
   GitBranch,
+  Globe,
   GripVertical,
+  Link2,
   Loader2,
   Mail,
+  Phone,
   Plus,
   QrCode,
   Save,
@@ -38,6 +43,7 @@ import {
   ToggleLeft,
   Trash2,
   Type,
+  Upload,
   X,
   Zap,
 } from "lucide-react";
@@ -45,7 +51,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
-type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "rating" | "date" | "condition";
+type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "rating" | "date" | "condition" | "file_upload" | "url" | "phone" | "time";
 
 interface FormField {
   id: string;
@@ -69,11 +75,15 @@ const FIELD_TYPES: { type: FieldType; label: string; Icon: React.ElementType }[]
   { type: "long_text", label: "Long Text", Icon: AlignLeft },
   { type: "email", label: "Email", Icon: Mail },
   { type: "number", label: "Number", Icon: Type },
+  { type: "phone", label: "Phone", Icon: Phone },
+  { type: "url", label: "URL", Icon: Globe },
   { type: "single_select", label: "Single Select", Icon: ChevronDown },
   { type: "multi_select", label: "Multi Select", Icon: ChevronDown },
   { type: "checkbox", label: "Checkbox", Icon: ToggleLeft },
   { type: "rating", label: "Rating", Icon: Type },
-  { type: "date", label: "Date", Icon: Type },
+  { type: "date", label: "Date", Icon: Calendar },
+  { type: "time", label: "Time", Icon: Clock },
+  { type: "file_upload", label: "File Upload", Icon: Upload },
 ];
 
 // Condition node — IF/ELSE branching

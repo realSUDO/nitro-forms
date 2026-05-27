@@ -367,8 +367,44 @@ export function PublicForm() {
                 type="date"
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full bg-transparent border-b-2 border-[#3f4147] focus:border-[#5865f2] px-0 py-3 text-lg text-[#f2f3f5] focus:outline-none transition-colors"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none"
               />
+            )}
+
+            {field.type === "time" && (
+              <input
+                type="time"
+                value={(answers[field.id] as string) ?? ""}
+                onChange={(e) => setAnswer(e.target.value)}
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none"
+              />
+            )}
+
+            {field.type === "phone" && (
+              <input
+                type="tel"
+                value={(answers[field.id] as string) ?? ""}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="+1 (555) 000-0000"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
+              />
+            )}
+
+            {field.type === "url" && (
+              <input
+                type="url"
+                value={(answers[field.id] as string) ?? ""}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="https://"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
+              />
+            )}
+
+            {field.type === "file_upload" && (
+              <label className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-[#3f4147] hover:border-[#5865f2] cursor-pointer transition-colors">
+                <span className="text-xs text-[#949ba4]">{answers[field.id] ? (answers[field.id] as File).name : "Click to upload file"}</span>
+                <input type="file" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setAnswer(e.target.files[0]); }} />
+              </label>
             )}
 
             {fieldErrors[field.id] && (

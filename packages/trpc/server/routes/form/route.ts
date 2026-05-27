@@ -8,7 +8,7 @@ import { cacheDraft, getCachedDraft, clearDraftCache } from "../../utils/redis";
 
 const fieldSchema = z.object({
   id: z.string(),
-  type: z.enum(["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date", "condition"]),
+  type: z.enum(["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date", "condition", "file_upload", "url", "phone", "time"]),
   label: z.string().min(1),
   description: z.string().optional(),
   placeholder: z.string().optional(),
