@@ -102,9 +102,10 @@ const headingFont: CSSProperties = {
 export function NitroFormsLanding() {
   return (
     <main
-      className="min-h-screen overflow-x-hidden bg-[#121316] text-[#e3e2e6]"
+      className="min-h-screen overflow-x-hidden bg-[#121316] text-[#e3e2e6] relative"
       style={{ fontFamily: "var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif" }}
     >
+      <FloatingGhost />
       <Navigation />
       <Hero />
       <Features />
@@ -185,11 +186,6 @@ function Hero() {
       </div>
 
       <TiltMockup />
-
-      {/* Floating ghost mascot */}
-      <div className="pointer-events-none absolute right-[8%] top-[34%] z-20 hidden lg:block">
-        <FloatingGhost size={150} mood="smirk" />
-      </div>
     </section>
   );
 }
