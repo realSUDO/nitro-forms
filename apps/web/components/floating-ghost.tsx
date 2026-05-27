@@ -19,14 +19,14 @@ export default function FloatingGhost({
   const randomPos = useCallback(() => {
     const side = Math.random() > 0.5;
     return {
-      x: side ? 78 + Math.random() * 16 : 2 + Math.random() * 14,
-      y: 15 + Math.random() * 65, // vh percentage
+      x: side ? 80 + Math.random() * 12 : 2 + Math.random() * 12,
+      y: 8 + Math.random() * 30,
     };
   }, []);
 
-  // Drift to new position every ~8s
+  // Drift to new position every ~4s
   useEffect(() => {
-    const interval = setInterval(() => setPos(randomPos()), 8000);
+    const interval = setInterval(() => setPos(randomPos()), 4000);
     return () => clearInterval(interval);
   }, [randomPos]);
 
@@ -53,9 +53,9 @@ export default function FloatingGhost({
       style={{ width: size, height: size }}
       animate={{ left: `${pos.x}%`, top: `${pos.y}%`, rotate: [0, 4, -3, 2, 0] }}
       transition={{
-        left: { duration: 6, ease: [0.4, 0, 0.2, 1] },
-        top: { duration: 6, ease: [0.4, 0, 0.2, 1] },
-        rotate: { duration: 8, repeat: Infinity, ease: "easeInOut" },
+        left: { duration: 3.5, ease: [0.4, 0, 0.2, 1] },
+        top: { duration: 3.5, ease: [0.4, 0, 0.2, 1] },
+        rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" },
       }}
       onMouseEnter={onHover}
     >
