@@ -98,7 +98,7 @@ export function CreatorDashboard() {
               {draftsOpen && drafts.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
                 <button onClick={() => { setPreviewSlug(f.slug); setActiveChannel("forms"); }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
-                  <Hash size={14} className="text-[#4e5058]" /><span className="truncate">{f.title}</span>
+                  <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
                 </button>
                 </ContextMenu>
               ))}
@@ -112,7 +112,7 @@ export function CreatorDashboard() {
               {publishedOpen && published.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
                 <button onClick={() => { setPreviewSlug(f.slug); setActiveChannel("forms"); }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
-                  <Hash size={14} className="text-[#f2f3f5]" /><span className="truncate">{f.title}</span>
+                  <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
                 </button>
                 </ContextMenu>
               ))}
@@ -158,7 +158,7 @@ export function CreatorDashboard() {
         ) : previewSlug ? (
           <div className="absolute inset-0 flex flex-col bg-[#313338] z-10">
             <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22]">
-              <span className="text-sm font-semibold text-[#f2f3f5]"># {previewSlug}</span>
+              <span className="text-sm font-semibold text-[#f2f3f5]"><Hash size={14} className="inline text-[#949ba4]" /> {formList.find(f => f.slug === previewSlug)?.title ?? previewSlug}</span>
               <div className="flex items-center gap-2">
                 <Link href={`/f/${previewSlug}`} target="_blank" className="px-3 py-1 rounded text-xs text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   Open
