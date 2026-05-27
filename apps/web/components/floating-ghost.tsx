@@ -53,11 +53,25 @@ export default function FloatingGhost({
     setTimeout(() => setExpression("normal"), 2200);
   };
 
+  const [clicked, setClicked] = useState(0);
+  const onClick = () => {
+    const r = Math.ceil(Math.random() * 4);
+    setClicked(r);
+    setExpression(r <= 2 ? "surprised" : "happy");
+    setTimeout(() => { setClicked(0); setExpression("normal"); }, 1200);
+  };
+
   const eyeX = mouse.x * 8;
   const eyeY = mouse.y * 5;
-  // Eyes get bigger when cursor is far away (looking harder)
   const farAway = mouseDist > 400;
   const eyeScale = farAway ? 1.4 : 1;
+
+  const clickAnims: Record<number, { y?: number[]; rotate?: number[]; scale?: number[]; x?: number[] }> = {
+    1: { y: [0, -30, 0], rotate: [0, 360], scale: [1, 1.15, 1] },
+    2: { y: [0, -12, 0, -8, 0], scale: [1, 0.8, 1.1, 0.95, 1] },
+    3: { x: [0, -15, 15, -8, 8, 0], rotate: [0, -8, 8, -4, 4, 0] },
+    4: { y: [0, -35, -30, 0], scale: [1, 0.9, 1.12, 1] },
+  };
 
   return (
     <motion.div
@@ -70,13 +84,14 @@ export default function FloatingGhost({
         rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
       }}
       onMouseEnter={onHover}
+      onClick={onClick}
     >
       <motion.div
         aria-hidden="true"
-        className="pointer-events-auto cursor-default select-none"
+        className="pointer-events-auto cursor-pointer select-none"
         style={{ width: size, height: size, filter: "drop-shadow(0 10px 25px rgba(88,101,242,0.12))", opacity: 0.85 }}
-        animate={{ y: [0, -10, 3, -6, 0], x: [0, 3, -2, 1, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        animate={clicked ? clickAnims[clicked] : { y: [0, -10, 3, -6, 0], x: [0, 3, -2, 1, 0] }}
+        transition={clicked ? { duration: 0.5, ease: "easeOut" } : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
         <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none">
           {/* wings */}
