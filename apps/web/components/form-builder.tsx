@@ -212,6 +212,7 @@ export function FormBuilder() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [saved, setSaved] = useState(true);
+  const [needsSave, setNeedsSave] = useState(false);
   const [formSettings, setFormSettings] = useState<Record<string, unknown>>({});
 
   // History (placeholder for future undo/redo)
@@ -325,6 +326,14 @@ export function FormBuilder() {
     setSaved(true);
   }
 
+  // Auto-save after AI generates (waits for state to update)
+  useEffect(() => {
+    if (needsSave && fields.length > 0) {
+      setNeedsSave(false);
+      handleSave();
+    }
+  }, [needsSave, fields]);
+
   async function handlePublish() {
     if (!saved) await handleSave();
     if (form?.status === "published") {
@@ -380,8 +389,8 @@ export function FormBuilder() {
       setShowAi(false);
       setAiPrompt("");
       setSaved(false);
-      // Auto-save to persist title + fields
-      setTimeout(() => handleSave(), 300);
+      // Mark for auto-save — useEffect will pick it up
+      setNeedsSave(true);
     },
   });
 
