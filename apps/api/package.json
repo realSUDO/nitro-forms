@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node -r tsx/cjs ./src/index.ts",
     "dev": "dotenv -- tsx watch ./src/index.ts",
-    "build": "tsup",
+    "build": "echo 'API runs with tsx in production - no build needed'",
     "lint": "eslint src/*"
   },
   "devDependencies": {
