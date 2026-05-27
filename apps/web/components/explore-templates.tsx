@@ -50,7 +50,7 @@ export function ExploreTemplates() {
   return (
     <>
       {/* Sidebar */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1e1f22]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
         <div className="px-6 pt-6 pb-4">
           <p className="text-[11px] font-mono uppercase tracking-widest text-[#949ba4] font-bold">Templates</p>
           <p className="text-xs text-[#949ba4] mt-0.5">Nitro Pro Gallery</p>

@@ -14,7 +14,7 @@ export default function AnalyticsIndex() {
   return (
     <>
       {/* Sidebar — like Discord voice channels */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1e1f22]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
         <div className="px-4 pt-5 pb-3">
           <p className="text-xs font-semibold text-[#f2f3f5]">Analytics</p>
           <p className="text-[11px] text-[#949ba4] mt-0.5">Select a form to view insights</p>

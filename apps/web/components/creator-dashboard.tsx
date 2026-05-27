@@ -28,7 +28,7 @@ export function CreatorDashboard() {
   return (
     <>
       {/* Sidebar */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1e1f22]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
         <div className="flex items-center justify-between px-4 h-12 font-semibold text-sm text-[#f2f3f5] shrink-0">
           NitroForms
         </div>
