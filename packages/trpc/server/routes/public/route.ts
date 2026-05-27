@@ -114,7 +114,10 @@ export const publicRouter = router({
       }
 
       // Validate answers with runtime Zod engine
-      const fields = form.fieldsJson as Array<{ id: string; type: string; label: string; required: boolean; options?: string[]; validation?: Record<string, number> }>;
+      // Only validate fields the user was shown (present in answers or non-required)
+      const allFields = form.fieldsJson as Array<{ id: string; type: string; label: string; required: boolean; options?: string[]; validation?: Record<string, number> }>;
+      const answeredIds = new Set(Object.keys(input.answers));
+      const fields = allFields.filter(f => f.type !== "condition" && (answeredIds.has(f.id) || !f.required));
       const validation = validateResponse(fields, input.answers);
 
       if (!validation.success) {
