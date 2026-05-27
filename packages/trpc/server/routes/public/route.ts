@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../../trpc";
-import db, { eq, and, count } from "@repo/database";
+import db, { eq, and, count, sql } from "@repo/database";
 import { formsTable, responsesTable, formEventsTable, emailLogsTable } from "@repo/database/schema";
 import { validateResponse } from "../../validators/runtime-engine";
 import { canAcceptSubmission, canShowInExplore } from "../../validators/visibility-guard";
@@ -36,6 +36,7 @@ export const publicRouter = router({
       visibility: formsTable.visibility,
       status: formsTable.status,
       createdAt: formsTable.createdAt,
+      responseCount: sql<number>`(SELECT count(*) FROM responses WHERE responses.form_id = forms.id)`.as("response_count"),
     }).from(formsTable)
       .where(and(eq(formsTable.status, "published"), eq(formsTable.visibility, "public")));
     return forms;

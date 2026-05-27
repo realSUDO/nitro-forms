@@ -70,11 +70,6 @@ export function ExploreTemplates() {
             </button>
           ))}
         </nav>
-        <div className="px-4 pb-4">
-          <Link href="/dashboard" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[#5865f2] text-white text-sm font-medium hover:bg-[#4752c4] transition-colors">
-            <Plus size={15} /> Create New Form
-          </Link>
-        </div>
       </aside>
       <div className="w-1 px-1 -mx-1 cursor-col-resize shrink-0 bg-clip-content bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors"
         onMouseDown={(e) => {
@@ -128,7 +123,11 @@ export function ExploreTemplates() {
                   <h3 className="text-lg font-semibold text-[#f2f3f5] mb-2">{title}</h3>
                   <div className="flex items-center gap-4 text-[#949ba4] mb-6">
                     <span className="flex items-center gap-1 text-[11px] font-mono">
-                      <Users size={12} /> {stat}
+                      <Users size={12} /> {(() => {
+                        const apiForm = apiForms?.find(f => f.slug === slug);
+                        const count = apiForm?.responseCount ?? 0;
+                        return `${count} responses`;
+                      })()}
                     </span>
                   </div>
                   <div className="mt-auto flex items-center gap-2">
