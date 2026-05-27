@@ -56,6 +56,8 @@ export function CreatorDashboard() {
   const drafts = formList.filter(f => f.status === "draft");
 
   const [activeChannel, setActiveChannel] = useState<string>("welcome");
+  const [draftsOpen, setDraftsOpen] = useState(true);
+  const [publishedOpen, setPublishedOpen] = useState(true);
 
   return (
     <>
@@ -89,10 +91,12 @@ export function CreatorDashboard() {
           </div>
           {drafts.length > 0 && (
             <div className="pt-2">
-              <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Drafts</p>
-              {drafts.map(f => (
+              <button onClick={() => setDraftsOpen(o => !o)} className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4] w-full hover:text-[#f2f3f5] transition-colors">
+                <ChevronDown size={11} className={cn("transition-transform", !draftsOpen && "-rotate-90")} /> Drafts
+              </button>
+              {draftsOpen && drafts.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <Link prefetch href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <Link prefetch href={`/f/${f.slug}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   <Hash size={14} className="text-[#4e5058]" /><span className="truncate">{f.title}</span>
                 </Link>
                 </ContextMenu>
@@ -101,10 +105,12 @@ export function CreatorDashboard() {
           )}
           {published.length > 0 && (
             <div className="pt-2">
-              <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Published</p>
-              {published.map(f => (
+              <button onClick={() => setPublishedOpen(o => !o)} className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4] w-full hover:text-[#f2f3f5] transition-colors">
+                <ChevronDown size={11} className={cn("transition-transform", !publishedOpen && "-rotate-90")} /> Published
+              </button>
+              {publishedOpen && published.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <Link prefetch href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <Link prefetch href={`/f/${f.slug}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
                   <Hash size={14} className="text-[#f2f3f5]" /><span className="truncate">{f.title}</span>
                 </Link>
                 </ContextMenu>
@@ -191,7 +197,7 @@ export function CreatorDashboard() {
                             onKeyDown={e => { if (e.key === "Enter") { e.currentTarget.blur(); } if (e.key === "Escape") setRenaming(null); }}
                             className="bg-[#1e1f22] rounded px-2 py-0.5 text-sm text-[#f2f3f5] outline-none ring-1 ring-[#5865f2] w-full" />
                         ) : (
-                          <Link prefetch href={`/builder/${form.id}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link>
+                          <Link prefetch href={`/f/${form.slug}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link>
                         )}
                       </td>
                       <td className="px-4 py-3"><span className={cn("px-2 py-0.5 rounded text-[11px] font-semibold capitalize", form.status === "published" ? "bg-[#3ba55c]/15 text-[#3ba55c]" : "bg-[#3f4147] text-[#949ba4]")}>{form.status}</span></td>
