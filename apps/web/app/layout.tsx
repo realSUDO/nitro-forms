@@ -19,6 +19,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "NitroForms | Forms, but faster.",
   description: "Create, publish, and analyze dynamic forms from one community-native workspace.",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({
