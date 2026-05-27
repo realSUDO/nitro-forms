@@ -75,6 +75,7 @@ const pricingPlans = [
     features: ["Unlimited Forms", "10,000 Submissions", "Custom Branding", "Smart AI Generation"],
     cta: "Start Pro Trial",
     highlight: true,
+    disabled: true,
   },
   {
     tier: "Enterprise",
@@ -83,6 +84,7 @@ const pricingPlans = [
     features: ["Dedicated Support", "SSO / SAML", "On-Premise Hosting"],
     cta: "Contact Sales",
     highlight: false,
+    disabled: true,
   },
 ];
 
@@ -487,7 +489,7 @@ function PricingSection() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        {pricingPlans.map(({ tier, price, period, features, cta, highlight }) => (
+        {pricingPlans.map(({ tier, price, period, features, cta, highlight, disabled }) => (
           <div
             className={cn(
               "relative flex flex-col rounded-3xl border p-8",
@@ -530,12 +532,14 @@ function PricingSection() {
               href="/dashboard"
               className={cn(
                 "block w-full rounded-xl py-3 text-center font-mono text-[13px] font-medium tracking-wide",
-                highlight
+                disabled
+                  ? "bg-[#292a2d] text-[#4e5058] cursor-not-allowed pointer-events-none"
+                  : highlight
                   ? "bg-[#5865f2] text-white shadow-[0_0_20px_rgba(88,101,242,0.2)] hover:bg-[#4752c4]"
                   : "border border-[#454655] bg-transparent text-[#e3e2e6] hover:bg-[#292a2d]",
               )}
             >
-              {cta}
+              {disabled ? "Coming Soon" : cta}
             </a>
           </div>
         ))}

@@ -29,22 +29,25 @@ const PLANS = [
     features: ["5 Active Forms", "100 Submissions / mo", "Basic Analytics", "Public Forms"],
     cta: "Current Plan",
     highlight: false,
+    disabled: false,
   },
   {
     tier: "Professional",
     price: "$29",
     period: "/mo",
     features: ["Unlimited Forms", "10,000 Submissions", "Advanced Analytics", "Custom Branding", "Smart AI Generation", "Priority Support"],
-    cta: "Upgrade",
+    cta: "Coming Soon",
     highlight: true,
+    disabled: true,
   },
   {
     tier: "Enterprise",
     price: "Custom",
     period: "",
     features: ["Everything in Pro", "Dedicated Support", "SSO / SAML", "On-Premise Hosting", "Custom Integrations", "SLA Guarantee"],
-    cta: "Contact Sales",
+    cta: "Coming Soon",
     highlight: false,
+    disabled: true,
   },
 ];
 
@@ -120,7 +123,7 @@ export function PricingPage() {
             <div>
               <h2 className="text-xl font-bold text-[#f2f3f5] mb-6">Plans</h2>
               <div className="grid grid-cols-3 gap-4">
-                {PLANS.map(({ tier, price, period, features, cta, highlight }) => (
+                {PLANS.map(({ tier, price, period, features, cta, highlight, disabled }) => (
                   <div key={tier} className={cn(
                     "rounded-lg p-5 flex flex-col",
                     highlight ? "bg-[#5865f2]/10 border border-[#5865f2]" : "bg-[#2b2d31]"
@@ -137,9 +140,9 @@ export function PricingPage() {
                         </li>
                       ))}
                     </ul>
-                    <button className={cn(
+                    <button disabled={disabled} className={cn(
                       "w-full py-2 rounded text-sm font-medium transition-colors",
-                      highlight ? "bg-[#5865f2] text-white hover:bg-[#4752c4]" : "border border-[#4e5058] text-[#b5bac1] hover:bg-[#3f4147]"
+                      disabled ? "bg-[#3f4147] text-[#4e5058] cursor-not-allowed" : highlight ? "bg-[#5865f2] text-white hover:bg-[#4752c4]" : "border border-[#4e5058] text-[#b5bac1] hover:bg-[#3f4147]"
                     )}>
                       {cta}
                     </button>
