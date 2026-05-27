@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ReactFlow,
@@ -162,6 +162,7 @@ const nodeTypes = { fieldNode: FieldNode, conditionNode: ConditionNode };
 export function FormBuilder() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const formId = params.id as string;
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
@@ -368,6 +369,16 @@ export function FormBuilder() {
       setSaved(false);
     },
   });
+
+  // Auto-trigger AI generation from ?ai= param
+  const aiParamRef = useRef(false);
+  useEffect(() => {
+    const aiPrompt = searchParams.get("ai");
+    if (aiPrompt && !aiParamRef.current && !aiGenerate.isPending) {
+      aiParamRef.current = true;
+      aiGenerate.mutate({ prompt: aiPrompt, mode: "think" });
+    }
+  }, [searchParams]);
 
   const selectedField = fields.find(f => f.id === selectedId) ?? null;
 

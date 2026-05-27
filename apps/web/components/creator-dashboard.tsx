@@ -142,18 +142,39 @@ export function CreatorDashboard() {
       {/* Main */}
       <main className={cn("flex-1 bg-[#313338] relative", previewSlug ? "overflow-hidden" : "overflow-y-auto")}>
         {activeChannel === "welcome" ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-48 h-48 mb-6" />
-            <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Welcome to NitroForms!</h1>
-            <p className="text-sm text-[#949ba4] mb-6 max-w-md">This is the beginning of your workspace. Create forms, collect responses, and analyze data — all from one place.</p>
-            <div className="flex gap-3">
-              <button onClick={() => { setActiveChannel("forms"); createForm.mutate({ title: "Untitled Form" }); }} className="px-4 py-2 rounded-lg bg-[#5865f2] text-white text-sm font-medium hover:bg-[#4752c4] transition-colors">
-                Create your first form
-              </button>
-              <button onClick={() => setActiveChannel("forms")} className="px-4 py-2 rounded-lg border border-[#4e5058] text-sm text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
-                View Dashboard
-              </button>
+          <div className="flex flex-col h-full">
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-48 h-48 mb-6" />
+              <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Welcome to NitroForms!</h1>
+              <p className="text-sm text-[#949ba4] mb-6 max-w-md">This is the beginning of your workspace. Create forms, collect responses, and analyze data — all from one place.</p>
+              <div className="flex gap-3">
+                <button onClick={() => { setActiveChannel("forms"); createForm.mutate({ title: "Untitled Form" }); }} className="px-4 py-2 rounded-lg bg-[#5865f2] text-white text-sm font-medium hover:bg-[#4752c4] transition-colors">
+                  Create your first form
+                </button>
+                <button onClick={() => { setActiveChannel("forms"); setPreviewSlug(null); }} className="px-4 py-2 rounded-lg border border-[#4e5058] text-sm text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+                  View Dashboard
+                </button>
+              </div>
+            </div>
+            {/* Discord-style input box for AI prompt */}
+            <div className="shrink-0 px-4 pb-4">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const input = (e.target as HTMLFormElement).elements.namedItem("prompt") as HTMLInputElement;
+                const prompt = input.value.trim();
+                if (!prompt) return;
+                const newForm = await createForm.mutateAsync({ title: "Untitled Form" });
+                if (newForm) {
+                  router.push(`/builder/${newForm.id}?ai=${encodeURIComponent(prompt)}`);
+                }
+              }} className="flex items-center gap-2 bg-[#383a40] rounded-lg px-4 py-2.5">
+                <Sparkles size={16} className="text-[#949ba4] shrink-0" />
+                <input name="prompt" placeholder="Describe a form to generate with AI..." className="flex-1 bg-transparent text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none" />
+                <button type="submit" disabled={createForm.isPending} className="px-3 py-1 rounded bg-[#5865f2] text-xs text-white hover:bg-[#4752c4] transition-colors disabled:opacity-50 shrink-0">
+                  {createForm.isPending ? "..." : "Generate"}
+                </button>
+              </form>
             </div>
           </div>
         ) : previewSlug ? (
@@ -281,12 +302,16 @@ export function CreatorDashboard() {
         </div>
 
         {/* Upgrade */}
-        <div className="mt-auto rounded-xl overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#4b1f58] via-[#252340] to-[#1b1d27]" />
+        <div className="mt-auto">
+          <div className="flex justify-end pr-2 mb-[-20px] relative z-20">
+            <img src="/nitro-bot.svg" alt="" className="w-20 h-20 rotate-12" />
+          </div>
+          <div className="rounded-xl relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#4b1f58] via-[#252340] to-[#1b1d27] rounded-xl" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(168,85,247,0.3),transparent_50%)]" />
           <div className="relative p-4">
             <p className="text-sm font-bold text-white">PRO</p>
-            <p className="text-[10px] text-white/50 mt-0.5">$9.99/mo</p>
+            <p className="text-[10px] text-white/50 mt-0.5">$29/mo</p>
             <ul className="mt-3 space-y-1.5">
               {[
                 { icon: Sparkles, text: "100 AI forms" },
@@ -302,6 +327,7 @@ export function CreatorDashboard() {
             <Link href="/pricing" className="block w-full mt-3 py-1.5 text-center rounded-lg text-xs font-semibold text-white bg-white/15 hover:bg-white/25 transition-colors">
               Upgrade
             </Link>
+          </div>
           </div>
         </div>
       </aside>
