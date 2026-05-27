@@ -26,9 +26,9 @@ export default function FloatingGhost({
     };
   }, []);
 
-  // Drift to new position every ~4s
+  // Drift to new position every ~10s
   useEffect(() => {
-    const interval = setInterval(() => setPos(randomPos()), 4000);
+    const interval = setInterval(() => setPos(randomPos()), 10000);
     return () => clearInterval(interval);
   }, [randomPos]);
 
@@ -63,11 +63,11 @@ export default function FloatingGhost({
     <motion.div
       className={`fixed z-30 hidden lg:block ${className}`}
       style={{ width: size, height: size, marginTop: -scrollY * 0.15 }}
-      animate={{ left: `${pos.x}%`, top: `${pos.y}%`, rotate: [0, 4, -3, 2, 0] }}
+      animate={{ left: `${pos.x}%`, top: `${pos.y}%`, rotate: [0, 2, -1.5, 1, 0] }}
       transition={{
-        left: { duration: 3.5, ease: [0.4, 0, 0.2, 1] },
-        top: { duration: 3.5, ease: [0.4, 0, 0.2, 1] },
-        rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+        left: { duration: 8, ease: [0.25, 0.1, 0.25, 1] },
+        top: { duration: 8, ease: [0.25, 0.1, 0.25, 1] },
+        rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
       }}
       onMouseEnter={onHover}
     >
@@ -75,8 +75,8 @@ export default function FloatingGhost({
         aria-hidden="true"
         className="pointer-events-auto cursor-default select-none"
         style={{ width: size, height: size, filter: "drop-shadow(0 10px 25px rgba(88,101,242,0.12))", opacity: 0.85 }}
-        animate={{ y: [0, -16, 5, -10, 0], x: [0, 4, -3, 2, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ y: [0, -10, 3, -6, 0], x: [0, 3, -2, 1, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
         <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none">
           {/* wings */}
