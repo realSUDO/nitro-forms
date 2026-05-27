@@ -476,28 +476,34 @@ export function FormBuilder() {
             onEdgeClick={(_, edge) => { setSelectedEdgeId(edge.id); setSelectedId(null); }}
             onPaneClick={() => { setSelectedId(null); setSelectedEdgeId(null); }}
             onNodeDragStop={(_, node) => {
-              // Auto-connect: find nearest node above as parent
               const thisY = node.position.y;
               const otherNodes = nodes.filter(n => n.id !== node.id);
-              const above = otherNodes
-                .filter(n => n.position.y < thisY)
-                .sort((a, b) => b.position.y - a.position.y)[0];
 
-              if (!above) return;
               // Don't auto-connect if this node already has an incoming edge
               if (edges.find(e => e.target === node.id)) return;
 
-              // Check if the above node is a condition with unfulfilled outputs
-              const aboveField = fields.find(f => f.id === above.id);
+              // Find closest node within magnet range (80px vertical)
+              const nearby = otherNodes
+                .filter(n => n.position.y < thisY)
+                .sort((a, b) => b.position.y - a.position.y)[0];
+
+              if (!nearby) return;
+
+              // Magnet: only connect if within 80px vertical proximity
+              const distance = thisY - nearby.position.y;
+              if (distance > 250) return;
+
+              // Don't connect if above node already has an outgoing edge (no double children via autoconnect)
+              const aboveField = fields.find(f => f.id === nearby.id);
               if (aboveField?.type === "condition") {
-                const yesEdge = edges.find(e => e.source === above.id && (e.sourceHandle === "yes" || e.sourceHandle === null));
-                const noEdge = edges.find(e => e.source === above.id && e.sourceHandle === "no");
-                if (!yesEdge || !noEdge) return; // condition not fully connected, skip
+                // Condition nodes can have 2 outputs (yes/no) — skip autoconnect entirely
+                return;
               }
+              if (edges.find(e => e.source === nearby.id)) return;
 
               setEdges(eds => [...eds, {
-                id: `e-auto-${above.id}-${node.id}`,
-                source: above.id,
+                id: `e-auto-${nearby.id}-${node.id}`,
+                source: nearby.id,
                 target: node.id,
                 animated: true,
                 type: "smoothstep",
