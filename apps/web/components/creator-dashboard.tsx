@@ -65,7 +65,7 @@ export function CreatorDashboard() {
           </div>
         </div>
       </aside>
-      <div className="w-px cursor-col-resize bg-[#3f4147]/50 hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+      <div className="w-1 px-1 -mx-1 cursor-col-resize shrink-0 bg-clip-content bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors"
         onMouseDown={(e) => {
           const startX = e.clientX;
           const aside = e.currentTarget.previousElementSibling as HTMLElement;
@@ -128,7 +128,7 @@ export function CreatorDashboard() {
       </main>
 
       {/* Right Panel */}
-      <div className="w-px cursor-col-resize bg-[#3f4147]/50 hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+      <div className="w-1 px-1 -mx-1 cursor-col-resize shrink-0 bg-clip-content bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors"
         onMouseDown={(e) => {
           const startX = e.clientX;
           const aside = e.currentTarget.nextElementSibling as HTMLElement;
