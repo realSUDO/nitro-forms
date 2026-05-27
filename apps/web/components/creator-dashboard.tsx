@@ -171,7 +171,7 @@ export function CreatorDashboard() {
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-8">
               <FormPreview form={formList.find(f => f.slug === previewSlug)!} />
             </div>
           </div>
@@ -305,7 +305,7 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-2xl">
       {/* Bot intro */}
       <div className="flex gap-3 mb-5">
         <div className="w-9 h-9 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0">
@@ -318,7 +318,7 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
       </div>
 
       {/* Fields as form questions */}
-      <div className="space-y-4 pl-12">
+      <div className="space-y-5 pl-12">
         {fields.map(f => (
           <div key={f.id}>
             {f.type === "condition" ? (
@@ -329,14 +329,14 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
               </div>
             ) : (
               <div>
-                <p className="text-sm text-[#f2f3f5] mb-1.5">{f.label}{f.required && <span className="text-[#ed4245] ml-0.5">*</span>}</p>
+                <p className="text-base text-[#f2f3f5] mb-2">{f.label}{f.required && <span className="text-[#ed4245] ml-0.5">*</span>}</p>
                 {(f.type === "short_text" || f.type === "email" || f.type === "number" || f.type === "date") && (
-                  <div className="h-9 rounded bg-[#383a40] px-3 flex items-center">
+                  <div className="h-10 rounded-lg bg-[#383a40] px-3 flex items-center">
                     <span className="text-xs text-[#4e5058]">{f.type === "email" ? "name@example.com" : f.type === "number" ? "0" : "Type here..."}</span>
                   </div>
                 )}
                 {f.type === "long_text" && (
-                  <div className="h-16 rounded bg-[#383a40] px-3 pt-2">
+                  <div className="h-20 rounded-lg bg-[#383a40] px-3 pt-2">
                     <span className="text-xs text-[#4e5058]">Type here...</span>
                   </div>
                 )}
