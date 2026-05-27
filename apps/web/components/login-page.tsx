@@ -31,8 +31,8 @@ export function LoginPage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#5865f2]/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="flex items-center gap-2 mb-6 relative z-10">
-        <div className="w-9 h-9 rounded-full bg-[#5865f2] flex items-center justify-center">
-          <img src="/nitro.png" alt="NitroForms" className="w-6 h-6" />
+        <div className="w-10 h-10 rounded-2xl bg-[#2b2d31] flex items-center justify-center">
+          <img src="/nitro.png" alt="NitroForms" className="w-7 h-7" />
         </div>
         <span className="text-lg font-bold text-[#f2f3f5]">NitroForms</span>
       </div>

@@ -21,8 +21,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden bg-[#313338] text-[#f2f3f5]">
       {/* Shared Rail */}
       <aside className="w-[72px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-4 gap-3">
-        <Link href="/dashboard" prefetch className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
-          <img src="/nitro.png" alt="NitroForms" className="w-7 h-7" />
+        <Link href="/dashboard" prefetch className="w-12 h-12 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-2">
+          <img src="/nitro.png" alt="NitroForms" className="w-8 h-8" />
         </Link>
 
         {NAV_ITEMS.map(({ Icon, href, label }) => {
