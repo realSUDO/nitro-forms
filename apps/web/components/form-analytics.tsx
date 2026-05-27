@@ -41,16 +41,18 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
 
   function exportCSV() {
     if (!responses?.responses.length) return;
+    const formFields = (form?.fieldsJson ?? []) as Array<{ id: string; label: string }>;
+    const fieldMap = Object.fromEntries(formFields.map(f => [f.id, f.label]));
     const rows = responses.responses.map(r => {
       const answers = r.answersJson as Record<string, unknown> | null;
       return {
-        email: r.respondentEmail ?? "anonymous",
-        date: r.submittedAt ? new Date(r.submittedAt).toISOString() : "",
-        ...Object.fromEntries(Object.entries(answers ?? {}).map(([k, v]) => [k, String(v)])),
+        "Email": r.respondentEmail ?? (answers?.["email_field"] as string) ?? "anonymous",
+        "Submitted At": r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "",
+        ...Object.fromEntries(Object.entries(answers ?? {}).filter(([k]) => k !== "email_field").map(([k, v]) => [fieldMap[k] ?? k, String(v ?? "")])),
       };
     });
     const headers = Object.keys(rows[0]!);
-    const csv = [headers.join(","), ...rows.map(r => headers.map(h => `"${(r as any)[h] ?? ""}"`).join(","))].join("\n");
+    const csv = [headers.join(","), ...rows.map(r => headers.map(h => `"${((r as any)[h] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -33,13 +33,13 @@ export async function clearDraftCache(formId: string) {
 }
 
 // Rate limiter using Redis (replaces in-memory)
-export async function checkRateLimitRedis(key: string, maxRequests = 5, windowSec = 600): Promise<boolean> {
+export async function checkRateLimitRedis(key: string, maxRequests = 10, windowSec = 600): Promise<boolean | null> {
   try {
     const current = await redis.incr(key);
     if (current === 1) await redis.expire(key, windowSec);
     return current <= maxRequests;
   } catch {
-    return false; // fail closed if Redis is down
+    return null; // fall through to in-memory
   }
 }
 

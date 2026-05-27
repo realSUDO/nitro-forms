@@ -201,6 +201,7 @@ export function FormBuilder() {
 
   const { data: form, isLoading } = trpc.form.getById.useQuery({ formId }, { enabled: !!formId });
   const updateForm = trpc.form.update.useMutation();
+  const utils = trpc.useUtils();
   const publishForm = trpc.form.publish.useMutation();
   const unpublishForm = trpc.form.unpublish.useMutation();
 
@@ -331,6 +332,7 @@ export function FormBuilder() {
     } else {
       await publishForm.mutateAsync({ formId });
     }
+    utils.form.getById.invalidate({ formId });
   }
 
   const [showShare, setShowShare] = useState(false);

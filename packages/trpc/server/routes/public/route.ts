@@ -8,7 +8,7 @@ import { canAcceptSubmission, canShowInExplore } from "../../validators/visibili
 import { checkRateLimitRedis, rateLimitMemoryStore } from "../../utils/redis";
 
 // Fallback in-memory rate limiter (if Redis is down)
-function checkRateLimitMemory(key: string, maxRequests = 5, windowMs = 600000): boolean {
+function checkRateLimitMemory(key: string, maxRequests = 10, windowMs = 600000): boolean {
   const now = Date.now();
   const timestamps = rateLimitMemoryStore.get(key) ?? [];
   const valid = timestamps.filter((t) => now - t < windowMs);
@@ -131,7 +131,7 @@ export const publicRouter = router({
       // Store response
       const [response] = await db.insert(responsesTable).values({
         formId: form.id,
-        respondentEmail: input.respondentEmail ?? null,
+        respondentEmail: input.respondentEmail ?? (input.answers["email_field"] as string) ?? null,
         answersJson: validation.data,
         metadataJson: input.metadata ?? {},
       }).returning();
