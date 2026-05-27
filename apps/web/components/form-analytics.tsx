@@ -19,9 +19,9 @@ import { trpc } from "~/trpc/client";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-export function FormAnalytics() {
+export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
   const params = useParams();
-  const formId = params.id as string;
+  const formId = formIdProp ?? (params.id as string);
 
   const { data: form } = trpc.form.getById.useQuery({ formId }, { enabled: !!formId });
   const { data: overview, isLoading } = trpc.analytics.getOverview.useQuery({ formId }, { enabled: !!formId });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, Plus, Search, Users } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -14,7 +15,26 @@ const STATIC_TEMPLATES = [
 ];
 
 export function ExploreTemplates() {
+  const router = useRouter();
   const { data: apiForms } = trpc.public.listExploreForms.useQuery();
+  const createForm = trpc.form.create.useMutation();
+  const updateForm = trpc.form.update.useMutation();
+
+  async function useTemplate(slug: string, title: string) {
+    // Fetch the template form fields
+    try {
+      const form = await fetch(`/api/trpc/public.getFormBySlug?input=${encodeURIComponent(JSON.stringify({ slug }))}`).then(r => r.json());
+      const fields = form?.[0]?.result?.data?.fields ?? form?.result?.data?.fields ?? [];
+      // Create a new form with the template's fields
+      const newForm = await createForm.mutateAsync({ title: `${title} (copy)` });
+      if (newForm && fields.length > 0) {
+        await updateForm.mutateAsync({ formId: newForm.id, fields });
+      }
+      router.push(`/builder/${newForm!.id}`);
+    } catch {
+      router.push("/builder");
+    }
+  }
 
   return (
     <>
@@ -88,9 +108,9 @@ export function ExploreTemplates() {
                     <Link href={`/f/${slug}`} className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#3f4147]/50 text-[#f2f3f5] hover:bg-[#3f4147] transition-colors border border-[#4e5058]/30">
                       Preview
                     </Link>
-                    <Link href={`/f/${slug}`} className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#5865f2] text-white hover:brightness-110 transition-all">
+                    <button onClick={() => useTemplate(slug, title)} className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#5865f2] text-white hover:brightness-110 transition-all">
                       Use template
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
