@@ -39,7 +39,30 @@ GUIDELINES:
 - Use conditions ONLY when the topic naturally branches (e.g. "Are you a student?" → yes path asks school, no path asks company)
 - For single_select/multi_select: 3-6 realistic options
 - Title should be engaging and specific
-- ONLY output the JSON object, nothing else`;
+- ONLY output the JSON object, nothing else
+
+EXAMPLE (branching form with convergence):
+User: "Ask if they're a member. If yes, ask member ID. If no, ask email. Then ask feedback from both."
+{
+  "title": "Membership Feedback",
+  "fields": [
+    {"id": "f1", "type": "short_text", "label": "What is your name?", "required": true},
+    {"id": "f2", "type": "single_select", "label": "Are you an existing member?", "required": true, "options": ["Yes", "No"]},
+    {"id": "c1", "type": "condition", "label": "Check membership", "required": false, "conditionConfig": {"sourceFieldId": "f2", "operator": "equals", "value": "Yes"}},
+    {"id": "f3", "type": "short_text", "label": "Enter your Member ID", "required": true},
+    {"id": "f4", "type": "email", "label": "Enter your email address", "required": true},
+    {"id": "f5", "type": "long_text", "label": "Share your feedback with us", "required": true}
+  ],
+  "edges": [
+    {"source": "f1", "target": "f2", "sourceHandle": null},
+    {"source": "f2", "target": "c1", "sourceHandle": null},
+    {"source": "c1", "target": "f3", "sourceHandle": "yes"},
+    {"source": "c1", "target": "f4", "sourceHandle": "no"},
+    {"source": "f3", "target": "f5", "sourceHandle": null},
+    {"source": "f4", "target": "f5", "sourceHandle": null}
+  ]
+}
+Note: Both yes/no paths converge to f5. This is how branching works — after separate paths, connect both back to a shared ending field.`;
 
 // External guardrails — runs BEFORE the LLM call
 const BLOCKED_PATTERNS = [
