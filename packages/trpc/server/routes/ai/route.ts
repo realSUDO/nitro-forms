@@ -18,14 +18,14 @@ Rules:
 
 // External guardrails — runs BEFORE the LLM call
 const BLOCKED_PATTERNS = [
-  /hack|exploit|inject|xss|sql/i,
-  /password|credit.?card|ssn|social.?security/i,
-  /bomb|weapon|gun|explosive|poison/i,
-  /drug|narcotic|cocaine|heroin|meth/i,
-  /kill|murder|suicide|self.?harm/i,
-  /child|minor|underage/i,
-  /porn|nude|nsfw|sex/i,
-  /phish|scam|fraud|steal/i,
+  /(?<!hackathon.*)(?:hack(?!athon)|exploit|inject|xss|sql.?inject)/i,
+  /password.?steal|credit.?card.?num|ssn|social.?security.?number/i,
+  /\bbomb\b|weapon|firearm|explosive|poison/i,
+  /\bdrug\b(?!store)|narcotic|cocaine|heroin|meth/i,
+  /\bkill\b|murder|suicide|self.?harm/i,
+  /\bchild\b.*\babuse\b|minor.*exploit|underage.*sex/i,
+  /\bporn\b|nude|nsfw|sexual/i,
+  /phish|scam.?form|fraud|steal.?data/i,
 ];
 
 function validatePrompt(prompt: string): { safe: boolean; reason?: string } {
