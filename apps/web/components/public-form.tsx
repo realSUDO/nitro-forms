@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
@@ -20,6 +20,16 @@ export function PublicForm() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [fieldPath, setFieldPath] = useState<string[]>([]);
   const [channel, setChannel] = useState<"welcome" | "submit">("welcome");
+  const handleNextRef = useRef<() => void>(() => {});
+
+  // Enter key advances the form
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) handleNextRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   if (isLoading) {
     return (
@@ -218,17 +228,7 @@ export function PublicForm() {
     }
   }
 
-  // Enter key advances the form
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey && channel === "submit") {
-        e.preventDefault();
-        handleNext();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
+  handleNextRef.current = handleNext;
 
   if (!field) return null;
 
