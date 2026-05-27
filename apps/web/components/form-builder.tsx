@@ -380,6 +380,8 @@ export function FormBuilder() {
       setShowAi(false);
       setAiPrompt("");
       setSaved(false);
+      // Auto-save to persist title + fields
+      setTimeout(() => handleSave(), 300);
     },
   });
 
