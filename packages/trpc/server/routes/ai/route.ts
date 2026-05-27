@@ -50,28 +50,55 @@ GUIDELINES:
 - Title should be engaging and specific
 - ONLY output the JSON object, nothing else
 
-EXAMPLE (branching form with convergence):
+EXAMPLE 1 (binary branching with convergence):
 User: "Ask if they're a member. If yes, ask member ID. If no, ask email. Then ask feedback from both."
 {
   "title": "Membership Feedback",
   "fields": [
-    {"id": "f1", "type": "short_text", "label": "What is your name?", "required": true},
-    {"id": "f2", "type": "single_select", "label": "Are you an existing member?", "required": true, "options": ["Yes", "No"]},
-    {"id": "c1", "type": "condition", "label": "Check membership", "required": false, "conditionConfig": {"sourceFieldId": "f2", "operator": "equals", "value": "Yes"}},
-    {"id": "f3", "type": "short_text", "label": "Enter your Member ID", "required": true},
-    {"id": "f4", "type": "email", "label": "Enter your email address", "required": true},
-    {"id": "f5", "type": "long_text", "label": "Share your feedback with us", "required": true}
+    {"id": "email_field", "type": "email", "label": "Your email address", "required": true},
+    {"id": "f1", "type": "single_select", "label": "Are you an existing member?", "required": true, "options": ["Yes", "No"]},
+    {"id": "c1", "type": "condition", "label": "Check membership", "required": false, "conditionConfig": {"sourceFieldId": "f1", "operator": "equals", "value": "Yes"}},
+    {"id": "f2", "type": "short_text", "label": "Enter your Member ID", "required": true},
+    {"id": "f3", "type": "short_text", "label": "How did you find us?", "required": true},
+    {"id": "f4", "type": "long_text", "label": "Share your feedback with us", "required": true}
   ],
   "edges": [
-    {"source": "f1", "target": "f2", "sourceHandle": null},
-    {"source": "f2", "target": "c1", "sourceHandle": null},
-    {"source": "c1", "target": "f3", "sourceHandle": "yes"},
-    {"source": "c1", "target": "f4", "sourceHandle": "no"},
+    {"source": "email_field", "target": "f1", "sourceHandle": null},
+    {"source": "f1", "target": "c1", "sourceHandle": null},
+    {"source": "c1", "target": "f2", "sourceHandle": "yes"},
+    {"source": "c1", "target": "f3", "sourceHandle": "no"},
+    {"source": "f2", "target": "f4", "sourceHandle": null},
+    {"source": "f3", "target": "f4", "sourceHandle": null}
+  ]
+}
+
+EXAMPLE 2 (3+ options — use CHAINED conditions):
+User: "Ask favorite sport (Cricket/Chess/Football). Ask sport-specific question for each. Then common feedback."
+{
+  "title": "Sports Survey",
+  "fields": [
+    {"id": "email_field", "type": "email", "label": "Your email address", "required": true},
+    {"id": "f1", "type": "single_select", "label": "What is your favorite sport?", "required": true, "options": ["Cricket", "Chess", "Football"]},
+    {"id": "c1", "type": "condition", "label": "Is Cricket?", "required": false, "conditionConfig": {"sourceFieldId": "f1", "operator": "equals", "value": "Cricket"}},
+    {"id": "f2", "type": "short_text", "label": "Who is your favorite cricketer?", "required": true},
+    {"id": "c2", "type": "condition", "label": "Is Chess?", "required": false, "conditionConfig": {"sourceFieldId": "f1", "operator": "equals", "value": "Chess"}},
+    {"id": "f3", "type": "short_text", "label": "What is your chess rating?", "required": true},
+    {"id": "f4", "type": "short_text", "label": "Who is your favorite football player?", "required": true},
+    {"id": "f5", "type": "long_text", "label": "Any feedback about sports events?", "required": true}
+  ],
+  "edges": [
+    {"source": "email_field", "target": "f1", "sourceHandle": null},
+    {"source": "f1", "target": "c1", "sourceHandle": null},
+    {"source": "c1", "target": "f2", "sourceHandle": "yes"},
+    {"source": "c1", "target": "c2", "sourceHandle": "no"},
+    {"source": "c2", "target": "f3", "sourceHandle": "yes"},
+    {"source": "c2", "target": "f4", "sourceHandle": "no"},
+    {"source": "f2", "target": "f5", "sourceHandle": null},
     {"source": "f3", "target": "f5", "sourceHandle": null},
     {"source": "f4", "target": "f5", "sourceHandle": null}
   ]
 }
-Note: Both yes/no paths converge to f5. This is how branching works — after separate paths, connect both back to a shared ending field.`;
+Note: For 3+ options, CHAIN conditions. First condition checks option A (yes→A questions, no→next condition). Second condition checks option B (yes→B questions, no→C questions). All paths converge to a shared end field.`;
 
 // External guardrails — runs BEFORE the LLM call
 const BLOCKED_PATTERNS = [
