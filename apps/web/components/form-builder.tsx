@@ -329,13 +329,28 @@ export function FormBuilder() {
   const [showAi, setShowAi] = useState(false);
   const aiGenerate = trpc.ai.generateForm.useMutation({
     onSuccess: (data) => {
+      // Set title if AI provided one
+      if (data.title) setTitle(data.title);
+      // Create nodes
       const newNodes = data.fields.map((f: any, i: number) => ({
         id: f.id,
-        type: "fieldNode",
+        type: f.type === "condition" ? "conditionNode" : "fieldNode",
         position: { x: 300, y: 80 + i * 140 },
         data: { field: { ...f, position: { x: 300, y: 80 + i * 140 } }, selected: false, onDelete: () => deleteField(f.id), onUpdate: (updated: any) => updateFieldData(updated) },
       }));
       setNodes(prev => [...prev, ...newNodes]);
+      // Create edges
+      if (data.edges?.length) {
+        const newEdges = data.edges.map((e: any) => ({
+          id: `e-${e.source}-${e.target}`,
+          source: e.source,
+          target: e.target,
+          sourceHandle: e.sourceHandle,
+          animated: true,
+          style: { stroke: e.sourceHandle === "yes" ? "#3ba55c" : e.sourceHandle === "no" ? "#ed4245" : "#5865f2" },
+        }));
+        setEdges(prev => [...prev, ...newEdges]);
+      }
       setShowAi(false);
       setAiPrompt("");
       setSaved(false);
