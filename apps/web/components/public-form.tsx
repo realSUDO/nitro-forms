@@ -20,7 +20,7 @@ export function PublicForm() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#313338] flex items-center justify-center">
+      <div className="min-h-screen bg-[#2b2d31] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-[#5865f2]" size={28} />
           <p className="text-sm text-[#949ba4]">Loading form...</p>
@@ -31,7 +31,7 @@ export function PublicForm() {
 
   if (error || !form) {
     return (
-      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-6">
           <Zap size={32} className="text-[#4e5058]" />
         </div>
@@ -46,7 +46,7 @@ export function PublicForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#5865f2]/10 flex items-center justify-center mb-6 animate-in zoom-in duration-300">
           <CheckCircle size={40} className="text-[#5865f2]" />
         </div>
@@ -165,7 +165,7 @@ export function PublicForm() {
   if (!field) return null;
 
   return (
-    <div className="min-h-screen bg-[#313338] flex flex-col">
+    <div className="min-h-screen bg-[#2b2d31] flex flex-col">
       {/* Thin top bar */}
       <div className="h-1 bg-[#2b2d31]">
         <div className="h-full bg-[#5865f2] transition-all duration-500" style={{ width: `${progress}%` }} />
