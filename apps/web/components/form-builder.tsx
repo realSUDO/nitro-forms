@@ -361,7 +361,7 @@ export function FormBuilder() {
           </div>
         </div>
       </aside>
-      <div className="w-1 cursor-col-resize bg-[#1e1f22] hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+      <div className="w-px cursor-col-resize bg-[#3f4147]/50 hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
         onMouseDown={(e) => {
           const startX = e.clientX;
           const aside = e.currentTarget.previousElementSibling as HTMLElement;
@@ -486,7 +486,7 @@ export function FormBuilder() {
       </div>
 
       {/* Inspector - drag left edge to resize */}
-      <div className="w-1 cursor-col-resize bg-[#1e1f22] hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+      <div className="w-px cursor-col-resize bg-[#3f4147]/50 hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
         onMouseDown={(e) => {
           const startX = e.clientX;
           const aside = e.currentTarget.nextElementSibling as HTMLElement;
