@@ -45,11 +45,11 @@ export const publicRouter = router({
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       const [form] = await db.select().from(formsTable)
-        .where(and(eq(formsTable.slug, input.slug), eq(formsTable.status, "published")))
+        .where(eq(formsTable.slug, input.slug))
         .limit(1);
 
-      if (!form) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Form not found or not published" });
+      if (!form || form.status === "archived") {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       }
 
       return {
