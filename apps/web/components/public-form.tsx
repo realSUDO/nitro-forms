@@ -208,24 +208,22 @@ export function PublicForm() {
   if (!field) return null;
 
   return (
-    <div className="h-screen flex bg-[#1e1f22] text-[#f2f3f5] overflow-hidden">
-      {/* Server rail */}
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#2b2d31]">
-        {/* Channel header */}
-        <div className="h-12 shrink-0 flex items-center gap-2 px-4 border-b border-[#1e1f22]">
-          <span className="text-[#949ba4]">#</span>
-          <span className="text-sm font-semibold">submit-response</span>
-          <div className="w-px h-5 bg-[#3f4147] mx-2 hidden sm:block" />
-          <span className="text-xs text-[#949ba4] truncate hidden sm:inline">{form.description ?? "Fill out this form"}</span>
+    <div className="h-screen flex flex-col bg-[#2b2d31] text-[#f2f3f5] overflow-hidden">
+      {/* Channel header */}
+      <div className="h-12 shrink-0 flex items-center gap-2 px-4 border-b border-[#1e1f22]">
+        <span className="text-[#949ba4]">#</span>
+        <span className="text-sm font-semibold truncate">{form.title}</span>
+        <div className="ml-auto">
+          <span className="text-[10px] text-[#949ba4] bg-[#1e1f22] px-2 py-0.5 rounded">{fieldPath.length + 1}/{totalSteps}</span>
         </div>
+      </div>
 
-        {/* Progress */}
-        <div className="h-0.5 bg-[#1e1f22]"><div className="h-full bg-[#5865f2] transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+      {/* Progress */}
+      <div className="h-0.5 bg-[#1e1f22]"><div className="h-full bg-[#5865f2] transition-all duration-500" style={{ width: `${progress}%` }} /></div>
 
-        {/* Messages area */}
-        <div className="flex-1 flex items-center justify-center overflow-y-auto px-4 py-6">
-          <div className="w-full max-w-lg" key={field.id}>
+      {/* Messages area */}
+      <div className="flex-1 flex items-center justify-center overflow-y-auto px-4 sm:px-6 py-6">
+        <div className="w-full max-w-lg" key={field.id}>
             {/* Title on first step */}
             {fieldPath.length === 0 && (
               <div className="mb-8">
@@ -398,7 +396,6 @@ export function PublicForm() {
               })()}
             </button>
             <span className="ml-auto text-[11px] text-[#4e5058]">{fieldPath.length + 1}/{totalSteps}</span>
-          </div>
           </div>
         </div>
       </div>
