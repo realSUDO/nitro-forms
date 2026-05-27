@@ -15,12 +15,14 @@ import {
   Zap,
 } from "lucide-react";
 
-import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 const navItems = ["Builder", "Templates", "Docs", "Pricing"];
 const navHrefs: Record<string, string> = {
-  Builder: "/builder",
+  Builder: "/dashboard",
+  Templates: "/explore",
+  Docs: "/docs",
+  Pricing: "/pricing",
 };
 
 const featureCards = [
@@ -409,9 +411,9 @@ function ApiSection() {
               </li>
             ))}
           </ul>
-          <Button className="mt-4 h-10 rounded-lg border border-[#bec2ff] bg-transparent px-6 font-mono text-[13px] font-medium tracking-wide text-[#bec2ff] hover:bg-[#bec2ff]/10">
+          <a href="/docs" className="mt-4 inline-flex h-10 items-center rounded-lg border border-[#bec2ff] bg-transparent px-6 font-mono text-[13px] font-medium tracking-wide text-[#bec2ff] hover:bg-[#bec2ff]/10">
             Read the Docs
-          </Button>
+          </a>
         </div>
 
         <div className="w-full max-w-xl flex-1">
@@ -523,13 +525,18 @@ function Footer() {
           </p>
         </div>
         <div className="flex gap-8">
-          {["Twitter", "GitHub", "Discord", "Status"].map((link) => (
+          {[
+            { label: "Explore", href: "/explore" },
+            { label: "Docs", href: "/docs" },
+            { label: "Pricing", href: "/pricing" },
+            { label: "Login", href: "/login" },
+          ].map(({ label, href }) => (
             <a
               className="font-mono text-[13px] font-medium tracking-wide text-[#8f8fa0] transition-colors hover:text-[#bec2ff]"
-              href="#"
-              key={link}
+              href={href}
+              key={label}
             >
-              {link}
+              {label}
             </a>
           ))}
         </div>

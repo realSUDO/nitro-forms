@@ -55,12 +55,11 @@ export function ExploreTemplates() {
         </div>
         <nav className="flex-1 px-2 space-y-0.5">
           {[
-            { label: "TEMPLATES", active: true },
-            { label: "DRAFTS", active: false },
-            { label: "PUBLISHED", active: false },
-            { label: "ARCHIVE", active: false },
-          ].map(({ label, active }) => (
-            <Link key={label} href={active ? "/explore" : "/dashboard"} className={cn(
+            { label: "TEMPLATES", href: "/explore", active: true },
+            { label: "MY FORMS", href: "/dashboard", active: false },
+            { label: "ANALYTICS", href: "/analytics", active: false },
+          ].map(({ label, href, active }) => (
+            <Link key={label} href={href} className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-mono transition-colors",
               active ? "bg-[#5865f2]/20 text-[#f2f3f5] font-semibold" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
             )}>
