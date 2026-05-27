@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { BarChart2, Compass, LayoutGrid, Settings, Zap } from "lucide-react";
+import { BarChart2, Compass, LayoutGrid, Settings } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 const NAV_ITEMS = [
@@ -22,7 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Shared Rail */}
       <aside className="w-[72px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-4 gap-3">
         <Link href="/dashboard" prefetch className="w-12 h-12 rounded-full bg-[#5865f2] flex items-center justify-center mb-2">
-          <Zap size={18} className="text-white" />
+          <img src="/nitro.png" alt="NitroForms" className="w-7 h-7" />
         </Link>
 
         {NAV_ITEMS.map(({ Icon, href, label }) => {

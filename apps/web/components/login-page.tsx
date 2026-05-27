@@ -3,7 +3,6 @@
 import { SignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Zap } from "lucide-react";
 
 export function LoginPage() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -33,7 +32,7 @@ export function LoginPage() {
 
       <div className="flex items-center gap-2 mb-6 relative z-10">
         <div className="w-9 h-9 rounded-full bg-[#5865f2] flex items-center justify-center">
-          <Zap size={18} className="text-white" />
+          <img src="/nitro.png" alt="NitroForms" className="w-6 h-6" />
         </div>
         <span className="text-lg font-bold text-[#f2f3f5]">NitroForms</span>
       </div>

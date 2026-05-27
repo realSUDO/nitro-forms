@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Star, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Star } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
@@ -34,7 +34,7 @@ export function PublicForm() {
     return (
       <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-6">
-          <Zap size={32} className="text-[#4e5058]" />
+          <img src="/nitro.png" alt="NitroForms" className="w-8 h-8 opacity-50" />
         </div>
         <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Form Not Available</h1>
         <p className="text-sm text-[#949ba4] mb-8 max-w-sm">{error?.message ?? "This form is not published or does not exist."}</p>

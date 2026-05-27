@@ -12,7 +12,6 @@ import {
   Sparkles,
   TrendingUp,
   Webhook,
-  Zap,
 } from "lucide-react";
 
 import { cn } from "~/lib/utils";
@@ -238,7 +237,9 @@ function DashboardMockup() {
     <div className="flex h-[420px] overflow-hidden rounded-xl bg-[#1f1f23]">
       {/* Server rail */}
       <div className="w-[42px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-3 gap-2">
-        <div className="w-7 h-7 rounded-full bg-[#5865f2] flex items-center justify-center text-[9px] font-bold text-white">N</div>
+        <div className="w-7 h-7 rounded-full bg-[#5865f2] flex items-center justify-center">
+          <img src="/nitro.png" alt="" className="w-5 h-5" />
+        </div>
         <div className="w-5 h-0.5 rounded bg-[#3f4147] my-1" />
         <div className="w-7 h-7 rounded-full bg-[#3f4147]" />
         <div className="w-7 h-7 rounded-full bg-[#3f4147]" />
