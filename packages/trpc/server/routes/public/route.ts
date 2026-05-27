@@ -89,6 +89,12 @@ export const publicRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       }
 
+      // Check requireAuth
+      const settings = form.settingsJson as { requireAuth?: boolean } | null;
+      if (settings?.requireAuth && !ctx.userId) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required to submit this form" });
+      }
+
       // Rate limit by slug (Redis-backed with in-memory fallback)
       if (!(await checkRateLimit(`submit:${input.slug}`))) {
         throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many submissions. Please try again later." });

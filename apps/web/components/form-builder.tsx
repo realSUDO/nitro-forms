@@ -24,17 +24,21 @@ import "@xyflow/react/dist/style.css";
 import {
   AlignLeft,
   ChevronDown,
+  Download,
   GitBranch,
   GripVertical,
   Loader2,
   Mail,
   Plus,
+  QrCode,
   Save,
   Share2,
   ToggleLeft,
   Trash2,
   Type,
+  X,
 } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 
@@ -48,6 +52,7 @@ interface FormField {
   required: boolean;
   order: number;
   options?: string[];
+  validation?: { minLength?: number; maxLength?: number; min?: number; max?: number };
   position?: { x: number; y: number };
   conditionConfig?: {
     sourceFieldId: string;
@@ -192,6 +197,8 @@ export function FormBuilder() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [saved, setSaved] = useState(true);
+  const [showQr, setShowQr] = useState(false);
+  const [formSettings, setFormSettings] = useState<Record<string, unknown>>({});
 
   // History (placeholder for future undo/redo)
   function pushHistory() { /* noop */ }
@@ -204,6 +211,8 @@ export function FormBuilder() {
       setTitle(form.title);
       const loadedFields = (form.fieldsJson as FormField[]) ?? [];
       setFields(loadedFields);
+      const savedSettings = form.settingsJson as Record<string, unknown> | null;
+      setFormSettings(savedSettings ?? {});
       const newNodes: Node[] = loadedFields.map((field, i) => ({
         id: field.id,
         type: field.type === "condition" ? "conditionNode" : "fieldNode",
@@ -212,9 +221,9 @@ export function FormBuilder() {
       }));
       setNodes(newNodes);
       // Load saved edges from settings, or empty
-      const savedSettings = form.settingsJson as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
-      if (savedSettings?.edges?.length) {
-        const newEdges: Edge[] = savedSettings.edges.map((e, i) => ({
+      const edgeSettings = savedSettings as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
+      if (edgeSettings?.edges?.length) {
+        const newEdges: Edge[] = edgeSettings.edges.map((e, i) => ({
           id: `e-${i}-${e.source}-${e.target}`,
           source: e.source,
           target: e.target,
@@ -297,7 +306,7 @@ export function FormBuilder() {
       return { ...f, position: node?.position ?? f.position };
     });
     const flowEdges = edges.map(e => ({ source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? null }));
-    await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { edges: flowEdges } });
+    await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { ...formSettings, edges: flowEdges } });
     setSaved(true);
   }
 
@@ -399,6 +408,9 @@ export function FormBuilder() {
             </button>
             <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
               <Share2 size={12} /> Share
+            </button>
+            <button onClick={() => setShowQr(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+              <QrCode size={12} /> QR
             </button>
             <button onClick={handlePublish} className="px-3 py-1.5 rounded text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
               {form.status === "published" ? "Unpublish" : "Publish"}
@@ -540,6 +552,28 @@ export function FormBuilder() {
                 <span className={cn("absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all duration-200", selectedField.required ? "left-4" : "left-0.5")} />
               </div>
             </div>
+
+            {/* Validation: text fields */}
+            {(selectedField.type === "short_text" || selectedField.type === "long_text") && (
+              <div className="space-y-2">
+                <label className="block text-[11px] text-[#949ba4]">Validation</label>
+                <div className="flex gap-2">
+                  <input type="number" placeholder="Min length" value={selectedField.validation?.minLength ?? ""} onChange={(e) => updateFieldData({ ...selectedField, validation: { ...selectedField.validation, minLength: e.target.value ? Number(e.target.value) : undefined } })} className="flex-1 bg-[#1e1f22] rounded px-2.5 py-1.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
+                  <input type="number" placeholder="Max length" value={selectedField.validation?.maxLength ?? ""} onChange={(e) => updateFieldData({ ...selectedField, validation: { ...selectedField.validation, maxLength: e.target.value ? Number(e.target.value) : undefined } })} className="flex-1 bg-[#1e1f22] rounded px-2.5 py-1.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
+                </div>
+              </div>
+            )}
+
+            {/* Validation: number fields */}
+            {selectedField.type === "number" && (
+              <div className="space-y-2">
+                <label className="block text-[11px] text-[#949ba4]">Validation</label>
+                <div className="flex gap-2">
+                  <input type="number" placeholder="Min value" value={selectedField.validation?.min ?? ""} onChange={(e) => updateFieldData({ ...selectedField, validation: { ...selectedField.validation, min: e.target.value ? Number(e.target.value) : undefined } })} className="flex-1 bg-[#1e1f22] rounded px-2.5 py-1.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
+                  <input type="number" placeholder="Max value" value={selectedField.validation?.max ?? ""} onChange={(e) => updateFieldData({ ...selectedField, validation: { ...selectedField.validation, max: e.target.value ? Number(e.target.value) : undefined } })} className="flex-1 bg-[#1e1f22] rounded px-2.5 py-1.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
+                </div>
+              </div>
+            )}
 
             {/* Options (for select fields) */}
             {(selectedField.type === "single_select" || selectedField.type === "multi_select") && (
@@ -697,9 +731,33 @@ export function FormBuilder() {
             </div>
             <p className="text-sm text-[#949ba4] mb-1">No selection</p>
             <p className="text-xs text-[#4e5058]">Click a node or edge to edit</p>
+            <div className="mt-6 w-full border-t border-[#3f4147] pt-4">
+              <div className="flex items-center justify-between gap-4 py-2.5 px-3 rounded-lg bg-[#1e1f22]">
+                <span className="text-sm text-[#b5bac1] whitespace-nowrap">Require login to submit</span>
+                <div onClick={() => { const next = !formSettings.requireAuth; setFormSettings(s => ({ ...s, requireAuth: next })); setSaved(false); }} className={cn("w-8 h-4 rounded-full cursor-pointer shrink-0 relative transition-colors duration-200", formSettings.requireAuth ? "bg-[#5865f2]" : "bg-[#3f4147]")}>
+                  <span className={cn("absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all duration-200", formSettings.requireAuth ? "left-4" : "left-0.5")} />
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </aside>
+
+      {/* QR Code Modal */}
+      {showQr && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowQr(false)}>
+          <div className="bg-[#2b2d31] rounded-xl p-6 shadow-xl border border-[#3f4147] flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between w-full">
+              <p className="text-sm font-semibold text-[#f2f3f5]">QR Code</p>
+              <button onClick={() => setShowQr(false)} className="text-[#949ba4] hover:text-[#f2f3f5]"><X size={16} /></button>
+            </div>
+            <QRCodeCanvas id="qr-canvas" value={`${typeof window !== "undefined" ? window.location.origin : ""}/f/${form?.slug}`} size={200} bgColor="#ffffff" fgColor="#000000" />
+            <button onClick={() => { const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement | null; if (!canvas) return; const url = canvas.toDataURL("image/png"); const a = document.createElement("a"); a.href = url; a.download = `${form?.slug ?? "form"}-qr.png`; a.click(); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
+              <Download size={12} /> Download PNG
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
