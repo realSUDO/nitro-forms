@@ -20,7 +20,7 @@ export function PublicForm() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1e1f22] flex items-center justify-center">
+      <div className="min-h-screen bg-[#313338] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-[#5865f2]" size={28} />
           <p className="text-sm text-[#949ba4]">Loading form...</p>
@@ -31,7 +31,7 @@ export function PublicForm() {
 
   if (error || !form) {
     return (
-      <div className="min-h-screen bg-[#1e1f22] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-6">
           <Zap size={32} className="text-[#4e5058]" />
         </div>
@@ -46,7 +46,7 @@ export function PublicForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#1e1f22] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#5865f2]/10 flex items-center justify-center mb-6 animate-in zoom-in duration-300">
           <CheckCircle size={40} className="text-[#5865f2]" />
         </div>
@@ -165,27 +165,26 @@ export function PublicForm() {
   if (!field) return null;
 
   return (
-    <div className="min-h-screen bg-[#1e1f22] flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 h-14 shrink-0">
-        <div className="flex items-center gap-2">
-          <Zap size={16} className="text-[#5865f2]" />
-          <span className="text-sm font-semibold text-[#f2f3f5]">NitroForms</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] font-mono text-[#949ba4]">
+    <div className="min-h-screen bg-[#313338] flex flex-col">
+      {/* Header — like Discord channel header */}
+      <header className="flex items-center gap-3 px-4 h-12 shrink-0 border-b border-[#1e1f22] bg-[#313338]">
+        <span className="text-[#949ba4]">#</span>
+        <span className="text-sm font-semibold text-[#f2f3f5]">{form.title}</span>
+        <span className="text-xs text-[#4e5058] ml-2 hidden sm:inline">{form.description ?? "Fill out this form"}</span>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-[10px] font-mono text-[#949ba4] bg-[#2b2d31] px-2 py-0.5 rounded">
             {fieldPath.length + 1} / {totalSteps}
           </span>
         </div>
       </header>
 
       {/* Progress bar */}
-      <div className="h-1 bg-[#2b2d31]">
+      <div className="h-0.5 bg-[#1e1f22]">
         <div className="h-full bg-[#5865f2] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Form content */}
-      <main className="flex-1 flex items-center justify-center p-6">
+      {/* Form content — styled like Discord messages area */}
+      <main className="flex-1 flex items-center justify-center p-6 bg-[#313338]">
         <div className="w-full max-w-lg">
           {/* Form title (only on first step) */}
           {fieldPath.length === 0 && (
@@ -195,14 +194,21 @@ export function PublicForm() {
             </div>
           )}
 
-          {/* Current field */}
-          <div className="animate-in fade-in slide-in-from-right-4 duration-300" key={field.id}>
-            <label className="block text-lg font-semibold text-[#f2f3f5] mb-1">
-              {field.label}
-              {field.required && <span className="text-[#5865f2] ml-1">*</span>}
-            </label>
-            {field.placeholder && <p className="text-sm text-[#949ba4] mb-4">{field.placeholder}</p>}
-            {!field.placeholder && <div className="mb-4" />}
+          {/* Current field — styled as bot message */}
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300" key={field.id}>
+            <div className="flex gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center shrink-0">
+                <Zap size={16} className="text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-semibold text-[#5865f2]">NitroForms</span>
+                  <span className="text-[10px] bg-[#5865f2] text-white px-1 py-0.5 rounded text-[9px] font-medium">BOT</span>
+                </div>
+                <p className="text-[#f2f3f5]">{field.label}{field.required && <span className="text-[#ed4245] ml-0.5">*</span>}</p>
+                {field.placeholder && <p className="text-xs text-[#949ba4] mt-0.5">{field.placeholder}</p>}
+              </div>
+            </div>
 
             {/* Input based on type */}
             {(field.type === "short_text" || field.type === "email") && (
@@ -211,7 +217,7 @@ export function PublicForm() {
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
                 autoFocus
-                className="w-full bg-transparent border-b-2 border-[#3f4147] focus:border-[#5865f2] px-0 py-3 text-lg text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none transition-colors"
+                className="w-full bg-[#383a40] rounded-lg px-4 py-3 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]"
                 placeholder="Type your answer here..."
               />
             )}
@@ -222,7 +228,7 @@ export function PublicForm() {
                 onChange={(e) => setAnswer(e.target.value)}
                 autoFocus
                 rows={4}
-                className="w-full bg-transparent border-b-2 border-[#3f4147] focus:border-[#5865f2] px-0 py-3 text-lg text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none transition-colors resize-none"
+                className="w-full bg-[#383a40] rounded-lg px-4 py-3 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-none"
                 placeholder="Type your answer here..."
               />
             )}
@@ -233,7 +239,7 @@ export function PublicForm() {
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(Number(e.target.value))}
                 autoFocus
-                className="w-full bg-transparent border-b-2 border-[#3f4147] focus:border-[#5865f2] px-0 py-3 text-lg text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none transition-colors"
+                className="w-full bg-[#383a40] rounded-lg px-4 py-3 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]"
                 placeholder="0"
               />
             )}
