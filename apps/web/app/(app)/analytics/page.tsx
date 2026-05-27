@@ -14,7 +14,7 @@ export default function AnalyticsIndex() {
   return (
     <>
       {/* Sidebar — like Discord voice channels */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1e1f22]">
         <div className="px-4 pt-5 pb-3">
           <p className="text-xs font-semibold text-[#f2f3f5]">Analytics</p>
           <p className="text-[11px] text-[#949ba4] mt-0.5">Select a form to view insights</p>
@@ -41,7 +41,7 @@ export default function AnalyticsIndex() {
                     : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]"
                 )}
               >
-                <Hash size={14} className={activeFormId === form.id ? "text-[#5865f2]" : "text-[#4e5058]"} />
+                <Hash size={14} className={activeFormId === form.id ? "text-[#f2f3f5]" : "text-[#4e5058]"} />
                 <span className="truncate flex-1">{form.title}</span>
                 {activeFormId === form.id && (
                   <span className="w-2 h-2 rounded-full bg-[#3ba55c] shrink-0" />

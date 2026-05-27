@@ -28,7 +28,7 @@ export function CreatorDashboard() {
   return (
     <>
       {/* Sidebar */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1e1f22]">
         <div className="flex items-center justify-between px-4 h-12 font-semibold text-sm text-[#f2f3f5] shrink-0">
           NitroForms
         </div>
@@ -53,7 +53,7 @@ export function CreatorDashboard() {
               <p className="flex items-center gap-1 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]"><ChevronDown size={11} /> Published</p>
               {published.map(f => (
                 <Link prefetch key={f.id} href={`/builder/${f.id}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
-                  <Hash size={14} className="text-[#5865f2]" /><span className="truncate">{f.title}</span>
+                  <Hash size={14} className="text-[#f2f3f5]" /><span className="truncate">{f.title}</span>
                 </Link>
               ))}
             </div>
@@ -103,7 +103,7 @@ export function CreatorDashboard() {
                   {formList.map((form, i) => (
                     <tr key={form.id} className={cn("hover:bg-[#3f4147]/30 transition-colors", i < formList.length - 1 && "border-b border-[#3f4147]/40")}>
                       <td className="px-4 py-3"><Link prefetch href={`/builder/${form.id}`} className="text-sm font-medium text-[#f2f3f5] hover:text-[#5865f2]">{form.title}</Link></td>
-                      <td className="px-4 py-3"><span className={cn("px-2 py-0.5 rounded text-[11px] font-semibold capitalize", form.status === "published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#3f4147] text-[#949ba4]")}>{form.status}</span></td>
+                      <td className="px-4 py-3"><span className={cn("px-2 py-0.5 rounded text-[11px] font-semibold capitalize", form.status === "published" ? "bg-[#3ba55c]/15 text-[#3ba55c]" : "bg-[#3f4147] text-[#949ba4]")}>{form.status}</span></td>
                       <td className="px-4 py-3 text-xs text-[#949ba4] capitalize">{form.visibility}</td>
                       <td className="px-4 py-3 text-right"><Link prefetch href={`/analytics/${form.id}`} className="text-[#949ba4] hover:text-[#f2f3f5]"><BarChart2 size={14} /></Link></td>
                     </tr>

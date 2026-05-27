@@ -50,7 +50,7 @@ export function ExploreTemplates() {
   return (
     <>
       {/* Sidebar */}
-      <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
+      <aside className="w-[240px] shrink-0 flex flex-col bg-[#1e1f22]">
         <div className="px-6 pt-6 pb-4">
           <p className="text-[11px] font-mono uppercase tracking-widest text-[#949ba4] font-bold">Templates</p>
           <p className="text-xs text-[#949ba4] mt-0.5">Nitro Pro Gallery</p>
@@ -63,7 +63,7 @@ export function ExploreTemplates() {
           ].map(({ label, href, active }) => (
             <Link key={label} href={href} className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] font-mono transition-colors",
-              active ? "bg-[#5865f2]/20 text-[#f2f3f5] font-semibold" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]"
+              active ? "bg-[#3f4147] text-[#f2f3f5] font-semibold" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#f2f3f5]"
             )}>
               {label}
             </Link>
@@ -79,8 +79,8 @@ export function ExploreTemplates() {
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-[#313338] relative">
         {/* Header */}
-        <header className="sticky top-0 z-10 h-12 flex items-center justify-between px-6 bg-[#2b2d31]">
-          <span className="text-lg font-extrabold text-[#5865f2]">Templates</span>
+        <header className="sticky top-0 z-10 h-12 flex items-center justify-between px-6 bg-[#313338] border-b border-[#1e1f22]">
+          <span className="text-lg font-extrabold text-[#f2f3f5]">Templates</span>
           <div className="flex items-center gap-4">
             <div className="flex items-center bg-[#1e1f22] px-3 py-1 rounded-lg">
               <Search size={14} className="text-[#949ba4]" />
@@ -118,7 +118,7 @@ export function ExploreTemplates() {
                     <Link href={`/f/${slug}`} className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#3f4147]/50 text-[#f2f3f5] hover:bg-[#3f4147] transition-colors border border-[#4e5058]/30">
                       Preview
                     </Link>
-                    <button onClick={() => useTemplate(slug, title)} className="flex-1 py-2 rounded-lg text-center text-[13px] font-mono bg-[#5865f2] text-white hover:brightness-110 transition-all">
+                    <button onClick={() => useTemplate(slug, title)} className="flex-1 py-2 rounded-lg text-center text-[13px] font-medium bg-[#5865f2] text-white hover:bg-[#4752c4] transition-all">
                       Use template
                     </button>
                   </div>
@@ -137,11 +137,6 @@ export function ExploreTemplates() {
           </div>
         </div>
 
-        {/* Ambient glow */}
-        <div className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-20 -z-10">
-          <div className="absolute top-[10%] left-[20%] w-96 h-96 bg-[#5865f2] rounded-full blur-[128px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-64 h-64 bg-[#28418e] rounded-full blur-[128px]" />
-        </div>
       </main>
     </>
   );
