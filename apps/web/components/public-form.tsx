@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
@@ -217,6 +217,18 @@ export function PublicForm() {
       setFieldPath(p => p.slice(0, -1));
     }
   }
+
+  // Enter key advances the form
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey && channel === "submit") {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   if (!field) return null;
 
