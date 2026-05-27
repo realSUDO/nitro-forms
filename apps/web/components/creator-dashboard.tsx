@@ -79,7 +79,7 @@ export function CreatorDashboard() {
             activeChannel === "forms" ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]"
           )}>
             <Hash size={14} className={activeChannel === "forms" ? "text-[#f2f3f5]" : "text-[#4e5058]"} />
-            general
+            dashboard
           </button>
 
           <div className="px-1 py-2">
