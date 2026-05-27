@@ -329,14 +329,20 @@ export function FormBuilder() {
   const [showAi, setShowAi] = useState(false);
   const aiGenerate = trpc.ai.generateForm.useMutation({
     onSuccess: (data) => {
-      // Set title if AI provided one
       if (data.title) setTitle(data.title);
+      // Add to fields state
+      const newFields: FormField[] = data.fields.map((f: any, i: number) => ({
+        ...f,
+        order: fields.length + i + 1,
+        position: { x: 300, y: 80 + i * 140 },
+      }));
+      setFields(prev => [...prev, ...newFields]);
       // Create nodes
-      const newNodes = data.fields.map((f: any, i: number) => ({
+      const newNodes = newFields.map((f) => ({
         id: f.id,
         type: f.type === "condition" ? "conditionNode" : "fieldNode",
-        position: { x: 300, y: 80 + i * 140 },
-        data: { field: { ...f, position: { x: 300, y: 80 + i * 140 } }, selected: false, onDelete: () => deleteField(f.id), onUpdate: (updated: any) => updateFieldData(updated) },
+        position: f.position!,
+        data: { field: f, selected: false, onDelete: () => deleteField(f.id), onUpdate: (updated: any) => updateFieldData(updated) },
       }));
       setNodes(prev => [...prev, ...newNodes]);
       // Create edges
