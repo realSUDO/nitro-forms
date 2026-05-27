@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Star, Zap } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
@@ -60,7 +61,21 @@ export function PublicForm() {
   }
 
   const allFields = form.fields as Array<{ id: string; type: string; label: string; required: boolean; placeholder?: string; options?: string[]; conditionConfig?: { sourceFieldId: string; operator: string; value: string } }>;
-  const settings = form.settings as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
+  const settings = form.settings as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }>; requireAuth?: boolean } | null;
+  const { user } = useUser();
+
+  // Gate: require login
+  if (settings?.requireAuth && !user) {
+    return (
+      <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
+        <h1 className="text-xl font-bold text-[#f2f3f5] mb-2">Login Required</h1>
+        <p className="text-sm text-[#949ba4] mb-6">You need to be logged in to submit this form.</p>
+        <Link href="/login" className="px-5 py-2 rounded bg-[#5865f2] text-sm text-white hover:bg-[#4752c4] transition-colors">
+          Log In
+        </Link>
+      </div>
+    );
+  }
   const flowEdges = settings?.edges ?? [];
   const hasFlow = flowEdges.length > 0;
 
