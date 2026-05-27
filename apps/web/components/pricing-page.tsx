@@ -78,7 +78,7 @@ export function PricingPage() {
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto bg-[#313338] py-8 px-10">
-        <div className="max-w-[740px]">
+        <div className="max-w-[740px] mx-auto">
           {active === "account" && (
             <div>
               <h2 className="text-xl font-bold text-[#f2f3f5] mb-4">My Account</h2>
