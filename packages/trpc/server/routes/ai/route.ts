@@ -1,45 +1,58 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../../trpc";
-import db, { eq, sql } from "@repo/database";
-import { formsTable } from "@repo/database/schema";
 
 const FIELD_TYPES = ["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date"] as const;
 
-const SYSTEM_PROMPT = `You are a form builder AI. Given a user prompt, generate a JSON array of form fields.
-Each field must have: id (f1, f2, etc), type (one of: ${FIELD_TYPES.join(", ")}), label (string), required (boolean).
-For single_select/multi_select, include "options" array of strings.
-For rating, no extra fields needed.
-Return ONLY valid JSON array, no markdown, no explanation.
-Max 12 fields. Keep labels concise and professional.
-Do NOT generate anything harmful, offensive, or unrelated to forms.`;
+const SYSTEM_PROMPT = `You are NitroForms AI — a strict form field generator. You ONLY output JSON arrays of form fields. You do NOT answer questions, write code, tell stories, or do anything other than generate form fields.
 
-const BLOCKED_TERMS = ["hack", "exploit", "password", "credit card", "ssn", "social security", "bomb", "weapon", "drug"];
+Rules:
+- Output ONLY a valid JSON array. No markdown, no explanation, no text before or after.
+- Each field: { id: "f1", type, label, required, options?: string[] }
+- Valid types: ${FIELD_TYPES.join(", ")}
+- For single_select/multi_select: include "options" as flat string array
+- Max 12 fields
+- Labels must be professional, concise, and relevant to the user's form topic
+- If the prompt is unrelated to forms, output a generic contact form
+- NEVER include harmful, offensive, illegal, or inappropriate content in labels or options`;
+
+// External guardrails — runs BEFORE the LLM call
+const BLOCKED_PATTERNS = [
+  /hack|exploit|inject|xss|sql/i,
+  /password|credit.?card|ssn|social.?security/i,
+  /bomb|weapon|gun|explosive|poison/i,
+  /drug|narcotic|cocaine|heroin|meth/i,
+  /kill|murder|suicide|self.?harm/i,
+  /child|minor|underage/i,
+  /porn|nude|nsfw|sex/i,
+  /phish|scam|fraud|steal/i,
+];
+
+function validatePrompt(prompt: string): { safe: boolean; reason?: string } {
+  const lower = prompt.toLowerCase();
+  for (const pattern of BLOCKED_PATTERNS) {
+    if (pattern.test(lower)) {
+      return { safe: false, reason: "Prompt contains restricted content. Please describe a legitimate form use case." };
+    }
+  }
+  if (prompt.length < 3) return { safe: false, reason: "Prompt too short" };
+  if (prompt.length > 500) return { safe: false, reason: "Prompt too long (max 500 chars)" };
+  return { safe: true };
+}
 
 export const aiRouter = router({
   generateForm: protectedProcedure
     .input(z.object({ prompt: z.string().min(3).max(500) }))
     .mutation(async ({ ctx, input }) => {
-      // Guardrail: block harmful prompts
-      const lower = input.prompt.toLowerCase();
-      if (BLOCKED_TERMS.some(t => lower.includes(t))) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Prompt contains blocked content" });
+      // External guardrails — before any LLM call
+      const check = validatePrompt(input.prompt);
+      if (!check.safe) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: check.reason });
       }
 
-      // Rate limit: 2 free AI generations per account
-      const [countResult] = await db.select({ count: sql<number>`count(*)` })
-        .from(formsTable)
-        .where(eq(formsTable.ownerId, ctx.userId));
-      const formCount = Number(countResult?.count ?? 0);
-      
-      // Check AI usage (stored in a simple way — count forms with ai_generated in settings)
-      const [aiCount] = await db.select({ count: sql<number>`count(*)` })
-        .from(formsTable)
-        .where(sql`${formsTable.ownerId} = ${ctx.userId} AND ${formsTable.settingsJson}->>'aiGenerated' = 'true'`);
-      
-      if (Number(aiCount?.count ?? 0) >= 2) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Free AI generation limit reached (2/2). Upgrade to Pro for unlimited." });
-      }
+      // TODO: Re-enable 2 free per account limit for production
+      // const [aiCount] = await db.select(...)
+      // if (Number(aiCount?.count ?? 0) >= 2) throw ...
 
       // Call Groq (Llama 3.1)
       const apiKey = process.env.GROQ_API_KEY;
