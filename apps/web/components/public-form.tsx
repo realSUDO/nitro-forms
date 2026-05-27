@@ -180,6 +180,18 @@ export function PublicForm() {
         return;
       }
     }
+    if (field.type === "phone" && answer) {
+      if (String(answer).replace(/\D/g, "").length < 7) {
+        setFieldErrors({ [field.id]: "Please enter a valid phone number" });
+        return;
+      }
+    }
+    if (field.type === "url" && answer) {
+      if (!/^https?:\/\/.+\..+/.test(String(answer))) {
+        setFieldErrors({ [field.id]: "Please enter a valid URL (https://...)" });
+        return;
+      }
+    }
     setFieldErrors({});
 
     if (hasFlow) {

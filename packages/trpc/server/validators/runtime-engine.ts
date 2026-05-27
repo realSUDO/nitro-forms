@@ -66,6 +66,18 @@ function buildFieldSchema(field: FormField): z.ZodType {
     case "date":
       schema = z.string().refine((v) => !isNaN(Date.parse(v)), { message: "Invalid date" });
       break;
+    case "time":
+      schema = z.string().regex(/^\d{2}:\d{2}/, "Invalid time format");
+      break;
+    case "phone":
+      schema = z.string().min(7, "Phone number too short").max(20, "Phone number too long");
+      break;
+    case "url":
+      schema = z.string().url("Invalid URL");
+      break;
+    case "file_upload":
+      schema = z.any(); // File validation handled at upload layer
+      break;
     default:
       schema = z.string();
   }
