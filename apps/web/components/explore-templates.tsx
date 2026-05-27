@@ -21,14 +21,23 @@ export function ExploreTemplates() {
   const updateForm = trpc.form.update.useMutation();
 
   async function useTemplate(slug: string, title: string) {
-    // Fetch the template form fields
     try {
-      const form = await fetch(`/api/trpc/public.getFormBySlug?input=${encodeURIComponent(JSON.stringify({ slug }))}`).then(r => r.json());
-      const fields = form?.[0]?.result?.data?.fields ?? form?.result?.data?.fields ?? [];
-      // Create a new form with the template's fields
+      const res = await fetch(`/api/trpc/public.getFormBySlug?input=${encodeURIComponent(JSON.stringify({ slug }))}`).then(r => r.json());
+      const data = res?.[0]?.result?.data ?? res?.result?.data ?? {};
+      const fields = data.fields ?? [];
+      const settings = data.settings ?? {};
+      // Auto-generate sequential edges if template has none
+      let edges = settings.edges ?? [];
+      if (edges.length === 0 && fields.length > 1) {
+        edges = fields.slice(1).map((f: any, i: number) => ({
+          source: fields[i].id,
+          target: f.id,
+          sourceHandle: null,
+        }));
+      }
       const newForm = await createForm.mutateAsync({ title: `${title} (copy)` });
-      if (newForm && fields.length > 0) {
-        await updateForm.mutateAsync({ formId: newForm.id, fields });
+      if (newForm) {
+        await updateForm.mutateAsync({ formId: newForm.id, fields, settings: { edges } });
       }
       router.push(`/builder/${newForm!.id}`);
     } catch {
