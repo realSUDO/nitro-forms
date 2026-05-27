@@ -234,106 +234,126 @@ function TiltMockup() {
 }
 
 function DashboardMockup() {
-  const fields = [
-    { label: "Full Name", filled: true },
-    { label: "Email Address", filled: true },
-    { label: "Role", filled: false },
-    { label: "Message", textarea: true },
-  ];
-
   return (
     <div className="flex h-[420px] overflow-hidden rounded-xl bg-[#1f1f23]">
-      {/* Left sidebar */}
-      <div className="w-56 shrink-0 border-r border-white/[0.06] bg-[#1a1b1e] p-4">
-        <p className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#8f8fa0]">
-          My Forms
+      {/* Left sidebar — Discord channel style */}
+      <div className="w-48 shrink-0 border-r border-white/[0.06] bg-[#1a1b1e] p-3">
+        <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#8f8fa0]">
+          NitroForms
         </p>
-        {[
-          { name: "Beta Signup", responses: 142, active: true },
-          { name: "Community Survey", responses: 89, active: false },
-          { name: "Bug Report", responses: 34, active: false },
-          { name: "Feature Request", responses: 21, active: false },
-        ].map(({ name, responses, active }) => (
-          <div
-            className={cn(
-              "mb-1 rounded-lg px-3 py-2.5",
-              active ? "bg-[#5865f2]/15" : "hover:bg-white/[0.04]",
-            )}
-            key={name}
-          >
-            <p className={cn("text-sm font-medium", active ? "text-[#bec2ff]" : "text-[#c6c5d7]")}>
-              {name}
-            </p>
-            <p className="mt-0.5 font-mono text-[11px] text-[#8f8fa0]">{responses} responses</p>
-          </div>
-        ))}
+        <div className="space-y-0.5">
+          {[
+            { name: "# welcome", active: false },
+            { name: "# dashboard", active: false },
+          ].map(({ name, active }) => (
+            <div key={name} className={cn("rounded px-2.5 py-1.5 text-[12px]", active ? "bg-[#3f4147] text-white" : "text-[#8f8fa0]")}>{name}</div>
+          ))}
+          <p className="pt-3 pb-1 font-mono text-[9px] font-semibold uppercase tracking-widest text-[#8f8fa0]/50">Forms</p>
+          {[
+            { name: "# Anime Fan Survey", active: true },
+            { name: "# Product Feedback", active: false },
+            { name: "# Gaming Signup", active: false },
+          ].map(({ name, active }) => (
+            <div key={name} className={cn("rounded px-2.5 py-1.5 text-[12px]", active ? "bg-[#3f4147] text-white" : "text-[#8f8fa0]")}>{name}</div>
+          ))}
+        </div>
       </div>
 
-      {/* Center — builder canvas */}
+      {/* Center — React Flow canvas with nodes */}
       <div className="flex flex-1 flex-col">
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
+        <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-[#8f8fa0]">
-              Builder
-            </span>
-            <span className="rounded bg-[#5865f2]/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#bec2ff]">
-              Beta Signup
-            </span>
+            <span className="text-[12px] font-semibold text-white">Anime Fan Survey</span>
+            <span className="rounded bg-[#3ba55c]/15 px-1.5 py-0.5 text-[9px] font-semibold text-[#3ba55c]">Published</span>
           </div>
           <div className="flex gap-2">
-            <div className="h-6 w-16 rounded bg-[#292a2d]" />
-            <div className="h-6 w-20 rounded bg-[#5865f2]/80" />
+            <div className="h-6 px-3 rounded bg-[#292a2d] flex items-center text-[10px] text-[#8f8fa0]">Share</div>
+            <div className="h-6 px-3 rounded bg-[#5865f2] flex items-center text-[10px] text-white">Publish</div>
           </div>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-hidden p-5">
-          {fields.map(({ label, filled, textarea }) => (
-            <div className="rounded-xl border border-[#454655]/30 bg-[#292a2d] p-4" key={label}>
-              <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#8f8fa0]">
-                {label}
-              </p>
-              <div
-                className={cn(
-                  "rounded-lg",
-                  textarea ? "h-12" : "h-8",
-                  filled ? "bg-[#5865f2]/10" : "bg-[#1f1f23]",
-                )}
-              />
+        {/* Canvas with nodes and edges */}
+        <div className="flex-1 relative bg-[#292a2d] overflow-hidden">
+          {/* Grid dots */}
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #8f8fa0 0.5px, transparent 0.5px)", backgroundSize: "20px 20px" }} />
+
+          {/* Node 1 — Name */}
+          <div className="absolute left-[20%] top-[12%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3">
+            <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SHORT TEXT</p>
+            <p className="text-[11px] text-white">Your Name</p>
+            <div className="mt-2 h-5 rounded bg-[#1f1f23]" />
+          </div>
+
+          {/* Edge 1→2 */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            <path d="M 170 85 C 170 120 170 120 170 140" stroke="#5865f2" strokeWidth="2" fill="none" opacity="0.6" />
+            <path d="M 170 195 C 170 220 250 220 250 245" stroke="#5865f2" strokeWidth="2" fill="none" opacity="0.6" />
+            {/* Condition edges */}
+            <path d="M 235 310 C 235 340 150 340 150 360" stroke="#3ba55c" strokeWidth="2" fill="none" opacity="0.7" />
+            <path d="M 275 310 C 275 340 350 340 350 360" stroke="#ed4245" strokeWidth="2" fill="none" opacity="0.7" />
+          </svg>
+
+          {/* Node 2 — Genre Select */}
+          <div className="absolute left-[18%] top-[38%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3">
+            <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SINGLE SELECT</p>
+            <p className="text-[11px] text-white">Fav Genre</p>
+            <div className="mt-1.5 space-y-1">
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3f4147] text-[7px] text-[#8f8fa0] flex items-center justify-center">A</span><span className="text-[9px] text-[#8f8fa0]">Shonen</span></div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3f4147] text-[7px] text-[#8f8fa0] flex items-center justify-center">B</span><span className="text-[9px] text-[#8f8fa0]">Seinen</span></div>
             </div>
-          ))}
+          </div>
+
+          {/* Node 3 — Condition */}
+          <div className="absolute left-[30%] top-[65%] w-[120px] rounded-lg border border-[#faa61a]/40 bg-[#2b2d31] p-2.5">
+            <div className="flex items-center gap-1 mb-1">
+              <span className="text-[9px] font-mono text-[#faa61a]">IF</span>
+            </div>
+            <p className="text-[10px] text-white">Genre = Shonen</p>
+            <div className="flex justify-between mt-2 text-[8px] font-mono">
+              <span className="text-[#3ba55c]">yes</span>
+              <span className="text-[#ed4245]">no</span>
+            </div>
+          </div>
+
+          {/* Node 4 — Rating (yes branch) */}
+          <div className="absolute left-[10%] top-[85%] w-[110px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-2.5">
+            <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">RATING</p>
+            <p className="text-[10px] text-white">Rate Shonen</p>
+            <div className="flex gap-0.5 mt-1">{[1,2,3,4,5].map(n => <span key={n} className="text-[10px] text-[#faa61a]">★</span>)}</div>
+          </div>
+
+          {/* Node 5 — Thank you (no branch) */}
+          <div className="absolute left-[55%] top-[85%] w-[110px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-2.5">
+            <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SHORT TEXT</p>
+            <p className="text-[10px] text-white">Any feedback?</p>
+            <div className="mt-1.5 h-4 rounded bg-[#1f1f23]" />
+          </div>
         </div>
       </div>
 
-      {/* Right — analytics */}
-      <div className="w-52 shrink-0 border-l border-white/[0.06] bg-[#1a1b1e] p-4">
-        <p className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#8f8fa0]">
-          Analytics
-        </p>
+      {/* Right — Inspector */}
+      <div className="w-48 shrink-0 border-l border-white/[0.06] bg-[#1a1b1e] p-4">
+        <p className="mb-3 text-[11px] font-semibold text-white">Settings</p>
         <div className="space-y-3">
-          {[
-            { label: "Completion", pct: 74 },
-            { label: "Drop-off", pct: 26 },
-            { label: "Avg. time", pct: 58 },
-          ].map(({ label, pct }) => (
-            <div key={label}>
-              <div className="mb-1 flex justify-between font-mono text-[11px] text-[#8f8fa0]">
-                <span>{label}</span>
-                <span className="text-[#c6c5d7]">{pct}%</span>
-              </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-[#292a2d]">
-                <div className="h-full rounded-full bg-[#5865f2]" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 space-y-2">
-          <div className="rounded-lg bg-[#292a2d] p-3">
-            <p className="font-mono text-[10px] text-[#8f8fa0]">Total responses</p>
-            <p className="mt-1 text-xl font-black text-[#e3e2e6]">142</p>
+          <div>
+            <p className="text-[9px] text-[#8f8fa0] mb-1">Label</p>
+            <div className="h-7 rounded bg-[#292a2d] px-2 flex items-center text-[10px] text-white">Fav Genre</div>
           </div>
-          <div className="rounded-lg bg-[#5865f2]/10 p-3">
-            <p className="font-mono text-[10px] text-[#bec2ff]">This week</p>
-            <p className="mt-1 text-xl font-black text-[#bec2ff]">+38</p>
+          <div>
+            <p className="text-[9px] text-[#8f8fa0] mb-1">Type</p>
+            <div className="h-7 rounded bg-[#5865f2]/10 px-2 flex items-center text-[10px] text-[#bec2ff]">single select</div>
+          </div>
+          <div>
+            <p className="text-[9px] text-[#8f8fa0] mb-1">Required</p>
+            <div className="w-8 h-4 rounded-full bg-[#3ba55c] relative"><div className="absolute right-0.5 top-0.5 w-3 h-3 rounded-full bg-white" /></div>
+          </div>
+          <div>
+            <p className="text-[9px] text-[#8f8fa0] mb-1">Options</p>
+            <div className="space-y-1">
+              {["Shonen", "Seinen", "Isekai", "Slice of Life"].map(o => (
+                <div key={o} className="h-5 rounded bg-[#292a2d] px-2 flex items-center text-[9px] text-[#8f8fa0]">{o}</div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
