@@ -145,17 +145,9 @@ export function CreatorDashboard() {
           <div className="flex flex-col h-full">
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-48 h-48 mb-6" />
-              <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Welcome to NitroForms!</h1>
-              <p className="text-sm text-[#949ba4] mb-6 max-w-md">This is the beginning of your workspace. Create forms, collect responses, and analyze data — all from one place.</p>
-              <div className="flex gap-3">
-                <button onClick={() => { setActiveChannel("forms"); createForm.mutate({ title: "Untitled Form" }); }} className="px-4 py-2 rounded-lg bg-[#5865f2] text-white text-sm font-medium hover:bg-[#4752c4] transition-colors">
-                  Create your first form
-                </button>
-                <button onClick={() => { setActiveChannel("forms"); setPreviewSlug(null); }} className="px-4 py-2 rounded-lg border border-[#4e5058] text-sm text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
-                  View Dashboard
-                </button>
-              </div>
+              <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-40 h-40 mb-4" />
+              <h1 className="text-xl font-bold text-[#f2f3f5] mb-1">Welcome to NitroForms!</h1>
+              <p className="text-sm text-[#949ba4] max-w-sm">Describe a form below and let AI build it for you, or head to the <button onClick={() => { setActiveChannel("forms"); setPreviewSlug(null); }} className="text-[#5865f2] hover:underline">dashboard</button> to get started manually.</p>
             </div>
             {/* Discord-style input box for AI prompt */}
             <div className="shrink-0 px-4 pb-4">
