@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "~/lib/utils";
+import FloatingGhost from "~/components/floating-ghost";
 
 const navItems = ["Builder", "Templates", "Docs", "Pricing"];
 const navHrefs: Record<string, string> = {
@@ -184,6 +185,11 @@ function Hero() {
       </div>
 
       <TiltMockup />
+
+      {/* Floating ghost mascot */}
+      <div className="pointer-events-none absolute right-[8%] top-[34%] z-20 hidden lg:block">
+        <FloatingGhost size={150} mood="smirk" />
+      </div>
     </section>
   );
 }
