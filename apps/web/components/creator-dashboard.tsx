@@ -156,7 +156,7 @@ export function CreatorDashboard() {
             </div>
           </div>
         ) : previewSlug ? (
-          <div className="absolute inset-0 flex flex-col bg-[#1e1f22] z-10">
+          <div className="absolute inset-0 flex flex-col bg-[#313338] z-10">
             <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22]">
               <span className="text-sm font-semibold text-[#f2f3f5]"><Hash size={14} className="inline text-[#949ba4]" /> {formList.find(f => f.slug === previewSlug)?.title ?? previewSlug}</span>
               <div className="flex items-center gap-2">
@@ -305,51 +305,65 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
   }
 
   return (
-    <div className="max-w-2xl">
-      {/* First message with avatar */}
-      <div className="flex gap-4 py-2 hover:bg-[#2b2d31]/50 px-2 rounded">
-        <div className="w-10 h-10 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0 mt-0.5">
-          <img src="/nitro.svg" alt="" className="w-6 h-6" />
+    <div className="max-w-lg mx-auto">
+      {/* Bot intro */}
+      <div className="flex gap-3 mb-5">
+        <div className="w-9 h-9 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0">
+          <img src="/nitro.svg" alt="" className="w-5 h-5" />
         </div>
-        <div className="min-w-0">
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm font-semibold text-[#f2f3f5]">NitroForms</span>
-            <span className="text-[9px] bg-[#5865f2] text-white px-1 rounded">BOT</span>
-            <span className="text-[11px] text-[#949ba4]">Today</span>
-          </div>
-          <p className="text-base text-[#f2f3f5] mt-0.5">Here&apos;s the structure of <strong>{form.title}</strong> ({fields.filter(f => f.type !== "condition").length} fields, {edges.length} connections)</p>
+        <div>
+          <span className="text-sm font-semibold text-[#f2f3f5]">{form.title}</span>
+          <p className="text-xs text-[#949ba4]">{fields.filter(f => f.type !== "condition").length} questions · {form.status}</p>
         </div>
       </div>
 
-      {/* Each field as a follow-up message (no avatar, indented) */}
-      {fields.map((f, i) => (
-        <div key={f.id} className={cn("flex gap-4 py-2 hover:bg-[#2b2d31]/50 px-2 rounded group", f.type === "condition" && "border-l-2 border-[#faa61a] ml-14")}>
-          <div className="w-10 shrink-0 flex items-center justify-center">
-            <span className="text-xs text-[#949ba4] opacity-0 group-hover:opacity-100">{i + 1}</span>
-          </div>
-          <div className="min-w-0 py-0.5">
-            <p className="text-base text-[#f2f3f5]">
-              {f.type === "condition" && <span className="text-[#faa61a] font-mono text-xs mr-1">IF</span>}
-              {f.label}
-              {f.required && <span className="text-[#ed4245] text-xs ml-1">*</span>}
-              <span className="text-xs text-[#949ba4] ml-2">{f.type.replace("_", " ")}</span>
-            </p>
-            {f.options && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {f.options.map(o => <span key={o} className="text-xs px-2 py-1 rounded bg-[#3f4147] text-[#f2f3f5]">{o}</span>)}
+      {/* Fields as form questions */}
+      <div className="space-y-4 pl-12">
+        {fields.map(f => (
+          <div key={f.id}>
+            {f.type === "condition" ? (
+              <div className="flex items-center gap-2 py-1">
+                <div className="h-px flex-1 bg-[#faa61a]/30" />
+                <span className="text-[11px] text-[#faa61a] font-mono">IF {fields.find(x => x.id === f.conditionConfig?.sourceFieldId)?.label} {f.conditionConfig?.operator} &quot;{f.conditionConfig?.value}&quot;</span>
+                <div className="h-px flex-1 bg-[#faa61a]/30" />
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-[#f2f3f5] mb-1.5">{f.label}{f.required && <span className="text-[#ed4245] ml-0.5">*</span>}</p>
+                {(f.type === "short_text" || f.type === "email" || f.type === "number" || f.type === "date") && (
+                  <div className="h-9 rounded bg-[#383a40] px-3 flex items-center">
+                    <span className="text-xs text-[#4e5058]">{f.type === "email" ? "name@example.com" : f.type === "number" ? "0" : "Type here..."}</span>
+                  </div>
+                )}
+                {f.type === "long_text" && (
+                  <div className="h-16 rounded bg-[#383a40] px-3 pt-2">
+                    <span className="text-xs text-[#4e5058]">Type here...</span>
+                  </div>
+                )}
+                {(f.type === "single_select" || f.type === "multi_select") && f.options && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {f.options.map(o => <span key={o} className="text-xs px-2.5 py-1 rounded-full bg-[#383a40] text-[#b5bac1]">{o}</span>)}
+                  </div>
+                )}
+                {f.type === "rating" && (
+                  <div className="flex gap-1">{[1,2,3,4,5].map(n => <span key={n} className="text-lg text-[#3f4147]">★</span>)}</div>
+                )}
+                {f.type === "checkbox" && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded border border-[#4e5058]" />
+                    <span className="text-xs text-[#949ba4]">Yes / No</span>
+                  </div>
+                )}
               </div>
             )}
-            {f.conditionConfig && (
-              <p className="text-xs text-[#b5bac1] mt-1">when &quot;{fields.find(x => x.id === f.conditionConfig!.sourceFieldId)?.label}&quot; {f.conditionConfig.operator} &quot;{f.conditionConfig.value}&quot;</p>
-            )}
-            {edges.filter(e => e.source === f.id).map(e => (
-              <p key={e.target} className="text-xs text-[#949ba4] mt-1">
-                ↳ {e.sourceHandle && <span className={e.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]"}>{e.sourceHandle}</span>} → {fields.find(x => x.id === e.target)?.label ?? e.target}
+            {edges.filter(e => e.source === f.id && e.sourceHandle).map(e => (
+              <p key={e.target} className="text-[11px] text-[#4e5058] mt-1 pl-2">
+                <span className={e.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]"}>{e.sourceHandle}</span> → {fields.find(x => x.id === e.target)?.label}
               </p>
             ))}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
