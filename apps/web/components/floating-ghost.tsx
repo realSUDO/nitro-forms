@@ -14,6 +14,8 @@ export default function FloatingGhost({
 }: FloatingGhostProps) {
   const [pos, setPos] = useState({ x: 82, y: 30 });
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [mouseDist, setMouseDist] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
   const [expression, setExpression] = useState<"normal" | "surprised" | "happy">("normal");
 
   const randomPos = useCallback(() => {
@@ -33,10 +35,17 @@ export default function FloatingGhost({
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       setMouse({ x: (e.clientX / window.innerWidth - 0.5) * 2, y: (e.clientY / window.innerHeight - 0.5) * 2 });
+      // Distance from ghost center (approximate)
+      const ghostCenterX = (pos.x / 100) * window.innerWidth + size / 2;
+      const ghostCenterY = (pos.y / 100) * window.innerHeight + size / 2;
+      const dist = Math.hypot(e.clientX - ghostCenterX, e.clientY - ghostCenterY);
+      setMouseDist(dist);
     };
+    const onScroll = () => setScrollY(window.scrollY);
     window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
+    window.addEventListener("scroll", onScroll);
+    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("scroll", onScroll); };
+  }, [pos, size]);
 
   const onHover = () => {
     setExpression("surprised");
@@ -46,11 +55,14 @@ export default function FloatingGhost({
 
   const eyeX = mouse.x * 8;
   const eyeY = mouse.y * 5;
+  // Eyes get bigger when cursor is far away (looking harder)
+  const farAway = mouseDist > 400;
+  const eyeScale = farAway ? 1.4 : 1;
 
   return (
     <motion.div
       className={`fixed z-30 hidden lg:block ${className}`}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, marginTop: -scrollY * 0.15 }}
       animate={{ left: `${pos.x}%`, top: `${pos.y}%`, rotate: [0, 4, -3, 2, 0] }}
       transition={{
         left: { duration: 3.5, ease: [0.4, 0, 0.2, 1] },
@@ -95,11 +107,13 @@ export default function FloatingGhost({
           <path d="M153 206C153 171 178 154 256 154C334 154 359 171 359 206V226C359 265 323 280 256 280C189 280 153 265 153 226V206Z" fill="black" />
 
           {/* eyes */}
-          <g transform={`translate(${eyeX}, ${eyeY})`}>
+          <g transform={`translate(${eyeX}, ${eyeY}) scale(${eyeScale})`} style={{ transformOrigin: "256px 220px" }}>
             {expression === "surprised" ? (
               <><circle cx="225" cy="218" r="15" fill="white" /><circle cx="287" cy="218" r="15" fill="white" /><circle cx="225" cy="218" r="5" fill="black" /><circle cx="287" cy="218" r="5" fill="black" /></>
             ) : expression === "happy" ? (
               <><path d="M205 225C216 210 236 210 246 225" stroke="white" strokeWidth="16" strokeLinecap="round" /><path d="M267 225C278 210 298 210 309 225" stroke="white" strokeWidth="16" strokeLinecap="round" /></>
+            ) : farAway ? (
+              <><circle cx="225" cy="218" r="13" fill="white" /><circle cx="287" cy="218" r="13" fill="white" /><circle cx={225 + eyeX * 0.3} cy={218 + eyeY * 0.3} r="5" fill="black" /><circle cx={287 + eyeX * 0.3} cy={218 + eyeY * 0.3} r="5" fill="black" /></>
             ) : (
               <><path d="M205 221C216 205 236 206 246 224" stroke="white" strokeWidth="16" strokeLinecap="round" /><path d="M267 224C278 206 298 205 309 221" stroke="white" strokeWidth="16" strokeLinecap="round" /></>
             )}
