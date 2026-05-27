@@ -160,9 +160,6 @@ export function CreatorDashboard() {
             <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22]">
               <span className="text-sm font-semibold text-[#f2f3f5]"><Hash size={14} className="inline text-[#949ba4]" /> {formList.find(f => f.slug === previewSlug)?.title ?? previewSlug}</span>
               <div className="flex items-center gap-2">
-                <Link href={`/f/${previewSlug}`} target="_blank" className="px-3 py-1 rounded text-xs text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
-                  Open
-                </Link>
                 <Link href={`/builder/${formList.find(f => f.slug === previewSlug)?.id ?? ""}`} className="px-3 py-1 rounded text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
                   Edit
                 </Link>

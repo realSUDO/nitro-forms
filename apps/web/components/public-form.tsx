@@ -153,7 +153,35 @@ export function PublicForm() {
   }
 
   function handleNext() {
-    if (!currentFieldId) return;
+    if (!currentFieldId || !field) return;
+
+    // Validate current field before advancing
+    const answer = answers[field.id];
+    if (field.required) {
+      if (answer === undefined || answer === null || answer === "") {
+        setFieldErrors({ [field.id]: "This field is required" });
+        return;
+      }
+      if (Array.isArray(answer) && answer.length === 0) {
+        setFieldErrors({ [field.id]: "Please select at least one option" });
+        return;
+      }
+    }
+    // Type validation
+    if (field.type === "email" && answer) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(answer))) {
+        setFieldErrors({ [field.id]: "Please enter a valid email" });
+        return;
+      }
+    }
+    if (field.type === "number" && answer !== undefined && answer !== "") {
+      if (isNaN(Number(answer))) {
+        setFieldErrors({ [field.id]: "Please enter a valid number" });
+        return;
+      }
+    }
+    setFieldErrors({});
+
     if (hasFlow) {
       const nextId = resolveNextVisible(currentFieldId);
       if (nextId) {
