@@ -156,7 +156,7 @@ export function CreatorDashboard() {
             </div>
           </div>
         ) : previewSlug ? (
-          <div className="absolute inset-0 flex flex-col bg-[#313338] z-10">
+          <div className="absolute inset-0 flex flex-col bg-[#1e1f22] z-10">
             <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22]">
               <span className="text-sm font-semibold text-[#f2f3f5]"><Hash size={14} className="inline text-[#949ba4]" /> {formList.find(f => f.slug === previewSlug)?.title ?? previewSlug}</span>
               <div className="flex items-center gap-2">
@@ -305,50 +305,51 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
   }
 
   return (
-    <div className="max-w-lg mx-auto">
-      {/* Form header as a message */}
-      <div className="flex gap-3 mb-4 pb-4 border-b border-[#3f4147]/30">
-        <div className="w-10 h-10 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0">
+    <div className="max-w-2xl">
+      {/* First message with avatar */}
+      <div className="flex gap-4 py-1 hover:bg-[#2b2d31]/50 px-2 rounded">
+        <div className="w-10 h-10 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0 mt-0.5">
           <img src="/nitro.svg" alt="" className="w-6 h-6" />
         </div>
-        <div>
-          <p className="text-sm font-semibold text-[#f2f3f5]">{form.title}</p>
-          <p className="text-xs text-[#949ba4]">{fields.filter(f => f.type !== "condition").length} fields · {edges.length} connections · {form.status}</p>
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-2">
+            <span className="text-sm font-semibold text-[#f2f3f5]">NitroForms</span>
+            <span className="text-[9px] bg-[#5865f2] text-white px-1 rounded">BOT</span>
+            <span className="text-[11px] text-[#949ba4]">Today</span>
+          </div>
+          <p className="text-base text-[#f2f3f5] mt-0.5">Here&apos;s the structure of <strong>{form.title}</strong> ({fields.filter(f => f.type !== "condition").length} fields, {edges.length} connections)</p>
         </div>
       </div>
 
-      {/* Fields as message list */}
-      <div className="space-y-1">
-        {fields.map(f => (
-          <div key={f.id} className={cn(
-            "px-3 py-2 rounded hover:bg-[#2b2d31] transition-colors",
-            f.type === "condition" && "border-l-2 border-[#faa61a]"
-          )}>
-            <div className="flex items-center gap-2">
-              <span className={cn("text-[10px] font-mono", f.type === "condition" ? "text-[#faa61a]" : "text-[#4e5058]")}>{f.type === "condition" ? "IF" : f.type.replace("_", " ")}</span>
-              {f.required && <span className="w-1 h-1 rounded-full bg-[#ed4245]" />}
-            </div>
-            <p className="text-sm text-[#f2f3f5]">{f.label}</p>
+      {/* Each field as a follow-up message (no avatar, indented) */}
+      {fields.map((f, i) => (
+        <div key={f.id} className={cn("flex gap-4 py-0.5 hover:bg-[#2b2d31]/50 px-2 rounded group", f.type === "condition" && "border-l-2 border-[#faa61a] ml-14")}>
+          <div className="w-10 shrink-0 flex items-center justify-center">
+            <span className="text-xs text-[#949ba4] opacity-0 group-hover:opacity-100">{i + 1}</span>
+          </div>
+          <div className="min-w-0 py-0.5">
+            <p className="text-base text-[#f2f3f5]">
+              {f.type === "condition" && <span className="text-[#faa61a] font-mono text-xs mr-1">IF</span>}
+              {f.label}
+              {f.required && <span className="text-[#ed4245] text-xs ml-1">*</span>}
+              <span className="text-xs text-[#949ba4] ml-2">{f.type.replace("_", " ")}</span>
+            </p>
             {f.options && (
               <div className="flex flex-wrap gap-1 mt-1">
-                {f.options.map(o => <span key={o} className="text-[10px] px-1.5 py-0.5 rounded bg-[#3f4147] text-[#949ba4]">{o}</span>)}
+                {f.options.map(o => <span key={o} className="text-xs px-2 py-1 rounded bg-[#3f4147] text-[#f2f3f5]">{o}</span>)}
               </div>
             )}
             {f.conditionConfig && (
-              <p className="text-[10px] text-[#faa61a] mt-0.5">{f.conditionConfig.operator} &quot;{f.conditionConfig.value}&quot;</p>
+              <p className="text-xs text-[#b5bac1] mt-1">when &quot;{fields.find(x => x.id === f.conditionConfig!.sourceFieldId)?.label}&quot; {f.conditionConfig.operator} &quot;{f.conditionConfig.value}&quot;</p>
             )}
-            {edges.filter(e => e.source === f.id).length > 0 && (
-              <div className="mt-1 space-y-0.5">
-                {edges.filter(e => e.source === f.id).map(e => (
-                  <p key={e.target} className="text-[10px] text-[#4e5058]">
-                    ↳ {e.sourceHandle && <span className={e.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]"}>{e.sourceHandle}:</span>} {fields.find(x => x.id === e.target)?.label ?? e.target}
-                  </p>
-                ))}
-              </div>
-            )}
+            {edges.filter(e => e.source === f.id).map(e => (
+              <p key={e.target} className="text-xs text-[#949ba4] mt-1">
+                ↳ {e.sourceHandle && <span className={e.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]"}>{e.sourceHandle}</span>} → {fields.find(x => x.id === e.target)?.label ?? e.target}
+              </p>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
