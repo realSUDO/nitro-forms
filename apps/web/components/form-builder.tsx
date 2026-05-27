@@ -73,26 +73,33 @@ function ConditionNode({ data }: { data: { field: FormField; selected: boolean; 
   const { field, onDelete } = data;
   return (
     <div className={cn(
-      "w-[260px] rounded-lg border p-4 shadow-lg transition-all relative",
-      data.selected ? "border-[#faa61a] shadow-[0_0_15px_rgba(250,166,26,0.3)] bg-[#2b2d31]" : "border-[#faa61a]/40 bg-[#2b2d31] hover:border-[#faa61a]/70"
+      "w-[220px] rounded-lg border p-3 shadow-lg transition-all relative group",
+      data.selected ? "border-[#faa61a] shadow-[0_0_15px_rgba(250,166,26,0.2)] bg-[#2b2d31]" : "border-[#faa61a]/30 bg-[#2b2d31] hover:border-[#faa61a]/60"
     )}>
       <Handle type="target" position={Position.Top} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#faa61a] !transition-colors" />
-      <Handle type="source" position={Position.Bottom} id="yes" style={{ left: "30%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#3ba55c] !border-0 hover:!bg-[#3ba55c] !transition-colors" />
-      <Handle type="source" position={Position.Bottom} id="no" style={{ left: "70%" }} className="!w-1.5 !h-1.5 !rounded-full !bg-[#ed4245] !border-0 hover:!bg-[#ed4245] !transition-colors" />
-      <div className="flex items-center justify-between mb-2">
+      <Handle type="source" position={Position.Bottom} id="yes" style={{ left: "30%" }} className="!w-2 !h-2 !rounded-full !bg-[#3ba55c] !border-0" />
+      <Handle type="source" position={Position.Bottom} id="no" style={{ left: "70%" }} className="!w-2 !h-2 !rounded-full !bg-[#ed4245] !border-0" />
+
+      <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
-          <GitBranch size={12} className="text-[#faa61a]" />
-          <span className="text-[10px] font-mono uppercase text-[#faa61a]">IF / ELSE</span>
+          <GitBranch size={11} className="text-[#faa61a]" />
+          <span className="text-[10px] font-mono text-[#faa61a]">IF</span>
         </div>
-        <button onClick={onDelete} className="p-1 rounded text-[#949ba4] hover:text-red-400 hover:bg-[#3f4147] transition-colors">
-          <Trash2 size={11} />
+        <button onClick={onDelete} className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#949ba4] hover:text-red-400 transition-all">
+          <Trash2 size={10} />
         </button>
       </div>
-      <p className="text-sm font-medium text-[#f2f3f5] mb-2">{field.label}</p>
-      <p className="text-[10px] text-[#949ba4] mb-3">Route based on answer value</p>
-      <div className="flex justify-between text-[10px] font-mono border-t border-[#3f4147] pt-2">
-        <span className="flex items-center gap-1 text-[#3ba55c]"><span className="w-1.5 h-1.5 rounded-full bg-[#3ba55c]" /> Yes</span>
-        <span className="flex items-center gap-1 text-[#ed4245]"><span className="w-1.5 h-1.5 rounded-full bg-[#ed4245]" /> No</span>
+      <p className="text-xs text-[#f2f3f5] mb-2">{field.label}</p>
+      {field.conditionConfig?.sourceFieldId && (
+        <p className="text-[10px] text-[#949ba4] mb-2 truncate">
+          {field.conditionConfig.operator} &quot;{field.conditionConfig.value}&quot;
+        </p>
+      )}
+
+      {/* Bottom labels near dots */}
+      <div className="flex justify-between px-2 mt-1">
+        <span className="text-[9px] font-mono text-[#3ba55c]">yes</span>
+        <span className="text-[9px] font-mono text-[#ed4245]">no</span>
       </div>
     </div>
   );
@@ -103,7 +110,7 @@ function FieldNode({ data }: { data: { field: FormField; selected: boolean; onDe
   const { field, onDelete } = data;
   return (
     <div className={cn(
-      "w-[280px] rounded-lg border bg-[#2b2d31] p-4 shadow-lg transition-all relative",
+      "w-[280px] rounded-lg border bg-[#2b2d31] p-4 shadow-lg transition-all relative group",
       data.selected ? "border-[#5865f2] shadow-[0_0_15px_rgba(88,101,242,0.3)]" : "border-[#3f4147] hover:border-[#4e5058]"
     )}>
       <Handle type="target" position={Position.Top} className="!w-1.5 !h-1.5 !rounded-full !bg-[#4e5058] !border-0 hover:!bg-[#5865f2] !transition-colors" />
@@ -115,19 +122,27 @@ function FieldNode({ data }: { data: { field: FormField; selected: boolean; onDe
         </div>
         <div className="flex items-center gap-1">
           {field.required && <span className="text-[9px] font-mono text-[#5865f2] bg-[#5865f2]/10 px-1.5 py-0.5 rounded">REQ</span>}
-          <button onClick={onDelete} className="p-1 rounded text-[#949ba4] hover:text-red-400 hover:bg-[#3f4147] transition-colors">
+          <button onClick={onDelete} className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#949ba4] hover:text-red-400 hover:bg-[#3f4147] transition-all">
             <Trash2 size={11} />
           </button>
         </div>
       </div>
-      <p className="text-sm font-medium text-[#f2f3f5] mb-1">{field.label}</p>
-      {field.placeholder && <p className="text-xs text-[#4e5058]">{field.placeholder}</p>}
+      {/* Editable label */}
+      <input
+        defaultValue={field.label}
+        onBlur={(e) => { if (e.target.value !== field.label) { (data as any).onUpdate?.({ ...field, label: e.target.value }); } }}
+        className="w-full text-sm font-medium text-[#f2f3f5] bg-transparent focus:bg-[#1e1f22] focus:rounded focus:px-2 focus:py-0.5 focus:outline-none focus:ring-1 focus:ring-[#5865f2] transition-all mb-1 -ml-0.5"
+      />
+      {field.placeholder && <p className="text-[11px] text-[#4e5058]">{field.placeholder}</p>}
       {field.options && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {field.options.slice(0, 3).map(o => (
-            <span key={o} className="text-[10px] px-1.5 py-0.5 rounded bg-[#3f4147] text-[#949ba4]">{o}</span>
+        <div className="mt-2 space-y-1">
+          {field.options.slice(0, 4).map((o, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span className="w-4 h-4 rounded-sm bg-[#3f4147] flex items-center justify-center text-[9px] text-[#949ba4] font-bold shrink-0">{String.fromCharCode(65 + i)}</span>
+              <span className="text-[11px] text-[#b5bac1]">{o}</span>
+            </div>
           ))}
-          {field.options.length > 3 && <span className="text-[10px] text-[#949ba4]">+{field.options.length - 3}</span>}
+          {field.options.length > 4 && <p className="text-[10px] text-[#4e5058] pl-6">+{field.options.length - 4} more</p>}
         </div>
       )}
     </div>
@@ -394,7 +409,7 @@ export function FormBuilder() {
         <div className="flex-1">
           <ReactFlow
             nodes={nodes}
-            edges={edges}
+            edges={edges.map(e => e.id === selectedEdgeId ? { ...e, style: { stroke: "#ffffff", strokeWidth: 2.5 }, animated: true } : e)}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodesDelete={(deleted) => {
@@ -485,44 +500,34 @@ export function FormBuilder() {
         }}
       />
       <aside className="w-[300px] shrink-0 bg-[#2b2d31] flex flex-col overflow-y-auto">
-        <div className="px-4 py-3 border-b border-[#3f4147]">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">
-            {selectedField ? "Field Settings" : "Inspector"}
+        <div className="px-4 py-3 border-b border-[#3f4147]/50">
+          <p className="text-xs font-semibold text-[#f2f3f5]">
+            {selectedField ? "Settings" : selectedEdgeId ? "Connection" : "Inspector"}
           </p>
         </div>
         {selectedField ? (
-          <div className="px-4 py-4 space-y-5 flex-1">
+          <div className="px-4 py-4 space-y-4 flex-1">
             {/* Type badge */}
             <div className="flex items-center gap-2">
               <span className={cn(
-                "px-2 py-1 rounded text-[10px] font-mono uppercase",
+                "px-2.5 py-1 rounded-md text-[10px] font-mono",
                 selectedField.type === "condition" ? "bg-[#faa61a]/10 text-[#faa61a]" : "bg-[#5865f2]/10 text-[#5865f2]"
               )}>
                 {selectedField.type.replace("_", " ")}
               </span>
-              {selectedField.required && <span className="px-2 py-1 rounded text-[10px] font-mono bg-red-500/10 text-red-400">Required</span>}
             </div>
 
             {/* Label */}
             <div>
-              <label className="block text-[11px] font-mono uppercase text-[#949ba4] mb-1.5">Label</label>
-              <input
-                value={selectedField.label}
-                onChange={(e) => updateFieldData({ ...selectedField, label: e.target.value })}
-                className="w-full bg-[#1e1f22] rounded-lg px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2] transition-shadow"
-              />
+              <label className="block text-[11px] text-[#949ba4] mb-1.5">Label</label>
+              <input value={selectedField.label} onChange={(e) => updateFieldData({ ...selectedField, label: e.target.value })} className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
             </div>
 
             {/* Placeholder */}
             {selectedField.type !== "condition" && (
               <div>
-                <label className="block text-[11px] font-mono uppercase text-[#949ba4] mb-1.5">Placeholder</label>
-                <input
-                  value={selectedField.placeholder ?? ""}
-                  onChange={(e) => updateFieldData({ ...selectedField, placeholder: e.target.value })}
-                  placeholder="Hint text for respondent..."
-                  className="w-full bg-[#1e1f22] rounded-lg px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2] transition-shadow"
-                />
+                <label className="block text-[11px] text-[#949ba4] mb-1.5">Placeholder</label>
+                <input value={selectedField.placeholder ?? ""} onChange={(e) => updateFieldData({ ...selectedField, placeholder: e.target.value })} placeholder="Hint text..." className="w-full bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]" />
               </div>
             )}
 
