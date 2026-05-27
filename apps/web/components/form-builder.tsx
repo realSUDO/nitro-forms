@@ -200,7 +200,6 @@ export function FormBuilder() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [saved, setSaved] = useState(true);
-  const [showQr, setShowQr] = useState(false);
   const [formSettings, setFormSettings] = useState<Record<string, unknown>>({});
 
   // History (placeholder for future undo/redo)
@@ -322,9 +321,13 @@ export function FormBuilder() {
     }
   }
 
-  function handleShare() {
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function handleCopyLink() {
     navigator.clipboard.writeText(`${window.location.origin}/f/${form?.slug}`);
-    alert(`Link copied!`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   const [aiPrompt, setAiPrompt] = useState("");
@@ -448,17 +451,14 @@ export function FormBuilder() {
             <button onClick={handleSave} disabled={saved || updateForm.isPending} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors disabled:opacity-40">
               <Save size={12} /> {updateForm.isPending ? "..." : "Save"}
             </button>
-            <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+            <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
               <Share2 size={12} /> Share
-            </button>
-            <button onClick={() => setShowQr(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
-              <QrCode size={12} /> QR
             </button>
             <button onClick={() => setShowAi(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs bg-[#5865f2]/10 text-[#bec2ff] border border-[#5865f2]/30 hover:bg-[#5865f2]/20 transition-colors">
               <Sparkles size={12} /> AI Generate
             </button>
-            <button onClick={handlePublish} className="px-3 py-1.5 rounded text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
-              {form.status === "published" ? "Unpublish" : "Publish"}
+            <button onClick={handlePublish} disabled={publishForm.isPending || unpublishForm.isPending} className={cn("px-3 py-1.5 rounded text-xs text-white transition-colors disabled:opacity-50", form.status === "published" ? "bg-[#3f4147] hover:bg-[#4e5058]" : "bg-[#3ba55c] hover:bg-[#2d8049]")}>
+              {(publishForm.isPending || unpublishForm.isPending) ? "..." : form.status === "published" ? "Unpublish" : "Publish"}
             </button>
           </div>
         </header>
@@ -794,18 +794,32 @@ export function FormBuilder() {
         )}
       </aside>
 
-      {/* QR Code Modal */}
-      {showQr && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowQr(false)}>
-          <div className="bg-[#2b2d31] rounded-xl p-6 shadow-xl border border-[#3f4147] flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between w-full">
-              <p className="text-sm font-semibold text-[#f2f3f5]">QR Code</p>
-              <button onClick={() => setShowQr(false)} className="text-[#949ba4] hover:text-[#f2f3f5]"><X size={16} /></button>
+      {/* Share Modal */}
+      {showShare && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setShowShare(false)}>
+          <div className="bg-[#2b2d31] rounded-xl p-6 shadow-xl border border-[#3f4147] w-[360px]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-[#f2f3f5]">Share Form</p>
+              <button onClick={() => setShowShare(false)} className="text-[#949ba4] hover:text-[#f2f3f5]"><X size={16} /></button>
             </div>
-            <QRCodeCanvas id="qr-canvas" value={`${typeof window !== "undefined" ? window.location.origin : ""}/f/${form?.slug}`} size={200} bgColor="#ffffff" fgColor="#000000" />
-            <button onClick={() => { const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement | null; if (!canvas) return; const url = canvas.toDataURL("image/png"); const a = document.createElement("a"); a.href = url; a.download = `${form?.slug ?? "form"}-qr.png`; a.click(); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
-              <Download size={12} /> Download PNG
-            </button>
+
+            {/* Copy link */}
+            <div className="flex items-center gap-2 mb-5">
+              <div className="flex-1 bg-[#1e1f22] rounded px-3 py-2 text-xs text-[#949ba4] truncate">
+                {typeof window !== "undefined" ? window.location.origin : ""}/f/{form?.slug}
+              </div>
+              <button onClick={handleCopyLink} className={cn("px-3 py-2 rounded text-xs font-medium transition-colors", copied ? "bg-[#3ba55c] text-white" : "bg-[#5865f2] text-white hover:bg-[#4752c4]")}>
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+
+            {/* QR */}
+            <div className="flex flex-col items-center gap-3 pt-4 border-t border-[#3f4147]">
+              <QRCodeCanvas id="qr-canvas" value={`${typeof window !== "undefined" ? window.location.origin : ""}/f/${form?.slug}`} size={160} bgColor="#ffffff" fgColor="#000000" />
+              <button onClick={() => { const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement | null; if (!canvas) return; const url = canvas.toDataURL("image/png"); const a = document.createElement("a"); a.href = url; a.download = `${form?.slug ?? "form"}-qr.png`; a.click(); }} className="text-xs text-[#949ba4] hover:text-[#f2f3f5] transition-colors">
+                Download QR as PNG
+              </button>
+            </div>
           </div>
         </div>
       )}
