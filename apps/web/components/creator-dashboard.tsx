@@ -34,7 +34,7 @@ export function CreatorDashboard() {
   });
   const publishForm = trpc.form.publish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
   const unpublishForm = trpc.form.unpublish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
-  const deleteForm = trpc.form.delete.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const deleteForm = trpc.form.delete.useMutation({ onSuccess: () => { utils.form.listMine.invalidate(); setPreviewSlug(null); } });
   const renameForm = trpc.form.rename.useMutation({ onSuccess: () => { utils.form.listMine.invalidate(); setRenaming(null); } });
   const duplicateForm = trpc.form.duplicate.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
 
@@ -331,7 +331,8 @@ export function CreatorDashboard() {
   );
 }
 
-function FormPreview({ form }: { form: { id: string; title: string; slug: string; status: string; fieldsJson?: unknown; settingsJson?: unknown } }) {
+function FormPreview({ form }: { form: { id: string; title: string; slug: string; status: string; fieldsJson?: unknown; settingsJson?: unknown } | undefined }) {
+  if (!form) return null;
   const fields = (form.fieldsJson ?? []) as Array<{ id: string; type: string; label: string; required?: boolean; options?: string[]; conditionConfig?: { sourceFieldId: string; operator: string; value: string } }>;
   const settings = form.settingsJson as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
   const edges = settings?.edges ?? [];
