@@ -51,13 +51,14 @@ export default function AnalyticsIndex() {
           )}
         </div>
       </aside>
-      <div className="w-1 cursor-col-resize bg-transparent hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
+      <div className="w-1 cursor-col-resize bg-[#1e1f22] hover:bg-[#5865f2]/50 active:bg-[#5865f2] transition-colors shrink-0"
         onMouseDown={(e) => {
           const startX = e.clientX;
           const aside = e.currentTarget.previousElementSibling as HTMLElement;
           const startW = aside.offsetWidth;
+          document.body.style.userSelect = "none";
           const onMove = (ev: MouseEvent) => { aside.style.width = `${Math.min(Math.max(startW + (ev.clientX - startX), 160), 400)}px`; };
-          const onUp = () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+          const onUp = () => { document.body.style.userSelect = ""; document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
           document.addEventListener("mousemove", onMove);
           document.addEventListener("mouseup", onUp);
         }}
