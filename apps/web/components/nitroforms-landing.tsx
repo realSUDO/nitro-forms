@@ -236,26 +236,25 @@ function TiltMockup() {
 function DashboardMockup() {
   return (
     <div className="flex h-[420px] overflow-hidden rounded-xl bg-[#1f1f23]">
-      {/* Left sidebar — Discord channel style */}
-      <div className="w-48 shrink-0 border-r border-white/[0.06] bg-[#1a1b1e] p-3">
-        <p className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-widest text-[#8f8fa0]">
-          NitroForms
-        </p>
+      {/* Server rail */}
+      <div className="w-[42px] shrink-0 bg-[#1e1f22] flex flex-col items-center py-3 gap-2">
+        <div className="w-7 h-7 rounded-full bg-[#5865f2] flex items-center justify-center text-[9px] font-bold text-white">N</div>
+        <div className="w-5 h-0.5 rounded bg-[#3f4147] my-1" />
+        <div className="w-7 h-7 rounded-full bg-[#3f4147]" />
+        <div className="w-7 h-7 rounded-full bg-[#3f4147]" />
+        <div className="w-7 h-7 rounded-full bg-[#3f4147]" />
+      </div>
+
+      {/* Channel sidebar */}
+      <div className="w-[140px] shrink-0 border-r border-white/[0.04] bg-[#2b2d31] py-3 px-2">
+        <p className="px-2 mb-2 text-[11px] font-semibold text-white">NitroForms</p>
         <div className="space-y-0.5">
-          {[
-            { name: "# welcome", active: false },
-            { name: "# dashboard", active: false },
-          ].map(({ name, active }) => (
-            <div key={name} className={cn("rounded px-2.5 py-1.5 text-[12px]", active ? "bg-[#3f4147] text-white" : "text-[#8f8fa0]")}>{name}</div>
-          ))}
-          <p className="pt-3 pb-1 font-mono text-[9px] font-semibold uppercase tracking-widest text-[#8f8fa0]/50">Forms</p>
-          {[
-            { name: "# Anime Fan Survey", active: true },
-            { name: "# Product Feedback", active: false },
-            { name: "# Gaming Signup", active: false },
-          ].map(({ name, active }) => (
-            <div key={name} className={cn("rounded px-2.5 py-1.5 text-[12px]", active ? "bg-[#3f4147] text-white" : "text-[#8f8fa0]")}>{name}</div>
-          ))}
+          <div className="rounded px-2 py-1 text-[11px] text-[#949ba4]"># welcome</div>
+          <div className="rounded px-2 py-1 text-[11px] text-[#949ba4]"># dashboard</div>
+          <p className="pt-2 pb-0.5 px-2 text-[8px] font-semibold uppercase tracking-wider text-[#949ba4]/50">Forms</p>
+          <div className="rounded px-2 py-1 text-[11px] bg-[#3f4147] text-white"># Anime Survey</div>
+          <div className="rounded px-2 py-1 text-[11px] text-[#949ba4]"># Feedback</div>
+          <div className="rounded px-2 py-1 text-[11px] text-[#949ba4]"># Gaming</div>
         </div>
       </div>
 
@@ -273,15 +272,17 @@ function DashboardMockup() {
         </div>
 
         {/* Canvas with nodes and edges */}
-        <div className="flex-1 relative bg-[#292a2d] overflow-hidden">
+        <div className="flex-1 relative bg-[#313338] overflow-hidden">
           {/* Grid dots */}
-          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #8f8fa0 0.5px, transparent 0.5px)", backgroundSize: "20px 20px" }} />
+          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "radial-gradient(circle, #949ba4 0.5px, transparent 0.5px)", backgroundSize: "24px 24px" }} />
 
           {/* Node 1 — Name */}
-          <div className="absolute left-[20%] top-[12%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3 transition-all hover:border-[#5865f2] hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] hover:-translate-y-0.5 cursor-default">
-            <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SHORT TEXT</p>
-            <p className="text-[11px] text-white">Your Name</p>
-            <div className="mt-2 h-5 rounded bg-[#1f1f23]" />
+          <div className="absolute left-[20%] top-[12%] w-[140px] rounded-lg border border-[#3f4147] bg-[#2b2d31] p-3 transition-all hover:border-[#5865f2] hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] hover:-translate-y-0.5 cursor-default">
+            <div className="absolute -top-1 left-1/2 w-2 h-2 rounded-full bg-[#4e5058] -translate-x-1/2" />
+            <p className="text-[9px] font-mono text-[#949ba4] mb-1">SHORT TEXT</p>
+            <p className="text-[11px] text-white font-medium">Your Name</p>
+            <div className="mt-2 h-5 rounded bg-[#1e1f22] border border-[#3f4147]" />
+            <div className="absolute -bottom-1 left-1/2 w-2 h-2 rounded-full bg-[#4e5058] -translate-x-1/2" />
           </div>
 
           {/* Edge 1→2 */}
@@ -295,17 +296,20 @@ function DashboardMockup() {
           </svg>
 
           {/* Node 2 — Genre Select */}
-          <div className="absolute left-[18%] top-[38%] w-[140px] rounded-lg border border-[#454655]/50 bg-[#2b2d31] p-3 transition-all hover:border-[#5865f2] hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] hover:-translate-y-0.5 cursor-default">
-            <p className="text-[9px] font-mono text-[#8f8fa0] mb-1">SINGLE SELECT</p>
-            <p className="text-[11px] text-white">Fav Genre</p>
+          <div className="absolute left-[18%] top-[38%] w-[140px] rounded-lg border border-[#3f4147] bg-[#2b2d31] p-3 transition-all hover:border-[#5865f2] hover:shadow-[0_0_12px_rgba(88,101,242,0.3)] hover:-translate-y-0.5 cursor-default">
+            <div className="absolute -top-1 left-1/2 w-2 h-2 rounded-full bg-[#4e5058] -translate-x-1/2" />
+            <p className="text-[9px] font-mono text-[#949ba4] mb-1">SINGLE SELECT</p>
+            <p className="text-[11px] text-white font-medium">Fav Genre</p>
             <div className="mt-1.5 space-y-1">
-              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3f4147] text-[7px] text-[#8f8fa0] flex items-center justify-center">A</span><span className="text-[9px] text-[#8f8fa0]">Shonen</span></div>
-              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3f4147] text-[7px] text-[#8f8fa0] flex items-center justify-center">B</span><span className="text-[9px] text-[#8f8fa0]">Seinen</span></div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3f4147] text-[7px] text-[#949ba4] flex items-center justify-center font-bold">A</span><span className="text-[9px] text-[#b5bac1]">Shonen</span></div>
+              <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#3f4147] text-[7px] text-[#949ba4] flex items-center justify-center font-bold">B</span><span className="text-[9px] text-[#b5bac1]">Seinen</span></div>
             </div>
+            <div className="absolute -bottom-1 left-1/2 w-2 h-2 rounded-full bg-[#4e5058] -translate-x-1/2" />
           </div>
 
           {/* Node 3 — Condition */}
-          <div className="absolute left-[30%] top-[65%] w-[120px] rounded-lg border border-[#faa61a]/40 bg-[#2b2d31] p-2.5 transition-all hover:border-[#faa61a] hover:shadow-[0_0_12px_rgba(250,166,26,0.3)] hover:-translate-y-0.5 cursor-default">
+          <div className="absolute left-[30%] top-[65%] w-[120px] rounded-lg border border-[#faa61a]/30 bg-[#2b2d31] p-2.5 transition-all hover:border-[#faa61a] hover:shadow-[0_0_12px_rgba(250,166,26,0.3)] hover:-translate-y-0.5 cursor-default">
+            <div className="absolute -top-1 left-1/2 w-2 h-2 rounded-full bg-[#4e5058] -translate-x-1/2" />
             <div className="flex items-center gap-1 mb-1">
               <span className="text-[9px] font-mono text-[#faa61a]">IF</span>
             </div>
@@ -314,6 +318,8 @@ function DashboardMockup() {
               <span className="text-[#3ba55c]">yes</span>
               <span className="text-[#ed4245]">no</span>
             </div>
+            <div className="absolute -bottom-1 left-[30%] w-2 h-2 rounded-full bg-[#3ba55c] -translate-x-1/2" />
+            <div className="absolute -bottom-1 left-[70%] w-2 h-2 rounded-full bg-[#ed4245] -translate-x-1/2" />
           </div>
 
           {/* Node 4 — Rating (yes branch) */}
@@ -333,26 +339,26 @@ function DashboardMockup() {
       </div>
 
       {/* Right — Inspector */}
-      <div className="w-48 shrink-0 border-l border-white/[0.06] bg-[#1a1b1e] p-4">
-        <p className="mb-3 text-[11px] font-semibold text-white">Settings</p>
+      <div className="w-48 shrink-0 border-l border-white/[0.04] bg-[#2b2d31] p-4">
+        <p className="mb-3 text-xs font-semibold text-white">Settings</p>
         <div className="space-y-3">
           <div>
-            <p className="text-[9px] text-[#8f8fa0] mb-1">Label</p>
-            <div className="h-7 rounded bg-[#292a2d] px-2 flex items-center text-[10px] text-white">Fav Genre</div>
+            <p className="text-[9px] text-[#949ba4] mb-1">Label</p>
+            <div className="h-7 rounded-lg bg-[#1e1f22] px-2 flex items-center text-[10px] text-white">Fav Genre</div>
           </div>
           <div>
-            <p className="text-[9px] text-[#8f8fa0] mb-1">Type</p>
-            <div className="h-7 rounded bg-[#5865f2]/10 px-2 flex items-center text-[10px] text-[#bec2ff]">single select</div>
+            <p className="text-[9px] text-[#949ba4] mb-1">Type</p>
+            <div className="h-7 rounded-lg bg-[#5865f2]/10 px-2 flex items-center text-[10px] text-[#bec2ff]">single select</div>
           </div>
           <div>
-            <p className="text-[9px] text-[#8f8fa0] mb-1">Required</p>
+            <p className="text-[9px] text-[#949ba4] mb-1">Required</p>
             <div className="w-8 h-4 rounded-full bg-[#3ba55c] relative"><div className="absolute right-0.5 top-0.5 w-3 h-3 rounded-full bg-white" /></div>
           </div>
           <div>
-            <p className="text-[9px] text-[#8f8fa0] mb-1">Options</p>
+            <p className="text-[9px] text-[#949ba4] mb-1">Options</p>
             <div className="space-y-1">
               {["Shonen", "Seinen", "Isekai", "Slice of Life"].map(o => (
-                <div key={o} className="h-5 rounded bg-[#292a2d] px-2 flex items-center text-[9px] text-[#8f8fa0]">{o}</div>
+                <div key={o} className="h-5 rounded bg-[#1e1f22] px-2 flex items-center text-[9px] text-[#b5bac1]">{o}</div>
               ))}
             </div>
           </div>
