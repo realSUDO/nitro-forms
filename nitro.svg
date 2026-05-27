@@ -1,30 +1,34 @@
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Polished white robot face icon</title>
+  <desc>A minimal white circular robot mascot icon with transparent background and transparent cut-out eyes and mouth.</desc>
+
   <defs>
-    <mask id="cutouts">
-      <rect width="1024" height="1024" fill="white"/>
-      <ellipse cx="600" cy="472.5" rx="30" ry="62.5" fill="black"/>
-      <ellipse cx="735" cy="477.5" rx="25" ry="52.5" fill="black"/>
-      <rect x="615" y="585" width="120" height="27" rx="13.5" fill="black"/>
-      <circle cx="614" cy="599" r="26" fill="black"/>
-      <circle cx="736" cy="599" r="26" fill="black"/>
+    <!-- Mask makes the eyes and mouth real transparent holes. -->
+    <mask id="face-cutouts" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="black"/>
+      <circle cx="256" cy="256" r="210" fill="white"/>
+
+      <!-- Transparent eye openings -->
+      <path d="M165 184 C230 176 283 246 252 319" stroke="black" stroke-width="36" stroke-linecap="round"/>
+      <path d="M299 134 C385 151 428 233 385 309" stroke="black" stroke-width="36" stroke-linecap="round"/>
+
+      <!-- Transparent mouth opening -->
+      <path d="M319 344 C335 331 361 335 363 348 C365 361 341 373 323 367 C310 363 309 353 319 344Z" fill="black"/>
     </mask>
+
+    <filter id="soft-polish" x="30" y="30" width="452" height="452" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
   </defs>
-  <g mask="url(#cutouts)" fill="#FFFFFF">
-    <line x1="430" y1="360" x2="360" y2="250" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round"/>
-    <circle cx="352.5" cy="237.5" r="32.5"/>
-    <line x1="485" y1="330" x2="475" y2="205" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round"/>
-    <circle cx="472.5" cy="187.5" r="32.5"/>
-    <path d="M390 365
-      C445 245 650 230 760 330
-      C865 420 860 520 850 560
-      C930 570 930 675 850 680
-      C805 790 700 825 625 890
-      C555 950 510 1015 555 990
-      C475 970 455 875 510 810
-      C420 780 345 730 330 650
-      C260 645 260 550 330 550
-      C320 465 335 410 390 365 Z"/>
-    <ellipse cx="332.5" cy="582.5" rx="47.5" ry="47.5"/>
-    <ellipse cx="867.5" cy="587.5" rx="47.5" ry="47.5"/>
+
+  <!-- Transparent background by default -->
+
+  <!-- White robot face. Eyes and mouth are cut out through the mask. -->
+  <g filter="url(#soft-polish)">
+    <circle cx="256" cy="256" r="210" fill="#FFFFFF" mask="url(#face-cutouts)"/>
   </g>
+
+  <!-- Subtle outer polish/edge so the white icon is still visible on light UIs. -->
+  <circle cx="256" cy="256" r="210" stroke="#E5E7EB" stroke-width="8"/>
+  <circle cx="214" cy="170" r="118" stroke="#FFFFFF" stroke-width="10" opacity="0.35"/>
 </svg>
