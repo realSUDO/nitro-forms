@@ -406,29 +406,34 @@ export function FormBuilder() {
             onEdgeClick={(_, edge) => { setSelectedEdgeId(edge.id); setSelectedId(null); }}
             onPaneClick={() => { setSelectedId(null); setSelectedEdgeId(null); }}
             onNodeDragStop={(_, node) => {
-              // Auto-connect: find nearest node above (parent) and below (child)
+              // Auto-connect: find nearest node above as parent
               const thisY = node.position.y;
-              const otherNodes = nodes.filter(n => n.id !== node.id && n.type !== "conditionNode");
-              // Find closest node above that doesn't already connect to this node
+              const otherNodes = nodes.filter(n => n.id !== node.id);
               const above = otherNodes
                 .filter(n => n.position.y < thisY)
                 .sort((a, b) => b.position.y - a.position.y)[0];
-              // Only auto-connect if no condition nodes are involved and no existing edge
-              const hasCondition = fields.some(f => f.type === "condition");
-              if (!hasCondition && above) {
-                const existingEdge = edges.find(e => e.target === node.id);
-                if (!existingEdge) {
-                  setEdges(eds => [...eds, {
-                    id: `e-auto-${above.id}-${node.id}`,
-                    source: above.id,
-                    target: node.id,
-                    animated: true,
-                    type: "smoothstep",
-                    style: { stroke: "#5865f2", strokeWidth: 2 },
-                  }]);
-                  setSaved(false);
-                }
+
+              if (!above) return;
+              // Don't auto-connect if this node already has an incoming edge
+              if (edges.find(e => e.target === node.id)) return;
+
+              // Check if the above node is a condition with unfulfilled outputs
+              const aboveField = fields.find(f => f.id === above.id);
+              if (aboveField?.type === "condition") {
+                const yesEdge = edges.find(e => e.source === above.id && (e.sourceHandle === "yes" || e.sourceHandle === null));
+                const noEdge = edges.find(e => e.source === above.id && e.sourceHandle === "no");
+                if (!yesEdge || !noEdge) return; // condition not fully connected, skip
               }
+
+              setEdges(eds => [...eds, {
+                id: `e-auto-${above.id}-${node.id}`,
+                source: above.id,
+                target: node.id,
+                animated: true,
+                type: "smoothstep",
+                style: { stroke: "#5865f2", strokeWidth: 2 },
+              }]);
+              setSaved(false);
             }}
             onInit={setReactFlowInstance}
             onDrop={onDrop}
