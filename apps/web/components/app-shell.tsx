@@ -2,20 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
-import { BarChart2, Compass, LayoutGrid, LogOut, Settings, Zap } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { BarChart2, Compass, LayoutGrid, Settings, Zap } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 const NAV_ITEMS = [
   { Icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
   { Icon: BarChart2, href: "/analytics", label: "Analytics" },
   { Icon: Compass, href: "/explore", label: "Explore" },
-  { Icon: Settings, href: "/pricing", label: "Pricing" },
+  { Icon: Settings, href: "/pricing", label: "Settings" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { signOut } = useClerk();
+  const { user } = useUser();
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#313338] text-[#f2f3f5]">
@@ -39,9 +39,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         })}
 
         <div className="flex-1" />
-        <button onClick={() => signOut({ redirectUrl: "/" })} className="w-10 h-10 rounded-full flex items-center justify-center text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors" title="Sign Out">
-          <LogOut size={16} />
-        </button>
+        {/* User avatar */}
+        <Link href="/pricing" prefetch title="Settings" className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-sm font-bold text-white hover:opacity-80 transition-opacity">
+          {(user?.firstName?.[0] ?? user?.username?.[0] ?? "U").toUpperCase()}
+        </Link>
       </aside>
 
       {/* Page content */}

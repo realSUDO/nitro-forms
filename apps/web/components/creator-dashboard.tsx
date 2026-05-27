@@ -74,6 +74,14 @@ export function CreatorDashboard() {
             welcome
           </button>
 
+          <button onClick={() => setActiveChannel("forms")} className={cn(
+            "flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm transition-colors",
+            activeChannel === "forms" ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]"
+          )}>
+            <Hash size={14} className={activeChannel === "forms" ? "text-[#f2f3f5]" : "text-[#4e5058]"} />
+            general
+          </button>
+
           <div className="px-1 py-2">
             <button onClick={() => { setActiveChannel("forms"); createForm.mutate({ title: "Untitled Form" }); }} disabled={createForm.isPending} className="flex items-center gap-2 w-full px-3 py-2 rounded bg-[#5865f2] text-white text-sm font-medium hover:bg-[#4752c4] transition-colors disabled:opacity-50">
               {createForm.isPending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />} Create Form
@@ -124,9 +132,9 @@ export function CreatorDashboard() {
       />
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto bg-[#313338] p-6">
+      <main className="flex-1 overflow-y-auto bg-[#313338]">
         {activeChannel === "welcome" ? (
-          <div className="max-w-2xl mx-auto flex flex-col items-center justify-center min-h-full text-center">
+          <div className="flex flex-col items-center justify-center h-full text-center p-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-48 h-48 mb-6" />
             <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Welcome to NitroForms!</h1>
@@ -141,7 +149,7 @@ export function CreatorDashboard() {
             </div>
           </div>
         ) : (
-        <div className="max-w-4xl">
+        <div className="max-w-4xl p-6">
           <h1 className="text-2xl font-bold text-[#f2f3f5] mb-1">Creator Dashboard</h1>
           <p className="text-sm text-[#949ba4] mb-6">Manage your forms and track responses.</p>
 
