@@ -175,6 +175,7 @@ export function FormBuilder() {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [saved, setSaved] = useState(true);
 
   // History (placeholder for future undo/redo)
@@ -401,8 +402,9 @@ export function FormBuilder() {
               setSaved(false);
             }}
             onConnect={onConnect}
-            onNodeClick={(_, node) => setSelectedId(node.id)}
-            onPaneClick={() => setSelectedId(null)}
+            onNodeClick={(_, node) => { setSelectedId(node.id); setSelectedEdgeId(null); }}
+            onEdgeClick={(_, edge) => { setSelectedEdgeId(edge.id); setSelectedId(null); }}
+            onPaneClick={() => { setSelectedId(null); setSelectedEdgeId(null); }}
             onInit={setReactFlowInstance}
             onDrop={onDrop}
             onDragOver={onDragOver}
@@ -634,13 +636,47 @@ export function FormBuilder() {
               </button>
             </div>
           </div>
-        ) : (
+        ) : selectedEdgeId ? (() => {
+            const selectedEdge = edges.find(e => e.id === selectedEdgeId);
+            if (selectedEdge) {
+              const sourceField = fields.find(f => f.id === selectedEdge.source);
+              const targetField = fields.find(f => f.id === selectedEdge.target);
+              return (
+                <div className="px-4 py-4 space-y-4">
+                  <span className="px-2 py-1 rounded text-[10px] font-mono bg-[#5865f2]/10 text-[#5865f2]">Edge</span>
+                  <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
+                    <p className="text-[10px] font-mono uppercase text-[#949ba4]">From</p>
+                    <p className="text-sm text-[#f2f3f5]">{sourceField?.label ?? "Unknown"}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
+                    <p className="text-[10px] font-mono uppercase text-[#949ba4]">To</p>
+                    <p className="text-sm text-[#f2f3f5]">{targetField?.label ?? "Unknown"}</p>
+                  </div>
+                  {selectedEdge.sourceHandle && (
+                    <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
+                      <p className="text-[10px] font-mono uppercase text-[#949ba4]">Branch</p>
+                      <p className={cn("text-sm font-semibold", selectedEdge.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]")}>
+                        {selectedEdge.sourceHandle === "yes" ? "✓ Yes path" : "✗ No path"}
+                      </p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { setEdges(eds => eds.filter(e => e.id !== selectedEdgeId)); setSelectedEdgeId(null); setSaved(false); }}
+                    className="w-full py-2.5 rounded-lg text-xs font-medium text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors"
+                  >
+                    Delete Edge
+                  </button>
+                </div>
+              );
+            }
+            return null;
+          })() : (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
             <div className="w-12 h-12 rounded-xl bg-[#3f4147] flex items-center justify-center mb-3">
               <Type size={20} className="text-[#4e5058]" />
             </div>
-            <p className="text-sm text-[#949ba4] mb-1">No field selected</p>
-            <p className="text-xs text-[#4e5058]">Click a node on the canvas to edit its settings</p>
+            <p className="text-sm text-[#949ba4] mb-1">No selection</p>
+            <p className="text-xs text-[#4e5058]">Click a node or edge to edit</p>
           </div>
         )}
       </aside>
