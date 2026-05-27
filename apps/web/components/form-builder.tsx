@@ -23,6 +23,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import {
   AlignLeft,
+  Brain,
   ChevronDown,
   Download,
   GitBranch,
@@ -38,6 +39,7 @@ import {
   Trash2,
   Type,
   X,
+  Zap,
 } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { cn } from "~/lib/utils";
@@ -327,6 +329,7 @@ export function FormBuilder() {
 
   const [aiPrompt, setAiPrompt] = useState("");
   const [showAi, setShowAi] = useState(false);
+  const [aiMode, setAiMode] = useState<"instant" | "think">("instant");
   const aiGenerate = trpc.ai.generateForm.useMutation({
     onSuccess: (data) => {
       if (data.title) setTitle(data.title);
@@ -821,8 +824,16 @@ export function FormBuilder() {
               className="w-full h-24 bg-[#1e1f22] rounded-lg px-3 py-2 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-none mb-3"
             />
             {aiGenerate.error && <p className="text-xs text-[#ed4245] mb-2">{aiGenerate.error.message}</p>}
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setAiMode("instant")} className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors", aiMode === "instant" ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:text-[#b5bac1]")}>
+                <Zap size={12} /> Instant
+              </button>
+              <button onClick={() => setAiMode("think")} className={cn("flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors", aiMode === "think" ? "bg-[#5865f2]/20 text-[#bec2ff]" : "text-[#949ba4] hover:text-[#b5bac1]")}>
+                <Brain size={12} /> Think
+              </button>
+            </div>
             <button
-              onClick={() => aiGenerate.mutate({ prompt: aiPrompt })}
+              onClick={() => aiGenerate.mutate({ prompt: aiPrompt, mode: aiMode })}
               disabled={!aiPrompt.trim() || aiGenerate.isPending}
               className="w-full py-2 rounded-lg text-sm font-medium bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >

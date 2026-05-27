@@ -90,7 +90,7 @@ function validatePrompt(prompt: string): { safe: boolean; reason?: string } {
 
 export const aiRouter = router({
   generateForm: protectedProcedure
-    .input(z.object({ prompt: z.string().min(3).max(500) }))
+    .input(z.object({ prompt: z.string().min(3).max(500), mode: z.enum(["instant", "think"]).default("instant") }))
     .mutation(async ({ ctx, input }) => {
       // External guardrails — before any LLM call
       const check = validatePrompt(input.prompt);
@@ -113,12 +113,12 @@ export const aiRouter = router({
           method: "POST",
           headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "llama-3.1-70b-versatile",
+            model: input.mode === "think" ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant",
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
               { role: "user", content: input.prompt },
             ],
-            temperature: 0.7,
+            temperature: 0.5,
           }),
         });
         const data = await res.json();
