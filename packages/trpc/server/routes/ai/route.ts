@@ -16,6 +16,13 @@ OUTPUT: Return ONLY a valid JSON object:
 FIELD TYPES: ${FIELD_TYPES.join(", ")}
 Plus "condition" for IF/ELSE branching.
 
+TYPE USAGE GUIDE:
+- phone: for phone numbers (contact forms, registrations)
+- url: for website links (portfolios, social profiles, project URLs)
+- time: for time inputs (scheduling, event times)
+- file_upload: for file/image/document uploads (resumes, screenshots, submissions)
+- Use phone when asking for contact number, url for links, time for scheduling, file_upload for attachments.
+
 FIELD FORMAT:
 { "id": "f1", "type": "short_text", "label": "What is your full name?", "required": true }
 { "id": "f2", "type": "single_select", "label": "Which category?", "required": true, "options": ["A", "B", "C"] }
