@@ -405,6 +405,31 @@ export function FormBuilder() {
             onNodeClick={(_, node) => { setSelectedId(node.id); setSelectedEdgeId(null); }}
             onEdgeClick={(_, edge) => { setSelectedEdgeId(edge.id); setSelectedId(null); }}
             onPaneClick={() => { setSelectedId(null); setSelectedEdgeId(null); }}
+            onNodeDragStop={(_, node) => {
+              // Auto-connect: find nearest node above (parent) and below (child)
+              const thisY = node.position.y;
+              const otherNodes = nodes.filter(n => n.id !== node.id && n.type !== "conditionNode");
+              // Find closest node above that doesn't already connect to this node
+              const above = otherNodes
+                .filter(n => n.position.y < thisY)
+                .sort((a, b) => b.position.y - a.position.y)[0];
+              // Only auto-connect if no condition nodes are involved and no existing edge
+              const hasCondition = fields.some(f => f.type === "condition");
+              if (!hasCondition && above) {
+                const existingEdge = edges.find(e => e.target === node.id);
+                if (!existingEdge) {
+                  setEdges(eds => [...eds, {
+                    id: `e-auto-${above.id}-${node.id}`,
+                    source: above.id,
+                    target: node.id,
+                    animated: true,
+                    type: "smoothstep",
+                    style: { stroke: "#5865f2", strokeWidth: 2 },
+                  }]);
+                  setSaved(false);
+                }
+              }
+            }}
             onInit={setReactFlowInstance}
             onDrop={onDrop}
             onDragOver={onDragOver}
@@ -639,33 +664,16 @@ export function FormBuilder() {
         ) : selectedEdgeId ? (() => {
             const selectedEdge = edges.find(e => e.id === selectedEdgeId);
             if (selectedEdge) {
-              const sourceField = fields.find(f => f.id === selectedEdge.source);
-              const targetField = fields.find(f => f.id === selectedEdge.target);
               return (
-                <div className="px-4 py-4 space-y-4">
-                  <span className="px-2 py-1 rounded text-[10px] font-mono bg-[#5865f2]/10 text-[#5865f2]">Edge</span>
-                  <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
-                    <p className="text-[10px] font-mono uppercase text-[#949ba4]">From</p>
-                    <p className="text-sm text-[#f2f3f5]">{sourceField?.label ?? "Unknown"}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
-                    <p className="text-[10px] font-mono uppercase text-[#949ba4]">To</p>
-                    <p className="text-sm text-[#f2f3f5]">{targetField?.label ?? "Unknown"}</p>
-                  </div>
-                  {selectedEdge.sourceHandle && (
-                    <div className="p-3 rounded-lg bg-[#1e1f22] space-y-2">
-                      <p className="text-[10px] font-mono uppercase text-[#949ba4]">Branch</p>
-                      <p className={cn("text-sm font-semibold", selectedEdge.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]")}>
-                        {selectedEdge.sourceHandle === "yes" ? "✓ Yes path" : "✗ No path"}
-                      </p>
-                    </div>
-                  )}
+                <div className="px-4 py-4 flex flex-col items-center justify-center gap-3">
+                  <p className="text-[10px] font-mono uppercase text-[#949ba4]">Edge Selected</p>
                   <button
                     onClick={() => { setEdges(eds => eds.filter(e => e.id !== selectedEdgeId)); setSelectedEdgeId(null); setSaved(false); }}
-                    className="w-full py-2.5 rounded-lg text-xs font-medium text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-red-400 border border-red-400/20 hover:bg-red-400/10 transition-colors"
                   >
-                    Delete Edge
+                    <Trash2 size={14} /> Delete Connection
                   </button>
+                  <p className="text-[10px] text-[#4e5058]">Or press Delete key</p>
                 </div>
               );
             }
