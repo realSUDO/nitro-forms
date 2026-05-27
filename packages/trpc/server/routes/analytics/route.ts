@@ -141,6 +141,34 @@ export const analyticsRouter = router({
 
       return { fields: ratingFields, summary };
     }),
+
+  getDeviceBreakdown: protectedProcedure
+    .input(z.object({ formId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [form] = await db.select().from(formsTable)
+        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .limit(1);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const responses = await db.select({ metadataJson: responsesTable.metadataJson })
+        .from(responsesTable)
+        .where(eq(responsesTable.formId, input.formId));
+
+      const devices: Record<string, number> = { desktop: 0, mobile: 0, tablet: 0 };
+      for (const r of responses) {
+        const meta = r.metadataJson as { device?: string } | null;
+        const device = meta?.device?.toLowerCase() ?? "desktop";
+        if (device.includes("mobile")) devices.mobile!++;
+        else if (device.includes("tablet")) devices.tablet!++;
+        else devices.desktop!++;
+      }
+      const total = responses.length || 1;
+      return {
+        desktop: { count: devices.desktop!, pct: Math.round((devices.desktop! / total) * 100) },
+        mobile: { count: devices.mobile!, pct: Math.round((devices.mobile! / total) * 100) },
+        tablet: { count: devices.tablet!, pct: Math.round((devices.tablet! / total) * 100) },
+      };
+    }),
 });
 
 export const responseRouter = router({

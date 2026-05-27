@@ -26,6 +26,7 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
   const { data: form } = trpc.form.getById.useQuery({ formId }, { enabled: !!formId });
   const { data: overview, isLoading } = trpc.analytics.getOverview.useQuery({ formId }, { enabled: !!formId });
   const { data: timeline } = trpc.analytics.getTimeline.useQuery({ formId, days: 7 }, { enabled: !!formId });
+  const { data: devices } = trpc.analytics.getDeviceBreakdown.useQuery({ formId }, { enabled: !!formId });
   const { data: responses } = trpc.response.listByForm.useQuery({ formId, limit: 5 }, { enabled: !!formId });
 
   if (isLoading) {
@@ -161,16 +162,16 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
                   <div className="w-36 h-36 rounded-full border-[14px] border-[#1e1f22] relative">
                     <div className="absolute inset-0 rounded-full border-[14px] border-t-[#5865f2] border-r-[#5865f2] border-b-[#b6c4ff] border-l-[#3f4147] rotate-45" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-bold text-[#f2f3f5]">{overview?.totalResponses ?? 0}</span>
+                      <span className="text-xl font-bold text-[#f2f3f5]">{devices?.desktop.pct ?? 0}%</span>
                       <span className="text-[10px] font-mono uppercase text-[#949ba4]">Total</span>
                     </div>
                   </div>
                 </div>
                 <div className="mt-6 space-y-3">
                   {[
-                    { label: "Desktop", count: `${Math.round((overview?.totalResponses ?? 0) * 0.72)} (72%)`, color: "bg-[#5865f2]" },
-                    { label: "Mobile", count: `${Math.round((overview?.totalResponses ?? 0) * 0.22)} (22%)`, color: "bg-[#b6c4ff]" },
-                    { label: "Tablet", count: `${Math.round((overview?.totalResponses ?? 0) * 0.06)} (6%)`, color: "bg-[#3f4147]" },
+                    { label: "Desktop", count: `${devices?.desktop.count ?? 0} (${devices?.desktop.pct ?? 0}%)`, color: "bg-[#5865f2]" },
+                    { label: "Mobile", count: `${devices?.mobile.count ?? 0} (${devices?.mobile.pct ?? 0}%)`, color: "bg-[#b6c4ff]" },
+                    { label: "Tablet", count: `${devices?.tablet.count ?? 0} (${devices?.tablet.pct ?? 0}%)`, color: "bg-[#3f4147]" },
                   ].map(({ label, count, color }) => (
                     <div key={label} className="flex items-center justify-between text-[13px] font-mono">
                       <div className="flex items-center gap-2"><div className={cn("w-2 h-2 rounded-full", color)} /><span className="text-[#949ba4]">{label}</span></div>
