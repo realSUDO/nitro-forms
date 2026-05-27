@@ -166,49 +166,27 @@ export function PublicForm() {
 
   return (
     <div className="min-h-screen bg-[#313338] flex flex-col">
-      {/* Header — like Discord channel header */}
-      <header className="flex items-center gap-3 px-4 h-12 shrink-0 border-b border-[#1e1f22] bg-[#313338]">
-        <span className="text-[#949ba4]">#</span>
-        <span className="text-sm font-semibold text-[#f2f3f5]">{form.title}</span>
-        <span className="text-xs text-[#4e5058] ml-2 hidden sm:inline">{form.description ?? "Fill out this form"}</span>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-[10px] font-mono text-[#949ba4] bg-[#2b2d31] px-2 py-0.5 rounded">
-            {fieldPath.length + 1} / {totalSteps}
-          </span>
-        </div>
-      </header>
-
-      {/* Progress bar */}
-      <div className="h-0.5 bg-[#1e1f22]">
-        <div className="h-full bg-[#5865f2] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+      {/* Thin top bar */}
+      <div className="h-1 bg-[#2b2d31]">
+        <div className="h-full bg-[#5865f2] transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Form content — styled like Discord messages area */}
-      <main className="flex-1 flex items-center justify-center p-6 bg-[#313338]">
-        <div className="w-full max-w-lg">
-          {/* Form title (only on first step) */}
+      {/* Center content */}
+      <main className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-md" key={field.id}>
+          {/* Title on first step */}
           {fieldPath.length === 0 && (
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">{form.title}</h1>
-              {form.description && <p className="text-sm text-[#949ba4]">{form.description}</p>}
+            <div className="mb-10 text-center">
+              <h1 className="text-xl font-bold text-[#f2f3f5]">{form.title}</h1>
+              {form.description && <p className="text-sm text-[#949ba4] mt-1">{form.description}</p>}
             </div>
           )}
 
-          {/* Current field — styled as bot message */}
-          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300" key={field.id}>
-            <div className="flex gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center shrink-0">
-                <Zap size={16} className="text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-semibold text-[#5865f2]">NitroForms</span>
-                  <span className="text-[10px] bg-[#5865f2] text-white px-1 py-0.5 rounded text-[9px] font-medium">BOT</span>
-                </div>
-                <p className="text-[#f2f3f5]">{field.label}{field.required && <span className="text-[#ed4245] ml-0.5">*</span>}</p>
-                {field.placeholder && <p className="text-xs text-[#949ba4] mt-0.5">{field.placeholder}</p>}
-              </div>
-            </div>
+          {/* Question */}
+          <p className="text-base text-[#f2f3f5] mb-4">
+            {field.label}
+            {field.required && <span className="text-[#ed4245] ml-1">*</span>}
+          </p>
 
             {/* Input based on type */}
             {(field.type === "short_text" || field.type === "email") && (
@@ -217,7 +195,7 @@ export function PublicForm() {
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
                 autoFocus
-                className="w-full bg-[#383a40] rounded-lg px-4 py-3 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
                 placeholder="Type your answer here..."
               />
             )}
@@ -228,7 +206,7 @@ export function PublicForm() {
                 onChange={(e) => setAnswer(e.target.value)}
                 autoFocus
                 rows={4}
-                className="w-full bg-[#383a40] rounded-lg px-4 py-3 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-none"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none resize-none"
                 placeholder="Type your answer here..."
               />
             )}
@@ -239,7 +217,7 @@ export function PublicForm() {
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(Number(e.target.value))}
                 autoFocus
-                className="w-full bg-[#383a40] rounded-lg px-4 py-3 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none focus:ring-1 focus:ring-[#5865f2]"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
                 placeholder="0"
               />
             )}
@@ -349,41 +327,30 @@ export function PublicForm() {
             {submitMutation.error && !Object.keys(fieldErrors).length && (
               <p className="text-sm text-red-400 mt-3">{submitMutation.error.message}</p>
             )}
-          </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between mt-12">
-            <button
-              onClick={handleBack}
-              disabled={fieldPath.length === 0}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-[#949ba4] hover:text-[#f2f3f5] hover:bg-[#2b2d31] transition-colors disabled:opacity-30 disabled:pointer-events-none"
-            >
-              <ArrowLeft size={16} /> Back
-            </button>
+          <div className="flex items-center gap-3 mt-8">
+            {fieldPath.length > 0 && (
+              <button onClick={handleBack} className="px-4 py-2 rounded text-sm text-[#b5bac1] hover:text-[#f2f3f5] transition-colors">
+                Back
+              </button>
+            )}
             <button
               onClick={handleNext}
               disabled={submitMutation.isPending}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-colors disabled:opacity-50"
+              className="px-5 py-2 rounded bg-[#5865f2] text-sm text-white hover:bg-[#4752c4] transition-colors disabled:opacity-50"
             >
-              {submitMutation.isPending ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (() => {
+              {submitMutation.isPending ? "..." : (() => {
                 const isLast = hasFlow ? !resolveNextVisible(currentFieldId!) : visibleFields.findIndex(f => f.id === currentFieldId) >= visibleFields.length - 1;
-                return isLast ? <>Submit <CheckCircle size={16} /></> : <>Next <ArrowRight size={16} /></>;
+                return isLast ? "Submit" : "Next";
               })()}
             </button>
           </div>
-
-          {/* Keyboard hint */}
-          <p className="text-center text-[10px] text-[#4e5058] mt-6">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-[#2b2d31] text-[#949ba4] font-mono">Enter ↵</kbd> to continue
-          </p>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="flex items-center justify-center py-4 text-[11px] text-[#4e5058]">
-        <span className="flex items-center gap-1.5">Powered by <Zap size={10} className="text-[#5865f2]" /> <span className="text-[#949ba4]">NitroForms</span></span>
+      <footer className="py-3 text-center text-[11px] text-[#4e5058]">
+        {fieldPath.length + 1} of {totalSteps}
       </footer>
     </div>
   );
