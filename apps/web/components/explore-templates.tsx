@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Hash, Plus, Search, Users } from "lucide-react";
+import { ChevronDown, Copy, Eye, Hash, Plus, Search, Users } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
+import { ContextMenu, type MenuItem } from "~/components/context-menu";
 
 const STATIC_TEMPLATES = [
   { slug: "anime-fan-survey", title: "Anime Fan Survey", category: "Entertainment", stat: "1.2k responses", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC9QrOTygO3iXHj7rLJRP2_4gwCrftKFDxbPX3Dv2JSAk8yGKaXZVIpbMRI-bxi6prSIMN-ohYpTujRaLwxylHLGJYzpDZtFHqPQgx-1vclmEdW68SBTkSmoEBOu1naXmMf17IrO4Nxj8ye1-qyhOohJLBv_m2UrjjofAU5RdXed_FIrKfRZ5CPC7gMG3i1qorSrGua4sDEfHW3__qo-qY7xM60bIIuNDUbKrK-BNpsPOesjHapEgSG0HnSgYiHg80UgzFx1IT7Y3s", badgeColor: "bg-[#007ac1]/80 text-white" },
@@ -111,7 +112,11 @@ export function ExploreTemplates() {
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {STATIC_TEMPLATES.filter(t => !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.category.toLowerCase().includes(search.toLowerCase())).map(({ slug, title, category, stat, image, badgeColor }) => (
-              <div key={slug} className="rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:-translate-y-1" style={{ background: "rgba(43,45,49,0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <ContextMenu key={slug} items={[
+                { label: "Use Template", icon: <Copy size={14} />, onClick: () => useTemplate(slug, title) },
+                { label: "Preview", icon: <Eye size={14} />, onClick: () => router.push(`/f/${slug}`) },
+              ]}>
+              <div className="rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:-translate-y-1" style={{ background: "rgba(43,45,49,0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.05)" }}>
                 <div className="h-40 relative overflow-hidden bg-[#292a2d]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -136,6 +141,7 @@ export function ExploreTemplates() {
                   </div>
                 </div>
               </div>
+              </ContextMenu>
             ))}
 
             {/* Add custom */}

@@ -1,15 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { BarChart2, FileText, Hash, Loader2, Volume2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BarChart2, Copy, FileText, Globe, Hash, Loader2, Pencil, Trash2, Upload, Volume2 } from "lucide-react";
 import { trpc } from "~/trpc/client";
 import { cn } from "~/lib/utils";
 import { FormAnalytics } from "~/components/form-analytics";
+import { ContextMenu, type MenuItem } from "~/components/context-menu";
 
 export default function AnalyticsIndex() {
+  const router = useRouter();
+  const utils = trpc.useUtils();
   const { data: forms, isLoading } = trpc.form.listMine.useQuery();
   const [activeFormId, setActiveFormId] = useState<string | null>(null);
+  const publishForm = trpc.form.publish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const unpublishForm = trpc.form.unpublish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const deleteForm = trpc.form.delete.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+  const duplicateForm = trpc.form.duplicate.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
+
+  function getMenuItems(form: { id: string; status: string }): MenuItem[] {
+    return [
+      { label: "Open Builder", icon: <FileText size={14} />, onClick: () => router.push(`/builder/${form.id}`) },
+      { label: "Duplicate", icon: <Copy size={14} />, onClick: () => duplicateForm.mutate({ formId: form.id }) },
+      ...(form.status === "published"
+        ? [{ label: "Unpublish", icon: <Globe size={14} />, onClick: () => unpublishForm.mutate({ formId: form.id }) }]
+        : [{ label: "Publish", icon: <Upload size={14} />, onClick: () => publishForm.mutate({ formId: form.id }) }]
+      ),
+      { label: "", onClick: () => {}, separator: true },
+      { label: "Delete", icon: <Trash2 size={14} />, onClick: () => deleteForm.mutate({ formId: form.id }), danger: true },
+    ];
+  }
 
   return (
     <>
@@ -31,8 +51,8 @@ export default function AnalyticsIndex() {
             <p className="px-3 py-2 text-xs text-[#4e5058]">No forms yet</p>
           ) : (
             forms.map(form => (
+              <ContextMenu key={form.id} items={getMenuItems(form)}>
               <button
-                key={form.id}
                 onClick={() => setActiveFormId(form.id)}
                 className={cn(
                   "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-left transition-colors",
@@ -47,6 +67,7 @@ export default function AnalyticsIndex() {
                   <span className="w-2 h-2 rounded-full bg-[#3ba55c] shrink-0" />
                 )}
               </button>
+              </ContextMenu>
             ))
           )}
         </div>
