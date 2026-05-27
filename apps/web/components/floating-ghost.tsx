@@ -47,52 +47,36 @@ export default function FloatingGhost({
     return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("scroll", onScroll); };
   }, [pos, size]);
 
-  const [clicked, setClicked] = useState(0); // 0=none, 1-4=different reactions
-
   const onHover = () => {
     setExpression("surprised");
     setTimeout(() => setExpression("happy"), 400);
     setTimeout(() => setExpression("normal"), 2200);
   };
 
-  const onClick = () => {
-    const reaction = Math.ceil(Math.random() * 4);
-    setClicked(reaction);
-    setExpression(reaction === 1 ? "surprised" : "happy");
-    setTimeout(() => { setClicked(0); setExpression("normal"); }, 1200);
-  };
-
   const eyeX = mouse.x * 8;
   const eyeY = mouse.y * 5;
+  // Eyes get bigger when cursor is far away (looking harder)
   const farAway = mouseDist > 400;
   const eyeScale = farAway ? 1.4 : 1;
-
-  // Click animations
-  const clickAnims: Record<number, { y?: number[]; rotate?: number[]; scale?: number[]; x?: number[] }> = {
-    1: { y: [0, -30, 0], rotate: [0, 360], scale: [1, 1.2, 1] }, // spin jump
-    2: { y: [0, -15, 0, -10, 0], scale: [1, 0.8, 1.1, 0.95, 1] }, // bounce squish
-    3: { x: [0, -20, 20, -10, 10, 0], rotate: [0, -10, 10, -5, 5, 0] }, // shake
-    4: { y: [0, -40, -35, 0], scale: [1, 0.9, 1.15, 1] }, // big jump
-  };
 
   return (
     <motion.div
       className={`fixed z-30 hidden lg:block ${className}`}
-      style={{ width: size, height: size, top: `calc(${pos.y}vh - ${scrollY * 0.5}px)` }}
-      animate={{ left: `${pos.x}%`, rotate: [0, 2, -1.5, 1, 0] }}
+      style={{ width: size, height: size, marginTop: -scrollY * 0.15 }}
+      animate={{ left: `${pos.x}%`, top: `${pos.y}%`, rotate: [0, 2, -1.5, 1, 0] }}
       transition={{
         left: { duration: 8, ease: [0.25, 0.1, 0.25, 1] },
+        top: { duration: 8, ease: [0.25, 0.1, 0.25, 1] },
         rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" },
       }}
       onMouseEnter={onHover}
-      onClick={onClick}
     >
       <motion.div
         aria-hidden="true"
-        className="pointer-events-auto cursor-pointer select-none"
+        className="pointer-events-auto cursor-default select-none"
         style={{ width: size, height: size, filter: "drop-shadow(0 10px 25px rgba(88,101,242,0.12))", opacity: 0.85 }}
-        animate={clicked ? clickAnims[clicked] : { y: [0, -10, 3, -6, 0], x: [0, 3, -2, 1, 0] }}
-        transition={clicked ? { duration: 0.5, ease: "easeOut" } : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ y: [0, -10, 3, -6, 0], x: [0, 3, -2, 1, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
         <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" className="h-full w-full" fill="none">
           {/* wings */}
