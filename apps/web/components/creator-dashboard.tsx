@@ -307,7 +307,7 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
   return (
     <div className="max-w-2xl">
       {/* First message with avatar */}
-      <div className="flex gap-4 py-1 hover:bg-[#2b2d31]/50 px-2 rounded">
+      <div className="flex gap-4 py-2 hover:bg-[#2b2d31]/50 px-2 rounded">
         <div className="w-10 h-10 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0 mt-0.5">
           <img src="/nitro.svg" alt="" className="w-6 h-6" />
         </div>
@@ -323,7 +323,7 @@ function FormPreview({ form }: { form: { id: string; title: string; slug: string
 
       {/* Each field as a follow-up message (no avatar, indented) */}
       {fields.map((f, i) => (
-        <div key={f.id} className={cn("flex gap-4 py-0.5 hover:bg-[#2b2d31]/50 px-2 rounded group", f.type === "condition" && "border-l-2 border-[#faa61a] ml-14")}>
+        <div key={f.id} className={cn("flex gap-4 py-2 hover:bg-[#2b2d31]/50 px-2 rounded group", f.type === "condition" && "border-l-2 border-[#faa61a] ml-14")}>
           <div className="w-10 shrink-0 flex items-center justify-center">
             <span className="text-xs text-[#949ba4] opacity-0 group-hover:opacity-100">{i + 1}</span>
           </div>
