@@ -19,6 +19,7 @@ export function PublicForm() {
   const [submitted, setSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [fieldPath, setFieldPath] = useState<string[]>([]);
+  const [channel, setChannel] = useState<"welcome" | "submit">("welcome");
 
   if (isLoading) {
     return (
@@ -48,14 +49,13 @@ export function PublicForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
-        <div className="w-20 h-20 rounded-2xl bg-[#5865f2]/10 flex items-center justify-center mb-6 animate-in zoom-in duration-300">
-          <CheckCircle size={40} className="text-[#5865f2]" />
-        </div>
-        <h1 className="text-3xl font-bold text-[#f2f3f5] mb-3">Thank you!</h1>
-        <p className="text-base text-[#949ba4] mb-8 max-w-sm">Your response has been submitted successfully. We appreciate your time.</p>
-        <Link href="/" className="px-6 py-2.5 rounded-lg border border-[#3f4147] text-sm text-[#b5bac1] hover:bg-[#2b2d31] transition-colors">
-          Back to Homepage
+      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/discord-wumpus.gif" alt="" className="w-28 h-28 mb-6" />
+        <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Response Submitted!</h1>
+        <p className="text-sm text-[#949ba4] mb-6 max-w-sm">Thank you for taking the time to fill this out. Your response has been recorded.</p>
+        <Link href="/" className="px-5 py-2 rounded-lg bg-[#5865f2] text-sm text-white hover:bg-[#4752c4] transition-colors">
+          Back to NitroForms
         </Link>
       </div>
     );
@@ -67,11 +67,12 @@ export function PublicForm() {
   // Gate: require login
   if (settings?.requireAuth && !user) {
     return (
-      <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
+      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
+        <img src="/nitro.svg" alt="" className="w-12 h-12 mb-4" />
         <h1 className="text-xl font-bold text-[#f2f3f5] mb-2">Login Required</h1>
-        <p className="text-sm text-[#949ba4] mb-6">You need to be logged in to submit this form.</p>
-        <Link href="/login" className="px-5 py-2 rounded bg-[#5865f2] text-sm text-white hover:bg-[#4752c4] transition-colors">
-          Log In
+        <p className="text-sm text-[#949ba4] mb-6 max-w-xs">This form requires you to be logged in before submitting a response.</p>
+        <Link href="/login" className="px-6 py-2.5 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-colors">
+          Log In to Continue
         </Link>
       </div>
     );
@@ -220,21 +221,77 @@ export function PublicForm() {
   if (!field) return null;
 
   return (
-    <div className="h-screen flex flex-col bg-[#2b2d31] text-[#f2f3f5] overflow-hidden">
-      {/* Channel header */}
-      <div className="h-12 shrink-0 flex items-center gap-2 px-4 border-b border-[#1e1f22]">
-        <span className="text-[#949ba4]">#</span>
-        <span className="text-sm font-semibold truncate">{form.title}</span>
-        <div className="ml-auto">
-          <span className="text-[10px] text-[#949ba4] bg-[#1e1f22] px-2 py-0.5 rounded">{fieldPath.length + 1}/{totalSteps}</span>
+    <div className="h-screen flex bg-[#1e1f22] text-[#f2f3f5] overflow-hidden">
+      {/* Server rail — hidden on mobile */}
+      <div className="w-[72px] shrink-0 bg-[#1e1f22] flex-col items-center py-3 gap-2 hidden md:flex">
+        <div className="w-12 h-12 rounded-2xl bg-[#2b2d31] flex items-center justify-center">
+          <img src="/nitro.svg" alt="" className="w-9 h-9" />
+        </div>
+        <div className="w-8 h-0.5 rounded bg-[#3f4147] my-1" />
+      </div>
+
+      {/* Channel sidebar — hidden on mobile */}
+      <div className="w-[240px] shrink-0 bg-[#2b2d31] flex-col hidden md:flex">
+        <div className="h-12 flex items-center px-4 font-semibold text-sm border-b border-[#1e1f22]">{form.title}</div>
+        <div className="flex-1 px-2 py-3 space-y-0.5">
+          <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[#949ba4]">Channels</p>
+          <button onClick={() => setChannel("welcome")} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", channel === "welcome" ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]")}>
+            <span className={channel === "welcome" ? "text-[#f2f3f5]" : "text-[#4e5058]"}>#</span> welcome
+          </button>
+          <button onClick={() => setChannel("submit")} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", channel === "submit" ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]")}>
+            <span className={channel === "submit" ? "text-[#f2f3f5]" : "text-[#4e5058]"}>#</span> submit-response
+          </button>
+        </div>
+        <div className="px-2 py-2 bg-[#1e1f22] flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-[#5865f2] flex items-center justify-center text-xs font-bold text-white">R</div>
+          <div>
+            <p className="text-xs font-medium text-[#f2f3f5]">Respondent</p>
+            <p className="text-[10px] text-[#3ba55c]">Online</p>
+          </div>
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="h-0.5 bg-[#1e1f22]"><div className="h-full bg-[#5865f2] transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+      {/* Main area */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#313338]">
+        {/* Channel header */}
+        <div className="h-12 shrink-0 flex items-center gap-2 px-4 border-b border-[#1e1f22]">
+          <span className="text-[#949ba4]">#</span>
+          <span className="text-sm font-semibold truncate">{channel === "welcome" ? "welcome" : "submit-response"}</span>
+          <div className="w-px h-5 bg-[#3f4147] mx-2 hidden sm:block" />
+          <span className="text-xs text-[#949ba4] truncate hidden sm:inline">{form.title}</span>
+          {channel === "submit" && (
+            <div className="ml-auto">
+              <span className="text-[10px] text-[#949ba4] bg-[#1e1f22] px-2 py-0.5 rounded">{fieldPath.length + 1}/{totalSteps}</span>
+            </div>
+          )}
+        </div>
 
-      {/* Messages area */}
-      <div className="flex-1 flex items-center justify-center overflow-y-auto px-4 sm:px-6 py-6">
+        {channel === "welcome" ? (
+          <>
+            {/* Welcome content */}
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/discord-wumpus.gif" alt="" className="w-32 h-32 mb-6" />
+              <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">{form.title}</h1>
+              {form.description && <p className="text-sm text-[#b5bac1] mb-3 max-w-sm">{form.description}</p>}
+              <div className="flex items-center gap-3 text-xs text-[#949ba4] mb-8">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#3ba55c]" /> {totalSteps} questions</span>
+                <span>·</span>
+                <span>~2 min</span>
+              </div>
+              <button onClick={() => setChannel("submit")} className="px-8 py-3 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-all hover:shadow-[0_0_20px_rgba(88,101,242,0.3)]">
+                Get Started
+              </button>
+              <p className="text-[11px] text-[#4e5058] mt-4">Powered by NitroForms</p>
+            </div>
+          </>
+        ) : (
+          <>
+        {/* Progress */}
+        <div className="h-0.5 bg-[#1e1f22]"><div className="h-full bg-[#5865f2] transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+
+        {/* Messages area */}
+        <div className="flex-1 flex items-center justify-center overflow-y-auto px-4 sm:px-6 py-6">
         <div className="w-full max-w-lg" key={field.id}>
             {/* Title on first step */}
             {fieldPath.length === 0 && (
@@ -446,6 +503,9 @@ export function PublicForm() {
             <span className="ml-auto text-[11px] text-[#4e5058]">{fieldPath.length + 1}/{totalSteps}</span>
           </div>
         </div>
+      </div>
+      </>
+        )}
       </div>
     </div>
   );
