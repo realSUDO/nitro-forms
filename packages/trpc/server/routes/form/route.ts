@@ -24,6 +24,11 @@ const fieldSchema = z.object({
     maxSelected: z.number().optional(),
   }).optional(),
   position: z.object({ x: z.number(), y: z.number() }).optional(),
+  conditionConfig: z.object({
+    sourceFieldId: z.string(),
+    operator: z.enum(["equals", "not_equals", "greater_than", "less_than", "contains"]),
+    value: z.string(),
+  }).optional(),
 });
 
 export const formRouter = router({
