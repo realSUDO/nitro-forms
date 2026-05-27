@@ -58,6 +58,7 @@ export function CreatorDashboard() {
   const [activeChannel, setActiveChannel] = useState<string>("welcome");
   const [draftsOpen, setDraftsOpen] = useState(true);
   const [publishedOpen, setPublishedOpen] = useState(true);
+  const [previewSlug, setPreviewSlug] = useState<string | null>(null);
 
   return (
     <>
@@ -76,7 +77,7 @@ export function CreatorDashboard() {
             welcome
           </button>
 
-          <button onClick={() => setActiveChannel("forms")} className={cn(
+          <button onClick={() => { setActiveChannel("forms"); setPreviewSlug(null); }} className={cn(
             "flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm transition-colors",
             activeChannel === "forms" ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147]/50 hover:text-[#b5bac1]"
           )}>
@@ -96,9 +97,9 @@ export function CreatorDashboard() {
               </button>
               {draftsOpen && drafts.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <Link prefetch href={`/f/${f.slug}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <button onClick={() => { setPreviewSlug(f.slug); setActiveChannel("forms"); }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
                   <Hash size={14} className="text-[#4e5058]" /><span className="truncate">{f.title}</span>
-                </Link>
+                </button>
                 </ContextMenu>
               ))}
             </div>
@@ -110,9 +111,9 @@ export function CreatorDashboard() {
               </button>
               {publishedOpen && published.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <Link prefetch href={`/f/${f.slug}`} className="flex items-center gap-2 px-2 py-1.5 rounded text-sm text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                <button onClick={() => { setPreviewSlug(f.slug); setActiveChannel("forms"); }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
                   <Hash size={14} className="text-[#f2f3f5]" /><span className="truncate">{f.title}</span>
-                </Link>
+                </button>
                 </ContextMenu>
               ))}
             </div>
@@ -138,7 +139,7 @@ export function CreatorDashboard() {
       />
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto bg-[#313338]">
+      <main className={cn("flex-1 bg-[#313338] relative", previewSlug ? "overflow-hidden" : "overflow-y-auto")}>
         {activeChannel === "welcome" ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -152,6 +153,26 @@ export function CreatorDashboard() {
               <button onClick={() => setActiveChannel("forms")} className="px-4 py-2 rounded-lg border border-[#4e5058] text-sm text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
                 View Dashboard
               </button>
+            </div>
+          </div>
+        ) : previewSlug ? (
+          <div className="absolute inset-0 flex flex-col bg-[#313338] z-10">
+            <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22]">
+              <span className="text-sm font-semibold text-[#f2f3f5]"># {previewSlug}</span>
+              <div className="flex items-center gap-2">
+                <Link href={`/f/${previewSlug}`} target="_blank" className="px-3 py-1 rounded text-xs text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors">
+                  Open
+                </Link>
+                <Link href={`/builder/${formList.find(f => f.slug === previewSlug)?.id ?? ""}`} className="px-3 py-1 rounded text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
+                  Edit
+                </Link>
+                <button onClick={() => setPreviewSlug(null)} className="px-3 py-1 rounded text-xs text-[#949ba4] hover:text-[#f2f3f5] transition-colors">
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <FormPreview form={formList.find(f => f.slug === previewSlug)!} />
             </div>
           </div>
         ) : (
@@ -271,5 +292,63 @@ export function CreatorDashboard() {
         </div>
       </aside>
     </>
+  );
+}
+
+function FormPreview({ form }: { form: { id: string; title: string; slug: string; status: string; fieldsJson?: unknown; settingsJson?: unknown } }) {
+  const fields = (form.fieldsJson ?? []) as Array<{ id: string; type: string; label: string; required?: boolean; options?: string[]; conditionConfig?: { sourceFieldId: string; operator: string; value: string } }>;
+  const settings = form.settingsJson as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }> } | null;
+  const edges = settings?.edges ?? [];
+
+  if (!fields.length) {
+    return <p className="text-sm text-[#949ba4] text-center py-12">No fields yet. Click Edit to add fields.</p>;
+  }
+
+  return (
+    <div className="max-w-lg mx-auto">
+      {/* Form header as a message */}
+      <div className="flex gap-3 mb-4 pb-4 border-b border-[#3f4147]/30">
+        <div className="w-10 h-10 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0">
+          <img src="/nitro.svg" alt="" className="w-6 h-6" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-[#f2f3f5]">{form.title}</p>
+          <p className="text-xs text-[#949ba4]">{fields.filter(f => f.type !== "condition").length} fields · {edges.length} connections · {form.status}</p>
+        </div>
+      </div>
+
+      {/* Fields as message list */}
+      <div className="space-y-1">
+        {fields.map(f => (
+          <div key={f.id} className={cn(
+            "px-3 py-2 rounded hover:bg-[#2b2d31] transition-colors",
+            f.type === "condition" && "border-l-2 border-[#faa61a]"
+          )}>
+            <div className="flex items-center gap-2">
+              <span className={cn("text-[10px] font-mono", f.type === "condition" ? "text-[#faa61a]" : "text-[#4e5058]")}>{f.type === "condition" ? "IF" : f.type.replace("_", " ")}</span>
+              {f.required && <span className="w-1 h-1 rounded-full bg-[#ed4245]" />}
+            </div>
+            <p className="text-sm text-[#f2f3f5]">{f.label}</p>
+            {f.options && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {f.options.map(o => <span key={o} className="text-[10px] px-1.5 py-0.5 rounded bg-[#3f4147] text-[#949ba4]">{o}</span>)}
+              </div>
+            )}
+            {f.conditionConfig && (
+              <p className="text-[10px] text-[#faa61a] mt-0.5">{f.conditionConfig.operator} &quot;{f.conditionConfig.value}&quot;</p>
+            )}
+            {edges.filter(e => e.source === f.id).length > 0 && (
+              <div className="mt-1 space-y-0.5">
+                {edges.filter(e => e.source === f.id).map(e => (
+                  <p key={e.target} className="text-[10px] text-[#4e5058]">
+                    ↳ {e.sourceHandle && <span className={e.sourceHandle === "yes" ? "text-[#3ba55c]" : "text-[#ed4245]"}>{e.sourceHandle}:</span>} {fields.find(x => x.id === e.target)?.label ?? e.target}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
