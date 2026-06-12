@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { Icon: LayoutGrid, href: "/dashboard", label: "Dashboard" },
   { Icon: BarChart2, href: "/analytics", label: "Analytics" },
   { Icon: Compass, href: "/explore", label: "Explore" },
-  { Icon: Settings, href: "/pricing", label: "Settings" },
+  { Icon: Settings, href: "/settings", label: "Settings" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -40,7 +40,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex-1" />
         {/* User avatar */}
-        <Link href="/pricing" prefetch title="Settings" className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-sm font-bold text-white hover:opacity-80 transition-opacity">
+        <Link href="/settings" prefetch title="Settings" className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-sm font-bold text-white hover:opacity-80 transition-opacity">
           {(user?.firstName?.[0] ?? user?.username?.[0] ?? "U").toUpperCase()}
         </Link>
       </aside>

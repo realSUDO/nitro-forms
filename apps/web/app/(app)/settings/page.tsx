@@ -1,4 +1,4 @@
-import { PricingPage } from "~/components/pricing-page";
+import { SettingsPage } from "~/components/settings-page";
 
 export const metadata = {
   title: "Pricing | NitroForms",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function Pricing() {
-  return <PricingPage />;
+  return <SettingsPage />;
 }

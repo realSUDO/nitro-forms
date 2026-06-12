@@ -125,3 +125,34 @@
     font-family: var(--font-space-grotesk), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   }
 }
+
+/* Light Mode Overrides for Hardcoded Discord Dark Colors */
+html:not(.dark) .bg-\[\#313338\] { background-color: #ffffff !important; }
+html:not(.dark) .bg-\[\#2b2d31\] { background-color: #f2f3f5 !important; }
+html:not(.dark) .bg-\[\#1e1f22\] { background-color: #e3e5e8 !important; }
+html:not(.dark) .bg-\[\#3f4147\] { background-color: #e3e5e8 !important; }
+html:not(.dark) .bg-\[\#383a40\] { background-color: #ffffff !important; border: 1px solid #e3e5e8 !important; }
+html:not(.dark) .bg-\[\#111214\] { background-color: #ffffff !important; }
+
+html:not(.dark) .text-\[\#f2f3f5\] { color: #060607 !important; }
+html:not(.dark) .text-\[\#b5bac1\] { color: #4e5058 !important; }
+html:not(.dark) .text-\[\#949ba4\] { color: #5c5e66 !important; }
+html:not(.dark) .text-\[\#4e5058\] { color: #80848e !important; }
+html:not(.dark) .text-\[\#80848e\] { color: #b5bac1 !important; }
+
+html:not(.dark) .border-\[\#1e1f22\] { border-color: #e3e5e8 !important; }
+html:not(.dark) .border-\[\#4e5058\] { border-color: #c9cdce !important; }
+html:not(.dark) .border-\[\#3f4147\] { border-color: #e3e5e8 !important; }
+
+/* Hovers */
+html:not(.dark) .hover\:bg-\[\#3f4147\]:hover { background-color: #e3e5e8 !important; }
+html:not(.dark) .hover\:text-\[\#f2f3f5\]:hover { color: #060607 !important; }
+html:not(.dark) .hover\:border-\[\#f2f3f5\]:hover { border-color: #060607 !important; }
+html:not(.dark) .hover\:bg-\[\#3f4147\]\/50:hover { background-color: #e3e5e8 !important; }
+
+/* Placeholders */
+html:not(.dark) .placeholder\:text-\[\#4e5058\]::placeholder { color: #80848e !important; }
+
+/* Form Canvas specifics */
+html:not(.dark) .react-flow__pane { background-color: #ffffff !important; }
+html:not(.dark) .bg-\[\#2b2d31\]\/90 { background-color: rgba(242, 243, 245, 0.9) !important; }

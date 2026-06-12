@@ -26,6 +26,7 @@ import {
   Brain,
   Calendar,
   ChevronDown,
+  ChevronLeft,
   Clock,
   Download,
   GitBranch,
@@ -50,6 +51,7 @@ import {
 import { QRCodeCanvas } from "qrcode.react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 
 type FieldType = "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "rating" | "date" | "condition" | "file_upload" | "url" | "phone" | "time";
 
@@ -204,6 +206,7 @@ export function FormBuilder() {
   const utils = trpc.useUtils();
   const publishForm = trpc.form.publish.useMutation();
   const unpublishForm = trpc.form.unpublish.useMutation();
+  const deleteForm = trpc.form.delete.useMutation();
 
   const [title, setTitle] = useState("");
   const [fields, setFields] = useState<FormField[]>([]);
@@ -214,6 +217,7 @@ export function FormBuilder() {
   const [saved, setSaved] = useState(true);
   const [needsSave, setNeedsSave] = useState(false);
   const [formSettings, setFormSettings] = useState<Record<string, unknown>>({});
+  const hasEdited = useRef(false);
 
   // History (placeholder for future undo/redo)
   function pushHistory() { /* noop */ }
@@ -252,6 +256,35 @@ export function FormBuilder() {
     }
   }, [form]);
 
+  // Intercept browser/mouse back button
+  const savedRef = useRef(saved);
+  const stateRefs = useRef({ fields, formTitle: form?.title, formId });
+  useEffect(() => { savedRef.current = saved; }, [saved]);
+  useEffect(() => { stateRefs.current = { fields, formTitle: form?.title, formId }; }, [fields, form?.title, formId]);
+
+  useEffect(() => {
+    // Push a dummy state so the first back pops this instead of leaving
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      const { formTitle, fields: currentFields, formId: currentFormId } = stateRefs.current;
+      
+      if (!hasEdited.current && formTitle === "Untitled Form" && currentFields.length <= 1) {
+        deleteForm.mutate({ formId: currentFormId });
+        router.push("/dashboard");
+      } else if (!savedRef.current) {
+        // Prevent leaving, push dummy state again, show prompt
+        window.history.pushState(null, "", window.location.href);
+        setShowBackPrompt(true);
+      } else {
+        router.push("/dashboard");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [router]);
+
   const onConnect = useCallback((connection: Connection) => {
     pushHistory();
     setEdges(eds => addEdge(connection, eds));
@@ -269,11 +302,31 @@ export function FormBuilder() {
         });
       }
     }
+    hasEdited.current = true;
     setSaved(false);
   }, [setEdges, fields]);
 
   function addFieldAtPosition(type: FieldType, position?: { x: number; y: number }) {
-    const pos = position ?? { x: 100 + Math.random() * 200, y: fields.length * 140 + Math.random() * 50 };
+    let pos = position;
+    let autoConnectTo: string | null = null;
+
+    if (!pos) {
+      // User clicked instead of dragging
+      const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+      const lastNode = sortedNodes[sortedNodes.length - 1];
+      
+      if (lastNode) {
+        pos = { x: lastNode.position.x, y: lastNode.position.y + 140 };
+        // If there are no condition nodes in the form, and this new node is not a condition
+        const hasCondition = fields.some(f => f.type === "condition") || type === "condition";
+        if (!hasCondition) {
+          autoConnectTo = lastNode.id;
+        }
+      } else {
+        pos = { x: 300, y: 100 }; // Default first position
+      }
+    }
+
     const newField: FormField = {
       id: `f_${Date.now()}`,
       type,
@@ -291,7 +344,20 @@ export function FormBuilder() {
       data: { field: newField, selected: false, onDelete: () => deleteField(newField.id) },
     };
     setNodes(nds => [...nds, newNode]);
+    
+    if (autoConnectTo) {
+      setEdges(eds => [...eds, {
+        id: `e-auto-${autoConnectTo}-${newField.id}`,
+        source: autoConnectTo,
+        target: newField.id,
+        animated: true,
+        type: "smoothstep",
+        style: { stroke: "#5865f2", strokeWidth: 2 },
+      }]);
+    }
+
     setSelectedId(newField.id);
+    hasEdited.current = true;
     setSaved(false);
     pushHistory();
   }
@@ -301,18 +367,19 @@ export function FormBuilder() {
   }
 
   function deleteField(id: string) {
-    if (id === "email_field") return; // Can't delete the email field
     pushHistory();
     setFields(prev => prev.filter(f => f.id !== id));
     setNodes(nds => nds.filter(n => n.id !== id));
     setEdges(eds => eds.filter(e => e.source !== id && e.target !== id));
     if (selectedId === id) setSelectedId(null);
+    hasEdited.current = true;
     setSaved(false);
   }
 
   function updateFieldData(updated: FormField) {
     setFields(prev => prev.map(f => f.id === updated.id ? updated : f));
     setNodes(nds => nds.map(n => n.id === updated.id ? { ...n, data: { ...n.data, field: updated } } : n));
+    hasEdited.current = true;
     setSaved(false);
   }
 
@@ -323,6 +390,7 @@ export function FormBuilder() {
     });
     const flowEdges = edges.map(e => ({ source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? null }));
     await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { ...formSettings, edges: flowEdges } });
+    hasEdited.current = true;
     setSaved(true);
   }
 
@@ -345,6 +413,7 @@ export function FormBuilder() {
   }
 
   const [showShare, setShowShare] = useState(false);
+  const [showBackPrompt, setShowBackPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
 
   function handleCopyLink() {
@@ -388,9 +457,16 @@ export function FormBuilder() {
       }
       setShowAi(false);
       setAiPrompt("");
+      hasEdited.current = true;
       setSaved(false);
       // Mark for auto-save — useEffect will pick it up
       setNeedsSave(true);
+
+      setTimeout(() => {
+        if (reactFlowInstance) {
+          reactFlowInstance.fitView({ padding: 0.3, duration: 800 });
+        }
+      }, 100);
     },
   });
 
@@ -470,9 +546,21 @@ export function FormBuilder() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Toolbar */}
         <header className="h-12 flex items-center px-4 gap-3 shrink-0 bg-[#2b2d31]">
+          <button onClick={() => {
+            if (!hasEdited.current && form.title === "Untitled Form" && fields.length <= 1) {
+              deleteForm.mutate({ formId });
+              router.push("/dashboard");
+            } else if (!saved) {
+              setShowBackPrompt(true);
+            } else {
+              router.push("/dashboard");
+            }
+          }} className="p-1.5 rounded text-[#949ba4] hover:text-[#f2f3f5] hover:bg-[#3f4147] transition-colors -ml-2 mr-1" title="Back to Dashboard">
+            <ChevronLeft size={18} />
+          </button>
           <input
             value={title}
-            onChange={(e) => { setTitle(e.target.value); setSaved(false); }}
+            onChange={(e) => { setTitle(e.target.value); hasEdited.current = true; setSaved(false); }}
             className="bg-transparent text-sm font-semibold text-[#f2f3f5] focus:outline-none border-b border-transparent focus:border-[#5865f2] px-1 w-48"
           />
           <span className={cn("text-[10px] font-mono px-2 py-0.5 rounded capitalize", form.status === "published" ? "bg-[#5865f2]/15 text-[#5865f2]" : "bg-[#3f4147] text-[#949ba4]")}>
@@ -497,6 +585,36 @@ export function FormBuilder() {
             </button>
           </div>
         </header>
+
+        {/* Unsaved Changes Prompt */}
+        <Dialog open={showBackPrompt} onOpenChange={setShowBackPrompt}>
+          <DialogContent className="p-0 bg-[#313338] border-none text-[#f2f3f5] sm:max-w-md overflow-hidden rounded-md shadow-2xl">
+            <div className="p-5 pt-6 pb-6">
+              <DialogTitle className="text-xl font-bold mb-2 text-left">Unsaved Changes</DialogTitle>
+              <DialogDescription className="text-[#b5bac1] text-left text-[15px]">
+                You have unsaved changes in your form. What would you like to do?
+              </DialogDescription>
+            </div>
+            <div className="bg-[#2b2d31] px-5 py-4 flex items-center justify-between">
+              <button onClick={() => setShowBackPrompt(false)} className="text-sm font-medium text-[#f2f3f5] hover:underline px-2 py-2 transition-colors">
+                Cancel
+              </button>
+              <div className="flex items-center gap-3">
+                <button onClick={() => {
+                  if (form.title === "Untitled Form") {
+                    deleteForm.mutate({ formId });
+                  }
+                  router.push("/dashboard");
+                }} className="px-4 py-2 text-[#ed4245] hover:underline font-medium text-sm transition-colors">
+                  Discard
+                </button>
+                <button onClick={async () => { await handleSave(); router.push("/dashboard"); }} disabled={updateForm.isPending} className="px-4 py-2 bg-[#5865f2] hover:bg-[#4752c4] text-white rounded font-medium text-sm transition-colors disabled:opacity-50">
+                  {updateForm.isPending ? "Saving..." : "Save Draft"}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* React Flow Canvas */}
         <div className="flex-1">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { Check, LogOut, X } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -51,10 +52,12 @@ const PLANS = [
   },
 ];
 
-export function PricingPage() {
-  const [active, setActive] = useState<SectionId>("plans");
+export function SettingsPage() {
+  const [active, setActive] = useState<SectionId>("appearance");
   const { signOut } = useClerk();
   const { user } = useUser();
+  const { theme, setTheme } = useTheme();
+  const [showLightModeAlert, setShowLightModeAlert] = useState(false);
 
   return (
     <>
@@ -159,12 +162,12 @@ export function PricingPage() {
               <div className="rounded-lg bg-[#2b2d31] p-5">
                 <p className="text-sm text-[#b5bac1] mb-3">Theme</p>
                 <div className="flex gap-3">
-                  <div className="w-16 h-16 rounded-lg bg-[#313338] border-2 border-[#5865f2] flex items-center justify-center">
+                  <button onClick={() => setTheme("dark")} className={cn("w-16 h-16 rounded-lg bg-[#313338] border-2 flex items-center justify-center transition-colors", theme !== "light" ? "border-[#5865f2]" : "border-transparent opacity-50 hover:opacity-100")}>
                     <span className="text-xs text-[#f2f3f5]">Dark</span>
-                  </div>
-                  <div className="w-16 h-16 rounded-lg bg-[#f2f3f5] border border-[#4e5058] flex items-center justify-center opacity-50">
+                  </button>
+                  <button onClick={() => setShowLightModeAlert(true)} className={cn("w-16 h-16 rounded-lg bg-[#f2f3f5] border-2 flex items-center justify-center transition-colors", theme === "light" ? "border-[#5865f2] opacity-100" : "border-[#4e5058] opacity-50 hover:opacity-100")}>
                     <span className="text-xs text-[#313338]">Light</span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -212,6 +215,24 @@ export function PricingPage() {
         </Link>
         <span className="text-[10px] text-[#949ba4] mt-1">ESC</span>
       </div>
+
+      {/* Light Mode Warning Popup */}
+      {showLightModeAlert && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4">
+          <div className="bg-[#313338] rounded-xl p-6 max-w-sm w-full shadow-2xl border border-[#1e1f22]">
+            <h3 className="text-xl font-bold text-[#f2f3f5] mb-2">Turn on Light Mode?</h3>
+            <p className="text-sm text-[#b5bac1] mb-8">Are you sure to turn on light mode? On your risk!!</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowLightModeAlert(false)} className="px-5 py-2.5 text-sm font-medium text-[#f2f3f5] hover:underline">
+                Cancel
+              </button>
+              <button onClick={() => { setTheme("light"); setShowLightModeAlert(false); }} className="px-5 py-2.5 rounded text-sm font-medium text-white bg-[#ed4245] hover:bg-[#da373c] transition-colors">
+                Turn On
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

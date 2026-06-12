@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import {
   BarChart2,
@@ -15,6 +16,7 @@ import {
   Pencil,
   Play,
   Plus,
+  Share2,
   Sparkles,
   Trash2,
   Upload,
@@ -22,10 +24,17 @@ import {
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
 import { ContextMenu, type MenuItem } from "~/components/context-menu";
+import { toast } from "sonner";
+import { BotSvg } from "~/components/bot-svg";
 
 export function CreatorDashboard() {
   const router = useRouter();
   const utils = trpc.useUtils();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => { setMounted(true); }, []);
+
   const [renaming, setRenaming] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const { data: forms, isLoading } = trpc.form.listMine.useQuery();
@@ -44,6 +53,13 @@ export function CreatorDashboard() {
       { label: "Duplicate", icon: <Copy size={14} />, onClick: () => duplicateForm.mutate({ formId: form.id }) },
       { label: "Open Builder", icon: <FileText size={14} />, onClick: () => router.push(`/builder/${form.id}`) },
       { label: "View Analytics", icon: <BarChart2 size={14} />, onClick: () => router.push(`/analytics/${form.id}`) },
+      { label: "Share", icon: <Share2 size={14} />, onClick: () => {
+        if (form.status !== "published") toast.error("Publish form to share");
+        else {
+          navigator.clipboard.writeText(`${window.location.origin}/f/${form.slug}`);
+          toast.success("Link copied to clipboard");
+        }
+      } },
       ...(form.status === "published"
         ? [{ label: "Unpublish", icon: <Globe size={14} />, onClick: () => unpublishForm.mutate({ formId: form.id }) }]
         : [{ label: "Publish", icon: <Upload size={14} />, onClick: () => publishForm.mutate({ formId: form.id }) }]
@@ -99,7 +115,7 @@ export function CreatorDashboard() {
               </button>
               {draftsOpen && drafts.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <button onClick={() => { setPreviewSlug(f.slug); setActiveChannel("forms"); }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
+                <button onClick={() => { if (previewSlug === f.slug) setPreviewSlug(null); else { setPreviewSlug(f.slug); setActiveChannel("forms"); } }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
                   <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
                 </button>
                 </ContextMenu>
@@ -113,7 +129,7 @@ export function CreatorDashboard() {
               </button>
               {publishedOpen && published.map(f => (
                 <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <button onClick={() => { setPreviewSlug(f.slug); setActiveChannel("forms"); }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
+                <button onClick={() => { if (previewSlug === f.slug) setPreviewSlug(null); else { setPreviewSlug(f.slug); setActiveChannel("forms"); } }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
                   <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
                 </button>
                 </ContextMenu>
@@ -145,8 +161,12 @@ export function CreatorDashboard() {
         {activeChannel === "welcome" ? (
           <div className="flex flex-col h-full">
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-40 h-40 mb-4" />
+              {mounted && (theme === "light" || resolvedTheme === "light") ? (
+                <BotSvg className="w-40 h-40 mb-4" />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src="/discord-wumpus.gif" alt="Wumpus waving" className="w-40 h-40 mb-4" />
+              )}
               <h1 className="text-xl font-bold text-[#f2f3f5] mb-1">Welcome to NitroForms!</h1>
               <p className="text-sm text-[#949ba4] max-w-sm">Describe a form below and let AI build it for you, or head to the <button onClick={() => { setActiveChannel("forms"); setPreviewSlug(null); }} className="text-[#5865f2] hover:underline">dashboard</button> to get started manually.</p>
             </div>
@@ -173,8 +193,34 @@ export function CreatorDashboard() {
         ) : previewSlug ? (
           <div className="absolute inset-0 flex flex-col bg-[#313338] z-10">
             <div className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22]">
-              <span className="text-sm font-semibold text-[#f2f3f5]"><Hash size={14} className="inline text-[#949ba4]" /> {formList.find(f => f.slug === previewSlug)?.title ?? previewSlug}</span>
+              <button onClick={() => setPreviewSlug(null)} className="text-sm font-semibold text-[#f2f3f5] hover:text-[#5865f2] transition-colors"><Hash size={14} className="inline text-[#949ba4]" /> {formList.find(f => f.slug === previewSlug)?.title ?? previewSlug}</button>
               <div className="flex items-center gap-2">
+                {(() => {
+                  const form = formList.find(f => f.slug === previewSlug);
+                  if (!form) return null;
+                  return (
+                    <>
+                      {form.status === "published" ? (
+                        <button onClick={() => unpublishForm.mutate({ formId: form.id })} className="px-3 py-1 rounded text-xs bg-[#3f4147] text-[#b5bac1] hover:text-[#f2f3f5] transition-colors">
+                          Unpublish
+                        </button>
+                      ) : (
+                        <button onClick={() => publishForm.mutate({ formId: form.id })} className="px-3 py-1 rounded text-xs bg-[#3ba55c] text-white hover:bg-[#2d7d46] transition-colors">
+                          Publish
+                        </button>
+                      )}
+                      <button onClick={() => {
+                        if (form.status !== "published") toast.error("Publish form to share");
+                        else {
+                          navigator.clipboard.writeText(`${window.location.origin}/f/${form.slug}`);
+                          toast.success("Link copied to clipboard");
+                        }
+                      }} className="px-2 py-1 rounded text-xs text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors" title="Share form">
+                        <Share2 size={14} />
+                      </button>
+                    </>
+                  );
+                })()}
                 <Link href={`/f/${previewSlug}`} target="_blank" className="px-2 py-1 rounded text-xs text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] transition-colors" title="Preview in new tab">
                   <Play size={14} />
                 </Link>
@@ -272,7 +318,7 @@ export function CreatorDashboard() {
               { label: "Analytics", href: "/analytics" },
               { label: "Explore", href: "/explore" },
               { label: "API Docs", href: "/docs" },
-              { label: "Pricing", href: "/pricing" },
+              { label: "Pricing", href: "/settings" },
             ].map(a => (
               <Link key={a.label} href={a.href} className="flex flex-col items-center gap-2 py-4 rounded-xl bg-[#313338] hover:bg-[#3f4147] transition-colors group">
                 <BarChart2 size={16} className="text-[#5865f2] group-hover:text-[#bec2ff]" />
@@ -320,7 +366,7 @@ export function CreatorDashboard() {
                 </li>
               ))}
             </ul>
-            <Link href="/pricing" className="block w-full mt-3 py-1.5 text-center rounded-lg text-xs font-semibold text-white bg-white/15 hover:bg-white/25 transition-colors">
+            <Link href="/settings" className="block w-full mt-3 py-1.5 text-center rounded-lg text-xs font-semibold text-white bg-white/15 hover:bg-white/25 transition-colors">
               Upgrade
             </Link>
           </div>

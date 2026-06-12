@@ -13,6 +13,7 @@ export default function AnalyticsIndex() {
   const utils = trpc.useUtils();
   const { data: forms, isLoading } = trpc.form.listMine.useQuery();
   const [activeFormId, setActiveFormId] = useState<string | null>(null);
+  const [resetKey, setResetKey] = useState(0);
   const publishForm = trpc.form.publish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
   const unpublishForm = trpc.form.unpublish.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
   const deleteForm = trpc.form.delete.useMutation({ onSuccess: () => utils.form.listMine.invalidate() });
@@ -47,13 +48,16 @@ export default function AnalyticsIndex() {
 
           {isLoading ? (
             <div className="flex justify-center py-4"><Loader2 size={16} className="animate-spin text-[#949ba4]" /></div>
-          ) : !forms?.length ? (
+          ) : !forms?.filter(f => f.status === "published").length ? (
             <p className="px-3 py-2 text-xs text-[#4e5058]">No forms yet</p>
           ) : (
-            forms.map(form => (
+            forms.filter(f => f.status === "published").map(form => (
               <ContextMenu key={form.id} items={getMenuItems(form)}>
               <button
-                onClick={() => setActiveFormId(form.id)}
+                onClick={() => {
+                  if (activeFormId === form.id) setResetKey(k => k + 1);
+                  setActiveFormId(form.id);
+                }}
                 className={cn(
                   "w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm text-left transition-colors",
                   activeFormId === form.id
@@ -87,7 +91,7 @@ export default function AnalyticsIndex() {
 
       {/* Main content */}
       {activeFormId ? (
-        <FormAnalytics key={activeFormId} formIdProp={activeFormId} />
+        <FormAnalytics key={`${activeFormId}-${resetKey}`} formIdProp={activeFormId} />
       ) : (
         <main className="flex-1 flex flex-col items-center justify-center bg-[#313338]">
           <div className="text-center">

@@ -4,12 +4,13 @@ import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import {
+  ChevronLeft,
+  ChevronRight,
   Download,
   Eye,
   Hash,
   Loader2,
   Search,
-  Star,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
@@ -22,6 +23,7 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
   const inline = !!formIdProp; // rendered inside analytics index — skip inner sidebar
   const [activeSection, setActiveSection] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
+  const [previewResponse, setPreviewResponse] = useState<any>(null);
 
   const overviewRef = useRef<HTMLDivElement>(null);
   const responsesRef = useRef<HTMLDivElement>(null);
@@ -67,6 +69,10 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
       JSON.stringify(r.answersJson ?? {}).toLowerCase().includes(q);
   });
 
+  const currentIndex = previewResponse ? filteredResponses.findIndex(r => r.id === previewResponse.id) : -1;
+  const prevResponse = currentIndex > 0 ? filteredResponses[currentIndex - 1] : null;
+  const nextResponse = currentIndex >= 0 && currentIndex < filteredResponses.length - 1 ? filteredResponses[currentIndex + 1] : null;
+
   if (isLoading) {
     return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-[#5865f2]" size={32} /></div>;
   }
@@ -77,7 +83,9 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
       {!inline && (
       <aside className="w-[240px] shrink-0 flex flex-col bg-[#2b2d31]">
         <div className="px-4 pt-6 pb-4">
-          <h2 className="text-lg font-semibold text-[#f2f3f5]">{form?.title ?? "Analytics"}</h2>
+          <button onClick={() => setPreviewResponse(null)} className="text-lg font-semibold text-[#f2f3f5] hover:text-[#5865f2] transition-colors text-left w-full">
+            {form?.title ?? "Analytics"}
+          </button>
           <p className="text-sm text-[#949ba4]">{overview?.totalResponses ?? 0} responses total</p>
         </div>
         <div className="flex-1 overflow-y-auto px-2 space-y-1">
@@ -110,7 +118,9 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
         <header className="h-12 shrink-0 flex items-center justify-between px-4 border-b border-[#1e1f22] bg-[#313338]">
           <div className="flex items-center gap-2">
             <Hash size={16} className="text-[#4e5058]" />
-            <span className="text-sm font-semibold text-[#f2f3f5]">{form?.title ?? "Analytics"}</span>
+            <button onClick={() => setPreviewResponse(null)} className="text-sm font-semibold text-[#f2f3f5] hover:text-[#5865f2] transition-colors">
+              {form?.title ?? "Analytics"}
+            </button>
             <span className="text-xs text-[#4e5058] ml-2">{overview?.totalResponses ?? 0} responses</span>
           </div>
           <div className="flex items-center gap-2">
@@ -124,8 +134,96 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-[#313338] p-6">
-          <div className="max-w-7xl mx-auto space-y-4">
+        <main className="flex-1 overflow-y-auto">
+          {previewResponse && form ? (
+            <div className="flex flex-col h-full bg-[#313338]">
+              <div className="h-12 shrink-0 flex items-center justify-between px-6 border-b border-[#1e1f22] bg-[#2b2d31]">
+                <div className="flex gap-2 items-center">
+                  <span className="text-sm font-semibold text-[#f2f3f5]">Response Preview</span>
+                  <span className="text-xs text-[#949ba4]">•</span>
+                  <button onClick={() => setPreviewResponse(null)} className="text-xs text-[#949ba4] hover:text-[#f2f3f5] hover:underline transition-colors">
+                    {form.title}
+                  </button>
+                </div>
+                <div className="flex gap-2 items-center">
+                  {/* Navigation Chevrons */}
+                  <div className="flex items-center gap-1 mr-4 border border-[#3f4147] rounded-md overflow-hidden bg-[#1e1f22]">
+                    <button
+                      onClick={() => prevResponse && setPreviewResponse(prevResponse)}
+                      disabled={!prevResponse}
+                      className="p-1.5 text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] disabled:opacity-30 transition-colors"
+                      title="Previous Response"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    <div className="px-2 text-xs font-mono text-[#949ba4] border-x border-[#3f4147] py-1.5 bg-[#2b2d31]">
+                      {currentIndex + 1} / {filteredResponses.length}
+                    </div>
+                    <button
+                      onClick={() => nextResponse && setPreviewResponse(nextResponse)}
+                      disabled={!nextResponse}
+                      className="p-1.5 text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#f2f3f5] disabled:opacity-30 transition-colors"
+                      title="Next Response"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+
+                  <button onClick={() => setPreviewResponse(null)} className="px-4 py-1.5 rounded-md text-xs bg-[#5865f2] text-white hover:bg-[#4752c4] transition-colors">
+                    Close Preview
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-8">
+                <div className="max-w-3xl mx-auto">
+                  <div className="flex gap-4 mb-10 items-center">
+                    <div className="w-12 h-12 rounded-full bg-[#2b2d31] flex items-center justify-center shrink-0 border border-[#3f4147]">
+                      <span className="text-sm font-bold text-[#f2f3f5]">{previewResponse.respondentEmail?.slice(0,2).toUpperCase() ?? "AN"}</span>
+                    </div>
+                    <div>
+                      <span className="text-base font-semibold text-[#f2f3f5]">Response from {previewResponse.respondentEmail ?? "Anonymous"}</span>
+                      <p className="text-sm text-[#949ba4] mt-0.5">
+                        Submitted on {previewResponse.submittedAt ? new Date(previewResponse.submittedAt).toLocaleString() : "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8 pl-4">
+                    {((form.fieldsJson ?? []) as any[]).filter(f => f.type !== "condition").map(f => {
+                      const ans = previewResponse.answersJson?.[f.id];
+                      return (
+                        <div key={f.id} className="relative pl-6 pb-6 before:absolute before:left-0 before:top-2 before:bottom-[-2rem] before:w-px before:bg-[#3f4147] last:before:hidden">
+                          {/* Question indicator dot */}
+                          <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#5865f2] ring-4 ring-[#313338]" />
+                          <p className="text-[13px] font-semibold text-[#949ba4] mb-1.5">{f.label}</p>
+                          <div className="relative text-[15px]">
+                            {(() => {
+                              if (ans === undefined || ans === null || ans === "") return <span className="text-[#4e5058] italic">No answer provided</span>;
+                              if (f.type === "file_upload" && typeof ans === "string") {
+                                return (
+                                  <a href={ans} download target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-[#5865f2]/10 hover:bg-[#5865f2]/20 text-[#bec2ff] text-sm transition-colors border border-[#5865f2]/30">
+                                    <Download size={14} /> Download File
+                                  </a>
+                                );
+                              }
+                              if (typeof ans === "boolean") return <span className="inline-flex items-center px-2 py-1 rounded bg-[#5865f2]/15 text-[#bec2ff] font-mono text-[11px] uppercase tracking-wider">{ans ? "Yes" : "No"}</span>;
+                              if (Array.isArray(ans)) return (
+                                <div className="flex flex-wrap gap-2">
+                                  {ans.map((a, i) => <span key={i} className="px-2.5 py-1 rounded bg-[#5865f2]/15 text-[#bec2ff] text-[14px]">{a}</span>)}
+                                </div>
+                              );
+                              return <div className="text-[#f2f3f5] leading-relaxed whitespace-pre-wrap border-l-2 border-[#4e5058]/50 pl-3 py-0.5">{String(ans)}</div>;
+                            })()}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+          <div className="max-w-6xl mx-auto p-8 space-y-8">
 
             {/* KPI Cards */}
             <div ref={overviewRef} className="grid grid-cols-3 gap-3">
@@ -217,7 +315,7 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-[#1e1f22]/50 border-b border-[#3f4147]/30">
-                    {["Respondent", "Status", "Satisfaction", "Date", ""].map(h => (
+                    {["Respondent", "Status", "Date", ""].map(h => (
                       <th key={h} className="px-6 py-4 text-[11px] font-mono uppercase tracking-widest text-[#949ba4]">{h}</th>
                     ))}
                   </tr>
@@ -238,11 +336,8 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
                           </div>
                         </td>
                         <td className="px-6 py-4"><span className="px-2 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase rounded">Completed</span></td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-0.5">{[1,2,3,4,5].map(s => <Star key={s} size={14} className={s <= 4 ? "text-[#5865f2] fill-[#5865f2]" : "text-[#3f4147]"} />)}</div>
-                        </td>
                         <td className="px-6 py-4 text-sm text-[#949ba4]">{r.submittedAt ? new Date(r.submittedAt).toLocaleString() : "—"}</td>
-                        <td className="px-6 py-4 text-right"><button className="text-[#949ba4] hover:text-[#5865f2]"><Eye size={16} /></button></td>
+                        <td className="px-6 py-4 text-right"><button onClick={() => setPreviewResponse(r)} className="text-[#949ba4] hover:text-[#5865f2]"><Eye size={16} /></button></td>
                       </tr>
                     );
                   })}
@@ -253,6 +348,7 @@ export function FormAnalytics({ formIdProp }: { formIdProp?: string } = {}) {
               </table>
             </div>
           </div>
+          )}
         </main>
       </div>
     </>

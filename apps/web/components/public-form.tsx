@@ -4,18 +4,27 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { useTheme } from "next-themes";
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Star } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { trpc } from "~/trpc/client";
+import { BotSvg } from "~/components/bot-svg";
 
-export function PublicForm() {
+export function PublicForm({ previewForm, previewAnswers, readOnly }: { previewForm?: any; previewAnswers?: Record<string, unknown>; readOnly?: boolean } = {}) {
   const params = useParams();
-  const slug = params.slug as string;
+  const slug = params?.slug as string | undefined;
   const { user } = useUser();
-  const { data: form, isLoading, error } = trpc.public.getFormBySlug.useQuery({ slug }, { enabled: !!slug });
+  const { data: fetchedForm, isLoading, error } = trpc.public.getFormBySlug.useQuery({ slug: slug! }, { enabled: !!slug && !previewForm });
   const submitMutation = trpc.public.submitResponse.useMutation();
+  const logEventMutation = trpc.public.logEvent.useMutation();
+  
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  
+  const form = previewForm || fetchedForm;
 
-  const [answers, setAnswers] = useState<Record<string, unknown>>({});
+  const [answers, setAnswers] = useState<Record<string, unknown>>(previewAnswers || {});
   const [submitted, setSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [fieldPath, setFieldPath] = useState<string[]>([]);
@@ -31,6 +40,15 @@ export function PublicForm() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Log 'view' event once form is loaded
+  const viewedRef = useRef(false);
+  useEffect(() => {
+    if (form && !viewedRef.current) {
+      viewedRef.current = true;
+      if (!readOnly && slug) logEventMutation.mutate({ slug, eventType: "view" });
+    }
+  }, [form, slug, logEventMutation, readOnly]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#2b2d31] flex items-center justify-center">
@@ -42,31 +60,44 @@ export function PublicForm() {
     );
   }
 
-  if (error || !form) {
-    return (
-      <div className="min-h-screen bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4">
-        <div className="w-20 h-20 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-6">
-          <img src="/nitro.svg" alt="NitroForms" className="w-10 h-10 opacity-50" />
+  if (!form) {
+    if (error) {
+      return (
+        <div className={cn("bg-[#2b2d31] flex flex-col items-center justify-center text-center px-4", readOnly ? "h-full min-h-[400px]" : "min-h-screen")}>
+          <div className="w-20 h-20 rounded-2xl bg-[#2b2d31] flex items-center justify-center mb-6">
+            <img src="/nitro.svg" alt="NitroForms" className="w-10 h-10 opacity-50" />
+          </div>
+          <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Form Not Available</h1>
+          <p className="text-sm text-[#949ba4] mb-8 max-w-sm">{error.message ?? "This form is not published or does not exist."}</p>
+          <Link href="/" className="px-6 py-2.5 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-colors">
+            Back to Homepage
+          </Link>
         </div>
-        <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Form Not Available</h1>
-        <p className="text-sm text-[#949ba4] mb-8 max-w-sm">{error?.message ?? "This form is not published or does not exist."}</p>
-        <Link href="/" className="px-6 py-2.5 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-colors">
-          Back to Homepage
-        </Link>
-      </div>
-    );
+      );
+    }
+    return null;
   }
 
   if (submitted) {
+    if (readOnly) {
+      return (
+        <div className={cn("bg-[#313338] flex flex-col items-center justify-center text-center px-4", readOnly ? "h-full min-h-[400px]" : "min-h-screen")}>
+          <CheckCircle className="text-[#3ba55c] w-16 h-16 mb-4" />
+          <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">End of Response</h1>
+          <p className="text-sm text-[#949ba4] max-w-sm">You have reached the end of this participant's response.</p>
+        </div>
+      );
+    }
     return (
-      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/discord-wumpus.gif" alt="" className="w-28 h-28 mb-6" />
-        <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Response Submitted!</h1>
-        <p className="text-sm text-[#949ba4] mb-6 max-w-sm">Thank you for taking the time to fill this out. Your response has been recorded.</p>
-        <Link href="/" className="px-5 py-2 rounded-lg bg-[#5865f2] text-sm text-white hover:bg-[#4752c4] transition-colors">
-          Back to NitroForms
-        </Link>
+      <div className={cn("bg-[#313338] flex flex-col items-center justify-center text-center px-4", readOnly ? "h-full min-h-[400px]" : "min-h-screen")}>
+        {mounted && (theme === "light" || resolvedTheme === "light") ? (
+          <BotSvg className="w-28 h-28 mb-6" />
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src="/discord-wumpus.gif" alt="" className="w-28 h-28 mb-6" />
+        )}
+        <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">Form submitted..</h1>
+        <p className="text-sm text-[#949ba4] mb-6 max-w-sm">you can close the page now..</p>
       </div>
     );
   }
@@ -75,9 +106,9 @@ export function PublicForm() {
   const settings = form.settings as { edges?: Array<{ source: string; target: string; sourceHandle: string | null }>; requireAuth?: boolean } | null;
 
   // Gate: require login
-  if (settings?.requireAuth && !user) {
+  if (settings?.requireAuth && !user && !readOnly) {
     return (
-      <div className="min-h-screen bg-[#313338] flex flex-col items-center justify-center text-center px-4">
+      <div className={cn("bg-[#313338] flex flex-col items-center justify-center text-center px-4", readOnly ? "h-full min-h-[400px]" : "min-h-screen")}>
         <img src="/nitro.svg" alt="" className="w-12 h-12 mb-4" />
         <h1 className="text-xl font-bold text-[#f2f3f5] mb-2">Login Required</h1>
         <p className="text-sm text-[#949ba4] mb-6 max-w-xs">This form requires you to be logged in before submitting a response.</p>
@@ -150,16 +181,49 @@ export function PublicForm() {
   const progress = totalSteps > 0 ? ((fieldPath.length + 1) / totalSteps) * 100 : 0;
 
   function setAnswer(value: unknown) {
+    if (readOnly) return;
     if (field) setAnswers(a => ({ ...a, [field.id]: value }));
   }
 
   async function handleSubmit() {
     setFieldErrors({});
+    if (readOnly) {
+      setSubmitted(true);
+      return;
+    }
+    
     try {
-      await submitMutation.mutateAsync({ slug, answers: answers as Record<string, unknown> });
+      // 1. Pre-process answers: upload any File objects
+      const processedAnswers = { ...answers };
+      for (const [key, value] of Object.entries(processedAnswers)) {
+        if (value instanceof File) {
+          const formData = new FormData();
+          formData.append("file", value);
+          
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => null);
+            throw new Error(errorData?.error || "File upload failed");
+          }
+          
+          const data = await res.json();
+          processedAnswers[key] = data.url; // Replace File with string URL
+        }
+      }
+
+      // 2. Submit form JSON payload
+      await submitMutation.mutateAsync({ slug: slug!, answers: processedAnswers as Record<string, unknown> });
       setSubmitted(true);
     } catch (e: any) {
-      if (e?.data?.cause) setFieldErrors(e.data.cause as Record<string, string>);
+      if (e?.data?.cause) {
+        setFieldErrors(e.data.cause as Record<string, string>);
+      } else {
+        setFieldErrors({ _global: e.message || "Submission failed" });
+      }
     }
   }
 
@@ -233,7 +297,7 @@ export function PublicForm() {
   if (!field) return null;
 
   return (
-    <div className="h-screen flex bg-[#1e1f22] text-[#f2f3f5] overflow-hidden">
+    <div className={cn("flex bg-[#1e1f22] text-[#f2f3f5] overflow-hidden", readOnly ? "h-full min-h-[400px]" : "h-screen")}>
       {/* Server rail — hidden on mobile */}
       <div className="w-[72px] shrink-0 bg-[#1e1f22] flex-col items-center py-3 gap-2 hidden md:flex">
         <div className="w-12 h-12 rounded-2xl bg-[#2b2d31] flex items-center justify-center">
@@ -278,12 +342,16 @@ export function PublicForm() {
           )}
         </div>
 
-        {channel === "welcome" ? (
+                {channel === "welcome" ? (
           <>
             {/* Welcome content */}
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/discord-wumpus.gif" alt="" className="w-32 h-32 mb-6" />
+              {mounted && (theme === "light" || resolvedTheme === "light") ? (
+                <BotSvg className="w-32 h-32 mb-6" />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src="/discord-wumpus.gif" alt="" className="w-32 h-32 mb-6" />
+              )}
               <h1 className="text-2xl font-bold text-[#f2f3f5] mb-2">{form.title}</h1>
               {form.description && <p className="text-sm text-[#b5bac1] mb-3 max-w-sm">{form.description}</p>}
               <div className="flex items-center gap-3 text-xs text-[#949ba4] mb-8">
@@ -291,8 +359,8 @@ export function PublicForm() {
                 <span>·</span>
                 <span>~2 min</span>
               </div>
-              <button onClick={() => setChannel("submit")} className="px-8 py-3 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-all hover:shadow-[0_0_20px_rgba(88,101,242,0.3)]">
-                Get Started
+              <button onClick={() => { if (!readOnly && slug) logEventMutation.mutate({ slug, eventType: "start" }); setChannel("submit"); }} className="px-8 py-3 rounded-lg bg-[#5865f2] text-sm font-medium text-white hover:bg-[#4752c4] transition-all hover:shadow-[0_0_20px_rgba(88,101,242,0.3)]">
+                {readOnly ? "View Response" : "Get Started"}
               </button>
               <p className="text-[11px] text-[#4e5058] mt-4">Powered by NitroForms</p>
             </div>
@@ -325,8 +393,9 @@ export function PublicForm() {
                 type={field.type === "email" ? "email" : "text"}
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
-                autoFocus
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
+                disabled={readOnly}
+                autoFocus={!readOnly}
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none disabled:opacity-50"
                 placeholder="Type your answer here..."
               />
             )}
@@ -335,9 +404,10 @@ export function PublicForm() {
               <textarea
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
-                autoFocus
+                disabled={readOnly}
+                autoFocus={!readOnly}
                 rows={4}
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none resize-none"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none resize-none disabled:opacity-50"
                 placeholder="Type your answer here..."
               />
             )}
@@ -347,8 +417,9 @@ export function PublicForm() {
                 type="number"
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(Number(e.target.value))}
-                autoFocus
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
+                disabled={readOnly}
+                autoFocus={!readOnly}
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none disabled:opacity-50"
                 placeholder="0"
               />
             )}
@@ -361,9 +432,10 @@ export function PublicForm() {
                     onClick={() => setAnswer(opt)}
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all",
+                      readOnly && "cursor-default",
                       answers[field.id] === opt
                         ? "border-[#5865f2] bg-[#5865f2]/10 text-[#f2f3f5]"
-                        : "border-[#3f4147] text-[#b5bac1] hover:border-[#4e5058] hover:bg-[#2b2d31]"
+                        : "border-[#3f4147] text-[#b5bac1] " + (readOnly ? "" : "hover:border-[#4e5058] hover:bg-[#2b2d31]")
                     )}
                   >
                     <span className={cn(
@@ -391,9 +463,10 @@ export function PublicForm() {
                       }}
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all",
+                        readOnly && "cursor-default",
                         selected
                           ? "border-[#5865f2] bg-[#5865f2]/10 text-[#f2f3f5]"
-                          : "border-[#3f4147] text-[#b5bac1] hover:border-[#4e5058] hover:bg-[#2b2d31]"
+                          : "border-[#3f4147] text-[#b5bac1] " + (readOnly ? "" : "hover:border-[#4e5058] hover:bg-[#2b2d31]")
                       )}
                     >
                       <span className={cn(
@@ -423,7 +496,7 @@ export function PublicForm() {
                         "transition-colors",
                         (answers[field.id] as number) >= n
                           ? "text-[#5865f2] fill-[#5865f2]"
-                          : "text-[#3f4147] group-hover:text-[#4e5058]"
+                          : "text-[#3f4147] " + (readOnly ? "" : "group-hover:text-[#4e5058]")
                       )}
                     />
                   </button>
@@ -432,10 +505,10 @@ export function PublicForm() {
             )}
 
             {field.type === "checkbox" && (
-              <label className="flex items-center gap-3 mt-2 cursor-pointer group">
+              <label className={cn("flex items-center gap-3 mt-2 group", !readOnly && "cursor-pointer")}>
                 <div className={cn(
                   "w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors",
-                  answers[field.id] ? "bg-[#5865f2] border-[#5865f2]" : "border-[#3f4147] group-hover:border-[#4e5058]"
+                  answers[field.id] ? "bg-[#5865f2] border-[#5865f2]" : "border-[#3f4147] " + (readOnly ? "" : "group-hover:border-[#4e5058]")
                 )}>
                   {!!answers[field.id] && <CheckCircle size={14} className="text-white" />}
                 </div>
@@ -448,7 +521,8 @@ export function PublicForm() {
                 type="date"
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none"
+                disabled={readOnly}
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none disabled:opacity-50"
               />
             )}
 
@@ -457,7 +531,8 @@ export function PublicForm() {
                 type="time"
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none"
+                disabled={readOnly}
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] focus:outline-none disabled:opacity-50"
               />
             )}
 
@@ -466,8 +541,9 @@ export function PublicForm() {
                 type="tel"
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
+                disabled={readOnly}
                 placeholder="+1 (555) 000-0000"
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none disabled:opacity-50"
               />
             )}
 
@@ -476,20 +552,34 @@ export function PublicForm() {
                 type="url"
                 value={(answers[field.id] as string) ?? ""}
                 onChange={(e) => setAnswer(e.target.value)}
+                disabled={readOnly}
                 placeholder="https://"
-                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none"
+                className="w-full bg-[#1e1f22] rounded px-3 py-2.5 text-sm text-[#f2f3f5] placeholder:text-[#4e5058] focus:outline-none disabled:opacity-50"
               />
             )}
 
             {field.type === "file_upload" && (
-              <label className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-[#3f4147] hover:border-[#5865f2] cursor-pointer transition-colors">
-                <span className="text-xs text-[#949ba4]">{answers[field.id] ? (answers[field.id] as File).name : "Click to upload file"}</span>
-                <input type="file" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setAnswer(e.target.files[0]); }} />
+              <label className={cn("flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-[#3f4147] transition-colors", readOnly ? "opacity-50 cursor-default" : "hover:border-[#5865f2] cursor-pointer")}>
+                <span className="text-xs text-[#949ba4]">{answers[field.id] ? (answers[field.id] as File).name || String(answers[field.id]) : "Click to upload file"}</span>
+                <input disabled={readOnly} type="file" className="hidden" onChange={(e) => { 
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 10 * 1024 * 1024) {
+                      setFieldErrors({ [field.id]: "File exceeds the 10MB limit." });
+                    } else {
+                      setFieldErrors({});
+                      setAnswer(file);
+                    }
+                  } 
+                }} />
               </label>
             )}
 
             {fieldErrors[field.id] && (
               <p className="text-sm text-red-400 mt-3">{fieldErrors[field.id]}</p>
+            )}
+            {fieldErrors._global && (
+              <p className="text-sm text-red-400 mt-3">{fieldErrors._global}</p>
             )}
             {submitMutation.error && !Object.keys(fieldErrors).length && (
               <p className="text-sm text-red-400 mt-3">{submitMutation.error.message}</p>
@@ -509,7 +599,8 @@ export function PublicForm() {
             >
               {submitMutation.isPending ? "..." : (() => {
                 const isLast = hasFlow ? !resolveNextVisible(currentFieldId!) : visibleFields.findIndex(f => f.id === currentFieldId) >= visibleFields.length - 1;
-                return isLast ? "Submit" : "Next";
+                if (isLast) return readOnly ? "Finish" : "Submit";
+                return "Next";
               })()}
             </button>
             <span className="ml-auto text-[11px] text-[#4e5058]">{fieldPath.length + 1}/{totalSteps}</span>

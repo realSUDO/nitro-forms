@@ -81,7 +81,12 @@ export const formRouter = router({
       if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
 
       const updates: Record<string, unknown> = {};
-      if (input.title) updates.title = input.title;
+      if (input.title) {
+        updates.title = input.title;
+        if (form.status === "draft") {
+          updates.slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+        }
+      }
       if (input.description !== undefined) updates.description = input.description;
       if (input.fields) updates.fieldsJson = input.fields;
       if (input.settings) updates.settingsJson = input.settings;
@@ -97,6 +102,11 @@ export const formRouter = router({
         .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
         .limit(1);
       if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+
+      const publishedForms = await db.select({ id: formsTable.id }).from(formsTable).where(and(eq(formsTable.ownerId, ctx.userId), eq(formsTable.status, "published")));
+      if (publishedForms.length >= 15 && form.status !== "published") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You have reached the maximum of 15 published forms." });
+      }
 
       const fields = form.fieldsJson as unknown[];
       if (!fields || fields.length === 0) {
@@ -175,11 +185,18 @@ export const formRouter = router({
   rename: protectedProcedure
     .input(z.object({ formId: z.string().uuid(), title: z.string().min(1).max(200) }))
     .mutation(async ({ ctx, input }) => {
+      const [existing] = await db.select().from(formsTable).where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId))).limit(1);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const updates: Record<string, unknown> = { title: input.title };
+      if (existing.status === "draft") {
+        updates.slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+      }
+
       const [form] = await db.update(formsTable)
-        .set({ title: input.title })
-        .where(and(eq(formsTable.id, input.formId), eq(formsTable.ownerId, ctx.userId)))
+        .set(updates)
+        .where(eq(formsTable.id, input.formId))
         .returning();
-      if (!form) throw new TRPCError({ code: "NOT_FOUND" });
       return form;
     }),
 

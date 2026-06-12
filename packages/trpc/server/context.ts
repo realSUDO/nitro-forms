@@ -31,6 +31,7 @@ export async function createContext({ req }: CreateExpressContextOptions) {
 
     return { userId, clerkUserId: userId, ip };
   } catch (err: any) {
+    console.error("Auth context error:", err);
     return { userId: null, clerkUserId: null, ip };
   }
 }

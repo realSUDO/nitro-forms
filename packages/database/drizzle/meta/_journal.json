@@ -15,6 +15,13 @@
       "when": 1779856463588,
       "tag": "0001_loud_mystique",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781272619157,
+      "tag": "0002_square_red_shift",
+      "breakpoints": true
     }
   ]
 }

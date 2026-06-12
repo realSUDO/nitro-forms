@@ -63,6 +63,16 @@ export const publicRouter = router({
       };
     }),
 
+  logEvent: publicProcedure
+    .input(z.object({ slug: z.string(), eventType: z.enum(["view", "start"]) }))
+    .mutation(async ({ input }) => {
+      const [form] = await db.select({ id: formsTable.id }).from(formsTable).where(eq(formsTable.slug, input.slug)).limit(1);
+      if (form) {
+        await db.insert(formEventsTable).values({ formId: form.id, eventType: input.eventType });
+      }
+      return { success: true };
+    }),
+
   submitResponse: publicProcedure
     .input(z.object({
       slug: z.string(),

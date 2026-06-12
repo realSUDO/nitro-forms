@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../../trpc";
+import { db, eq } from "@repo/database";
+import { usersTable } from "@repo/database/schema";
 
 const FIELD_TYPES = ["short_text", "long_text", "email", "number", "single_select", "multi_select", "checkbox", "rating", "date", "file_upload", "url", "phone", "time"] as const;
 
@@ -134,9 +136,11 @@ export const aiRouter = router({
         throw new TRPCError({ code: "BAD_REQUEST", message: check.reason });
       }
 
-      // TODO: Re-enable 2 free per account limit for production
-      // const [aiCount] = await db.select(...)
-      // if (Number(aiCount?.count ?? 0) >= 2) throw ...
+      // Enforce 3 free per account limit
+      const [userRec] = await db.select({ count: usersTable.aiGenerationsCount }).from(usersTable).where(eq(usersTable.id, ctx.userId)).limit(1);
+      if (userRec && userRec.count >= 3) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Free tier is limited to 3 AI generations." });
+      }
 
       // Call Groq (Llama 3.1)
       const apiKey = process.env.GROQ_API_KEY;
@@ -193,6 +197,12 @@ export const aiRouter = router({
         // Ensure email_field is first
         const hasEmail = validated.some((f: any) => f.id === "email_field");
         if (!hasEmail) validated.unshift({ id: "email_field", type: "email", label: "Your email address", required: true });
+
+        // Increment user's AI generations count
+        await db.update(usersTable)
+          .set({ aiGenerationsCount: (userRec?.count ?? 0) + 1 })
+          .where(eq(usersTable.id, ctx.userId));
+
         return { fields: validated, edges: finalEdges, title, source: "ai" };
       } catch {
         return generateFallback(input.prompt);
