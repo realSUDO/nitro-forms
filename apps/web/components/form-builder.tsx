@@ -389,9 +389,10 @@ export function FormBuilder() {
       return { ...f, position: node?.position ?? f.position };
     });
     const flowEdges = edges.map(e => ({ source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? null }));
-    await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { ...formSettings, edges: flowEdges } });
+    const updated = await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { ...formSettings, edges: flowEdges } });
     hasEdited.current = true;
     setSaved(true);
+    return updated;
   }
 
   // Auto-save after AI generates (waits for state to update)
@@ -568,7 +569,14 @@ export function FormBuilder() {
           </span>
           {!saved && <span className="text-[10px] text-[#949ba4]">• unsaved</span>}
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={async () => { if (!saved) await handleSave(); window.open(`/f/${form?.slug}`, '_blank'); }} className="px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
+            <button onClick={async () => { 
+              let currentSlug = form?.slug;
+              if (!saved) {
+                const updated = await handleSave();
+                currentSlug = updated?.slug || currentSlug;
+              }
+              window.open(`/f/${currentSlug}`, '_blank'); 
+            }} className="px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors">
               Preview
             </button>
             <button onClick={handleSave} disabled={saved || updateForm.isPending} className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs border border-[#3f4147] text-[#b5bac1] hover:bg-[#3f4147] transition-colors disabled:opacity-40">
