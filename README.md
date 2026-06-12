@@ -4,7 +4,11 @@
 
 🌐 **Live:** [https://nitroforms.fun](https://nitroforms.fun)  
 📖 **API Docs:** [https://nitroforms.fun/docs](https://nitroforms.fun/docs)  
-📦 **SDK:** `npm install @nitroforms/sdk`
+
+
+#### DEMO CREDS
+**email** : miniits09@gmail.com
+**password** : vv@001122
 
 ---
 
@@ -163,16 +167,6 @@ curl -X POST https://nitroforms.fun/api/v2/forms/my-form/submit \
   -d '{"answers":{"email_field":"user@test.com","f1":"Great!"}}'
 ```
 
-### 7. SDK
-```typescript
-import { NitroForms } from '@nitroforms/sdk';
-
-const nitro = new NitroForms('nitro_sk_...');
-const { forms } = await nitro.forms.list();
-const result = await nitro.forms.submit('my-form', {
-  answers: { email_field: 'user@test.com', f1: 5 }
-});
-```
 
 ---
 
@@ -260,8 +254,6 @@ Self-hosted on a single Ubuntu VM with:
 - PM2 (process management)
 - Docker (PostgreSQL + Valkey)
 - Let's Encrypt (auto-renewing SSL)
-
-See [deploy-nitro.md](./deploy-nitro.md) for full guide.
 
 ---
 
