@@ -3,7 +3,7 @@ import { formsTable } from "./form";
 
 export const responsesTable = pgTable("responses", {
   id: uuid("id").primaryKey().defaultRandom(),
-  formId: uuid("form_id").notNull().references(() => formsTable.id),
+  formId: uuid("form_id").notNull().references(() => formsTable.id, { onDelete: "cascade" }),
   respondentEmail: varchar("respondent_email", { length: 255 }),
   answersJson: jsonb("answers_json").notNull().default({}),
   metadataJson: jsonb("metadata_json").default({}),

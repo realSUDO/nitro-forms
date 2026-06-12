@@ -4,8 +4,8 @@ import { responsesTable } from "./response";
 
 export const emailLogsTable = pgTable("email_logs", {
   id: uuid("id").primaryKey().defaultRandom(),
-  formId: uuid("form_id").notNull().references(() => formsTable.id),
-  responseId: uuid("response_id").references(() => responsesTable.id),
+  formId: uuid("form_id").notNull().references(() => formsTable.id, { onDelete: "cascade" }),
+  responseId: uuid("response_id").references(() => responsesTable.id, { onDelete: "cascade" }),
   recipient: varchar("recipient", { length: 255 }).notNull(),
   type: varchar("type", { length: 50 }).notNull(),
   status: varchar("status", { length: 20 }).notNull(),

@@ -38,7 +38,8 @@ export const formRouter = router({
       description: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+      const baseSlug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+      const slug = baseSlug + "-" + nanoid(6);
       const [form] = await db.insert(formsTable).values({
         ownerId: ctx.userId,
         title: input.title,
@@ -84,7 +85,8 @@ export const formRouter = router({
       if (input.title) {
         updates.title = input.title;
         if (form.status === "draft") {
-          updates.slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+          const baseSlug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+          updates.slug = baseSlug + "-" + nanoid(6);
         }
       }
       if (input.description !== undefined) updates.description = input.description;
@@ -190,7 +192,8 @@ export const formRouter = router({
 
       const updates: Record<string, unknown> = { title: input.title };
       if (existing.status === "draft") {
-        updates.slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+        const baseSlug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+        updates.slug = baseSlug + "-" + nanoid(6);
       }
 
       const [form] = await db.update(formsTable)

@@ -3,7 +3,7 @@ import { formsTable } from "./form";
 
 export const formEventsTable = pgTable("form_events", {
   id: uuid("id").primaryKey().defaultRandom(),
-  formId: uuid("form_id").notNull().references(() => formsTable.id),
+  formId: uuid("form_id").notNull().references(() => formsTable.id, { onDelete: "cascade" }),
   eventType: varchar("event_type", { length: 50 }).notNull(),
   fieldId: varchar("field_id", { length: 100 }),
   metadataJson: jsonb("metadata_json"),

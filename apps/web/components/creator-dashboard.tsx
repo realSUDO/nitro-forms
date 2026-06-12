@@ -114,11 +114,20 @@ export function CreatorDashboard() {
                 <ChevronDown size={11} className={cn("transition-transform", !draftsOpen && "-rotate-90")} /> Drafts
               </button>
               {draftsOpen && drafts.map(f => (
-                <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <button onClick={() => { if (previewSlug === f.slug) setPreviewSlug(null); else { setPreviewSlug(f.slug); setActiveChannel("forms"); } }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
-                  <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
-                </button>
-                </ContextMenu>
+                renaming === f.id ? (
+                  <div key={f.id} className="px-2 py-1">
+                    <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                      onBlur={() => { if (renameValue.trim() && renameValue !== f.title) renameForm.mutate({ formId: f.id, title: renameValue.trim() }); else setRenaming(null); }}
+                      onKeyDown={e => { if (e.key === "Enter") { e.currentTarget.blur(); } if (e.key === "Escape") setRenaming(null); }}
+                      className="bg-[#1e1f22] rounded px-2 py-0.5 text-sm text-[#f2f3f5] outline-none ring-1 ring-[#5865f2] w-full" />
+                  </div>
+                ) : (
+                  <ContextMenu key={f.id} items={getMenuItems(f)}>
+                  <button onClick={() => { if (previewSlug === f.slug) setPreviewSlug(null); else { setPreviewSlug(f.slug); setActiveChannel("forms"); } }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
+                    <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
+                  </button>
+                  </ContextMenu>
+                )
               ))}
             </div>
           )}
@@ -128,11 +137,20 @@ export function CreatorDashboard() {
                 <ChevronDown size={11} className={cn("transition-transform", !publishedOpen && "-rotate-90")} /> Published
               </button>
               {publishedOpen && published.map(f => (
-                <ContextMenu key={f.id} items={getMenuItems(f)}>
-                <button onClick={() => { if (previewSlug === f.slug) setPreviewSlug(null); else { setPreviewSlug(f.slug); setActiveChannel("forms"); } }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
-                  <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
-                </button>
-                </ContextMenu>
+                renaming === f.id ? (
+                  <div key={f.id} className="px-2 py-1">
+                    <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                      onBlur={() => { if (renameValue.trim() && renameValue !== f.title) renameForm.mutate({ formId: f.id, title: renameValue.trim() }); else setRenaming(null); }}
+                      onKeyDown={e => { if (e.key === "Enter") { e.currentTarget.blur(); } if (e.key === "Escape") setRenaming(null); }}
+                      className="bg-[#1e1f22] rounded px-2 py-0.5 text-sm text-[#f2f3f5] outline-none ring-1 ring-[#5865f2] w-full" />
+                  </div>
+                ) : (
+                  <ContextMenu key={f.id} items={getMenuItems(f)}>
+                  <button onClick={() => { if (previewSlug === f.slug) setPreviewSlug(null); else { setPreviewSlug(f.slug); setActiveChannel("forms"); } }} className={cn("flex items-center gap-2 w-full px-2 py-1.5 rounded text-sm text-left transition-colors", previewSlug === f.slug ? "bg-[#3f4147] text-[#f2f3f5]" : "text-[#949ba4] hover:bg-[#3f4147] hover:text-[#f2f3f5]")}>
+                    <Hash size={14} className={previewSlug === f.slug ? "text-[#f2f3f5]" : "text-[#4e5058]"} /><span className="truncate">{f.title}</span>
+                  </button>
+                  </ContextMenu>
+                )
               ))}
             </div>
           )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";
 
 export type MenuItem = {
@@ -13,7 +13,7 @@ export type MenuItem = {
 
 type Props = {
   items: MenuItem[];
-  children: React.ReactNode;
+  children: React.ReactElement;
 };
 
 export function ContextMenu({ items, children }: Props) {
@@ -32,8 +32,14 @@ export function ContextMenu({ items, children }: Props) {
   }, [pos]);
 
   return (
-    <div onContextMenu={(e) => { e.preventDefault(); setPos({ x: e.clientX, y: e.clientY }); }}>
-      {children}
+    <>
+      {React.cloneElement(children, {
+        onContextMenu: (e: any) => {
+          e.preventDefault();
+          setPos({ x: e.clientX, y: e.clientY });
+          if (children.props.onContextMenu) children.props.onContextMenu(e);
+        }
+      })}
       {pos && (
         <div ref={ref} className="fixed z-[9999] min-w-[180px] py-1.5 rounded-lg bg-[#111214] border border-[#3f4147] shadow-xl" style={{ top: pos.y, left: pos.x }}>
           {items.map((item, i) => (
@@ -53,6 +59,6 @@ export function ContextMenu({ items, children }: Props) {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
