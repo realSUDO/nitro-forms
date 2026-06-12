@@ -392,6 +392,7 @@ export function FormBuilder() {
     const updated = await updateForm.mutateAsync({ formId, title, fields: fieldsWithPositions, settings: { ...formSettings, edges: flowEdges } });
     hasEdited.current = true;
     setSaved(true);
+    utils.form.getById.setData({ formId }, updated);
     return updated;
   }
 
