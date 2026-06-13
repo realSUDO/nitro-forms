@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure upload directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    const uploadsDir = path.join(process.cwd(), "uploads");
     await fs.mkdir(uploadsDir, { recursive: true });
 
     // Generate safe filename
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     const filePath = path.join(uploadsDir, safeName);
     await fs.writeFile(filePath, buffer);
 
-    return NextResponse.json({ url: `/uploads/${safeName}`, name: file.name });
+    return NextResponse.json({ url: `/api/file/${safeName}`, name: file.name });
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
