@@ -3,9 +3,9 @@ import { promises as fs } from "fs";
 import path from "path";
 import mime from "mime"; // Note: this requires 'mime' package, we should probably check if it's installed.
 
-export async function GET(req: NextRequest, { params }: { params: { filename: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
   try {
-    const filename = params.filename;
+    const { filename } = await params;
     
     // Prevent directory traversal attacks
     if (!filename || filename.includes("/") || filename.includes("..")) {
